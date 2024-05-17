@@ -1,6 +1,9 @@
-﻿namespace OmniFi_API.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace OmniFi_API.Models
 {
-    public class Role
+    public class Role : IdentityRole
     {
+
     }
 }

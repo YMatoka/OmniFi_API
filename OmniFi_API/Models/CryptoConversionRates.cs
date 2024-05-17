@@ -1,6 +1,6 @@
 ﻿namespace OmniFi_API.Models
 {
-    public class CryptoConversionRate
+    public class CryptoConversionRates
     {
         public int CryptoConversionRateID { get; set; }
         public int SourceCurrencyID { get; set; }

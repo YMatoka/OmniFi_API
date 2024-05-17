@@ -1,6 +1,11 @@
 ﻿namespace OmniFi_API.Models
 {
-    public class FiatConversionRate
+    public class FiatConversionRates
     {
+        public int FiatConversionRateID { get; set; }
+        public int SourceCurrencyID { get; set; }
+        public int TargetCurrencyID { get; set; }
+        public decimal Rate { get; set; }
+        public DateTime LastUpdated { get; set; }
     }
 }
