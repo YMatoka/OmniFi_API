@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniFi_API", "OmniFi_API\OmniFi_API.csproj", "{DC0FD090-716C-42D9-B6E7-75E48668BB28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniFi_API", "OmniFi_API\OmniFi_API.csproj", "{DC0FD090-716C-42D9-B6E7-75E48668BB28}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTestApp", "ConsoleTestApp\ConsoleTestApp.csproj", "{ED524592-BDB3-45CF-8455-5B9432862003}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{DC0FD090-716C-42D9-B6E7-75E48668BB28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC0FD090-716C-42D9-B6E7-75E48668BB28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC0FD090-716C-42D9-B6E7-75E48668BB28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED524592-BDB3-45CF-8455-5B9432862003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED524592-BDB3-45CF-8455-5B9432862003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED524592-BDB3-45CF-8455-5B9432862003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED524592-BDB3-45CF-8455-5B9432862003}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
