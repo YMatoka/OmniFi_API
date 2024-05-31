@@ -8,8 +8,15 @@ Console.WriteLine();
 
 //using (var db = new ApplicationDbContext(optionsBuilder.Options))
 //{
-//    Console.WriteLine($"Number of Banks Table Row = {db.Banks.Count()}");
+//    var data  = db.CryptoExchanges.ToArray();
+//    var roles = db.Roles.ToArray();
+
+//    foreach(var item in roles)
+//    {
+//        Console.WriteLine($"The role {item.Name}");
+//    }
+
+    
 //}
 
-// See https://aka.ms/new-console-template for more information
 

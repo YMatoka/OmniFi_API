@@ -56,6 +56,9 @@ namespace OmniFi_API.Data
 
             modelBuilder.ApplyConfiguration(new FiatCurrencyConfig());
 
+            modelBuilder.ApplyConfiguration(new ApplicationRoleConfig());
+            modelBuilder.ApplyConfiguration(new ApplicationUserConfig());
+
         }
 
 

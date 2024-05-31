@@ -6,7 +6,7 @@ namespace OmniFi_API.Models.Currencies
 {
     public class FiatCurrency
     {
-        public int CurrencyID { get; set; }
+        public int FiatCurrencyID { get; set; }
         public required string CurrencyCode { get; set; }
         public required string CurrencyName { get; set; }
         public required string CurrencySymbol { get; set; }

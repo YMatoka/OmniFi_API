@@ -152,7 +152,7 @@ namespace OmniFi_API.Migrations
                         .IsUnique()
                         .HasFilter("[CryptoExchangeID] IS NOT NULL");
 
-                    b.ToTable("AssetPlatforms");
+                    b.ToTable("AssetPlatforms", (string)null);
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Assets.AssetSource", b =>
@@ -170,7 +170,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasKey("AssetSourceID");
 
-                    b.ToTable("AssetSources");
+                    b.ToTable("AssetSources", (string)null);
 
                     b.HasData(
                         new
@@ -240,7 +240,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("AssetTrackings");
+                    b.ToTable("AssetTrackings", (string)null);
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Banks.Bank", b =>
@@ -261,7 +261,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasKey("BankID");
 
-                    b.ToTable("Banks");
+                    b.ToTable("Banks", (string)null);
 
                     b.HasData(
                         new
@@ -293,7 +293,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("BankAccounts");
+                    b.ToTable("BankAccounts", (string)null);
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Banks.BankCredential", b =>
@@ -325,7 +325,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("BankCredentials");
+                    b.ToTable("BankCredentials", (string)null);
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoApiCredential", b =>
@@ -359,7 +359,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ApiCredentials");
+                    b.ToTable("ApiCredentials", (string)null);
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoExchange", b =>
@@ -380,7 +380,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasKey("CryptoExchangeID");
 
-                    b.ToTable("CryptoExchanges");
+                    b.ToTable("CryptoExchanges", (string)null);
 
                     b.HasData(
                         new
@@ -424,7 +424,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("CryptoExchangeAccounts");
+                    b.ToTable("CryptoExchangeAccounts", (string)null);
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoHolding", b =>
@@ -451,16 +451,16 @@ namespace OmniFi_API.Migrations
 
                     b.HasKey("CrytpoHoldingID");
 
-                    b.ToTable("CryptoHoldings");
+                    b.ToTable("CryptoHoldings", (string)null);
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Currencies.FiatCurrency", b =>
                 {
-                    b.Property<int>("CurrencyID")
+                    b.Property<int>("FiatCurrencyID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CurrencyID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FiatCurrencyID"));
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
@@ -477,42 +477,42 @@ namespace OmniFi_API.Migrations
                         .HasMaxLength(3)
                         .HasColumnType("nvarchar(3)");
 
-                    b.HasKey("CurrencyID");
+                    b.HasKey("FiatCurrencyID");
 
-                    b.ToTable("FiatCurrencies");
+                    b.ToTable("FiatCurrencies", (string)null);
 
                     b.HasData(
                         new
                         {
-                            CurrencyID = 1,
+                            FiatCurrencyID = 1,
                             CurrencyCode = "USD",
                             CurrencyName = "United States Dollar",
                             CurrencySymbol = "$"
                         },
                         new
                         {
-                            CurrencyID = 2,
+                            FiatCurrencyID = 2,
                             CurrencyCode = "EUR",
                             CurrencyName = "Euro",
                             CurrencySymbol = "€"
                         },
                         new
                         {
-                            CurrencyID = 3,
+                            FiatCurrencyID = 3,
                             CurrencyCode = "GBP",
                             CurrencyName = "British Pound",
                             CurrencySymbol = "£"
                         },
                         new
                         {
-                            CurrencyID = 4,
+                            FiatCurrencyID = 4,
                             CurrencyCode = "CHF",
                             CurrencyName = "Swiss Franc",
                             CurrencySymbol = "₣"
                         },
                         new
                         {
-                            CurrencyID = 5,
+                            FiatCurrencyID = 5,
                             CurrencyCode = "JPY",
                             CurrencyName = "Japanese Yen",
                             CurrencySymbol = "¥"
@@ -544,6 +544,22 @@ namespace OmniFi_API.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "e1f8f0f8-4e98-4d30-abf8-8488705defe3",
+                            ConcurrencyStamp = "c833d87b-30cd-4cc0-aa19-9eb5cc2c4b13",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "ea1104de-92d7-499a-a2eb-0f707e6bb911",
+                            ConcurrencyStamp = "bbaf7e3d-5d38-4372-bddf-beed77f83baf",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Identity.ApplicationUser", b =>
@@ -568,16 +584,15 @@ namespace OmniFi_API.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("FiatCurrencyCurrencyID")
-                        .HasColumnType("int");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -620,8 +635,6 @@ namespace OmniFi_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FiatCurrencyCurrencyID");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -629,6 +642,8 @@ namespace OmniFi_API.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("SelectedFiatCurrencyID");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -820,7 +835,7 @@ namespace OmniFi_API.Migrations
                 {
                     b.HasOne("OmniFi_API.Models.Currencies.FiatCurrency", "FiatCurrency")
                         .WithMany("Users")
-                        .HasForeignKey("FiatCurrencyCurrencyID")
+                        .HasForeignKey("SelectedFiatCurrencyID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

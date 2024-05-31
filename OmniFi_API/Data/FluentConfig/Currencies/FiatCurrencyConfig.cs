@@ -9,7 +9,7 @@ namespace OmniFi_API.Data.FluentConfig.Currencies
     {
         public void Configure(EntityTypeBuilder<FiatCurrency> builder)
         {
-            builder.HasKey(x => x.CurrencyID);
+            builder.HasKey(x => x.FiatCurrencyID);
 
 
             builder
@@ -30,14 +30,14 @@ namespace OmniFi_API.Data.FluentConfig.Currencies
             var data = new List<FiatCurrency>(){
                 new FiatCurrency
                 {
-                    CurrencyID = 1,
+                    FiatCurrencyID = 1,
                     CurrencyCode = FiatCurrencyCodes.USD,
                     CurrencyName = "United States Dollar",
                     CurrencySymbol = "$"
                 },
                 new FiatCurrency
                 {
-                    CurrencyID = 2,
+                    FiatCurrencyID = 2,
                     CurrencyCode = FiatCurrencyCodes.EUR,
                     CurrencyName = "Euro",
                     CurrencySymbol = "€"
@@ -45,7 +45,7 @@ namespace OmniFi_API.Data.FluentConfig.Currencies
                 new FiatCurrency
                 {
 
-                    CurrencyID = 3,
+                    FiatCurrencyID = 3,
                     CurrencyCode = FiatCurrencyCodes.GBP,
                     CurrencyName = "British Pound",
                     CurrencySymbol = "£"
@@ -53,14 +53,14 @@ namespace OmniFi_API.Data.FluentConfig.Currencies
                 new FiatCurrency
                 {
 
-                    CurrencyID = 4,
+                    FiatCurrencyID = 4,
                     CurrencyCode = FiatCurrencyCodes.CHF,
                     CurrencyName = "Swiss Franc",
                     CurrencySymbol = "₣"
                 },
                 new FiatCurrency
                 {
-                    CurrencyID = 5,
+                    FiatCurrencyID = 5,
                     CurrencyCode = FiatCurrencyCodes.JPY,
                     CurrencyName = "Japanese Yen",
                     CurrencySymbol = "¥"

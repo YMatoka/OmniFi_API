@@ -7,6 +7,28 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Ressources\Images\Logos\BinanceLogo.png" />
+    <None Remove="Ressources\Images\Logos\BoursoBankLogo.png" />
+    <None Remove="Ressources\Images\Logos\CryptoDotComLogo.png" />
+    <None Remove="Ressources\Images\Logos\KrakenLogo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Ressources\Images\Logos\BinanceLogo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\Images\Logos\BoursoBankLogo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\Images\Logos\CryptoDotComLogo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\Images\Logos\KrakenLogo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EfCore.SchemaCompare" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
