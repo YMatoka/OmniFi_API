@@ -1,9 +1,15 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using OmniFi_API.Data;
+using OmniFi_API.Mapping;
 using OmniFi_API.Models.Identity;
+using OmniFi_API.Options;
+using OmniFi_API.Options.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 // Add services to the container.
 
@@ -21,6 +27,12 @@ builder.Services
     .AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddAutoMapper(typeof(MappingConfig));
+
+builder.Services.Configure<UserRepositoryOptions>(
+    builder.Configuration.GetSection(UserRepositoryOptions.SectionName));
+
 
 var app = builder.Build();
 
