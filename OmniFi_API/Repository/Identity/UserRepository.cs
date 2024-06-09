@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OmniFi_API.Data;
+using OmniFi_API.Data.Interfaces;
 using OmniFi_API.Dtos.Identity;
 using OmniFi_API.Models.Identity;
 using OmniFi_API.Options.Identity;
@@ -17,17 +18,17 @@ namespace OmniFi_API.Repository.Identity
     public class UserRepository : IUserRepository
     {
 
-        private readonly ApplicationDbContext _db;
+        private readonly IApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IMapper _mapper;
         private readonly UserRepositoryOptions _options;
 
         public UserRepository(
-            ApplicationDbContext db, 
-            UserManager<ApplicationUser> userManager, 
-            RoleManager<ApplicationRole> roleManager, 
-            IMapper mapper, 
+            IApplicationDbContext db,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager,
+            IMapper mapper,
             IOptions<UserRepositoryOptions> options)
         {
             _db = db;
@@ -37,21 +38,41 @@ namespace OmniFi_API.Repository.Identity
             _options = options.Value;
         }
 
-        public bool IsUniqueUser(string username)
+        public bool IsUserExistsByUserName(string username)
         {
-        
+
             return _db.Users
                 .FirstOrDefault(x => x.UserName == username) is null ?
-                true :
-                false;
+                false :
+                true;
         }
+
+        public bool IsUserExistsByEmail(string email)
+        {
+
+            return _db.Users
+                .FirstOrDefault(x => x.NormalizedEmail == email.ToUpper()) is null ?
+                false :
+                true;
+        }
+
 
         public async Task<LoginResponseDTO?> Login(LoginRequestDTO loginRequestDTO)
         {
-            var user = _db.Users
-                .FirstOrDefault(x => x.UserName == loginRequestDTO.UserName);
+            ApplicationUser? user = null;
 
-            if (user == null)
+            if (loginRequestDTO.UserName is not null)
+            {
+                user = _db.Users
+                    .FirstOrDefault(x => (x.UserName == loginRequestDTO.UserName));
+            }
+            else if (loginRequestDTO.Email is not null)
+            {
+                user = _db.Users
+                    .FirstOrDefault(x => (x.NormalizedEmail == loginRequestDTO.Email.ToUpper()));
+            }
+
+            if (user is null)
                 return null;
 
             bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDTO.Password);
@@ -90,7 +111,7 @@ namespace OmniFi_API.Repository.Identity
 
             var currency = _db.FiatCurrencies.FirstOrDefault(x => x.CurrencyCode == registerationRequestDTO.FiatCurrencyCode) ??
                 _db.FiatCurrencies.First(x => x.CurrencyCode == FiatCurrencyCodes.EUR);
-            
+
             ApplicationUser user = new()
             {
                 UserName = registerationRequestDTO.UserName,
@@ -105,7 +126,7 @@ namespace OmniFi_API.Repository.Identity
             {
                 var result = await _userManager.CreateAsync(user, registerationRequestDTO.Password);
 
-                if(result.Succeeded)
+                if (result.Succeeded)
                 {
                     if (!(_roleManager.RoleExistsAsync(Roles.Admin).GetAwaiter().GetResult()))
                     {

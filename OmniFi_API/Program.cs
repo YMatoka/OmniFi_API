@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OmniFi_API.Data;
+using OmniFi_API.Data.Interfaces;
 using OmniFi_API.Mapping;
 using OmniFi_API.Models.Identity;
 using OmniFi_API.Options;
@@ -19,7 +20,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<ApplicationDbContext>(
+builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"))
     );
 

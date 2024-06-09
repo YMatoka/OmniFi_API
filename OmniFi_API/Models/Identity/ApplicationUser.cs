@@ -19,7 +19,7 @@ namespace OmniFi_API.Models.Identity
         public ICollection<BankCredential>? BankCredentials { get; set; }
         public ICollection<AssetTracking>? AssetTrackings { get; set; }
         public int SelectedFiatCurrencyID { get; set; }
-        public  required FiatCurrency FiatCurrency { get; set; }
+        public required FiatCurrency FiatCurrency { get; set; }
 
     }
 }
