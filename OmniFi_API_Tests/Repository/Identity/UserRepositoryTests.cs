@@ -241,7 +241,7 @@ namespace OmniFi_API_Tests.Repository.Identity
 
             // Assert
             Assert.That(result, Is.Not.Null);
-            Assert.That(result!.UserName, Is.EqualTo(registerationRequestDTO.UserName));
+            Assert.That(result!.User!.UserName, Is.EqualTo(registerationRequestDTO.UserName));
         }
 
         public static RegisterationRequestDTO[] RegisterationRequestDTOsCases()

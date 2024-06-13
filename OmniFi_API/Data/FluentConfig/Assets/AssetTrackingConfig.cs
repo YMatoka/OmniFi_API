@@ -11,6 +11,10 @@ namespace OmniFi_API.Data.FluentConfig.Assets
             builder.HasKey(x => x.AssetTrackingID);
 
             builder
+                .Property(x => x.AssetTrackingID)
+                .ValueGeneratedOnAdd();
+
+            builder
                 .HasOne(x => x.User)
                 .WithMany(x => x.AssetTrackings)
                 .HasForeignKey(x => x.UserID);

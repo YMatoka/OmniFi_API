@@ -10,7 +10,12 @@ namespace OmniFi_API.Data.FluentConfig.Banks
         {
             builder.HasKey(x => x.BankCredientialID);
 
+            builder
+                .Property(x => x.BankCredientialID)
+                .ValueGeneratedOnAdd();
+
             builder.Property(x => x.BankUserID).IsRequired();
+
             builder
                 .Property(x => x.Password)
                 .HasMaxLength(450)

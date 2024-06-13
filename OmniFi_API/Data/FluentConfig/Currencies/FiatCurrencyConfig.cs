@@ -11,6 +11,9 @@ namespace OmniFi_API.Data.FluentConfig.Currencies
         {
             builder.HasKey(x => x.FiatCurrencyID);
 
+            builder
+                .Property(x => x.FiatCurrencyID)
+                .ValueGeneratedOnAdd();
 
             builder
                 .Property(x => x.CurrencyCode)

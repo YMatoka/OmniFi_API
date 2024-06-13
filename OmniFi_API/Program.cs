@@ -7,6 +7,8 @@ using OmniFi_API.Mapping;
 using OmniFi_API.Models.Identity;
 using OmniFi_API.Options;
 using OmniFi_API.Options.Identity;
+using OmniFi_API.Repository.Identity;
+using OmniFi_API.Repository.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,8 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"))
     );
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services
     .AddIdentity<ApplicationUser, ApplicationRole>()

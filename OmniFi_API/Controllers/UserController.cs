@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.IdentityModel.Tokens;
@@ -48,6 +49,7 @@ namespace OmniFi_API.Controllers
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Register([FromBody] RegisterationRequestDTO registerationRequestDTO)
         {
             
@@ -67,20 +69,20 @@ namespace OmniFi_API.Controllers
                 return BadRequest(_apiResponse);
             }
 
-            var newUser = await _userRepository.Register(registerationRequestDTO);
+            var response = await _userRepository.Register(registerationRequestDTO);
             
-            if (newUser is null)
+            if (!response.IsSucceeded)
             {
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 _apiResponse.IsSucess = false;
-                _apiResponse.ErrorMessages.Add("Error while registering");
+                _apiResponse.ErrorMessages = response.ErrorMessages;
                 return BadRequest(_apiResponse);
             }
 
             _apiResponse.IsSucess = true;
             _apiResponse.StatusCode = HttpStatusCode.Created;
-            _apiResponse.Result = newUser;
-            return Ok(_apiResponse);
+            _apiResponse.Result = response.User;
+            return CreatedAtAction(nameof(Register), _apiResponse);
 
         }
 

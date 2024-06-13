@@ -11,6 +11,10 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
             builder.HasKey(x => x.ExchangeAccountID);
 
             builder
+                .Property(x => x.ExchangeAccountID)
+                .ValueGeneratedOnAdd();
+
+            builder
                 .HasOne(x => x.CryptoExchange)
                 .WithMany(x => x.cryptoExchangeAccounts)
                 .HasForeignKey(x => x.CryptoExchangeID);

@@ -106,7 +106,7 @@ namespace OmniFi_API.Repository.Identity
             };
         }
 
-        public async Task<UserDTO?> Register(RegisterationRequestDTO registerationRequestDTO)
+        public async Task<IdentityResponse> Register(RegisterationRequestDTO registerationRequestDTO)
         {
 
             var currency = _db.FiatCurrencies.FirstOrDefault(x => x.CurrencyCode == registerationRequestDTO.FiatCurrencyCode) ??
@@ -119,8 +119,11 @@ namespace OmniFi_API.Repository.Identity
                 LastName = registerationRequestDTO.LastName,
                 Email = registerationRequestDTO.Email,
                 NormalizedEmail = registerationRequestDTO.Email.ToUpper(),
+                CreatedAt = DateTime.UtcNow,
                 FiatCurrency = currency
             };
+
+            IdentityResponse response = new IdentityResponse();
 
             try
             {
@@ -128,6 +131,7 @@ namespace OmniFi_API.Repository.Identity
 
                 if (result.Succeeded)
                 {
+
                     if (!(_roleManager.RoleExistsAsync(Roles.Admin).GetAwaiter().GetResult()))
                     {
                         await _roleManager.CreateAsync(new ApplicationRole() { Name = Roles.Admin });
@@ -140,8 +144,21 @@ namespace OmniFi_API.Repository.Identity
 
                     await _userManager.AddToRoleAsync(user, Roles.User);
 
-                    return _mapper.Map<UserDTO>(_db.Users
+                    response.User = _mapper.Map<UserDTO>(_db.Users
                         .FirstOrDefault(x => x.UserName == user.UserName));
+
+                    return response;
+                }
+                else if (!result.Succeeded) 
+                {
+                    response.IsSucceeded = false;
+
+                    foreach(var error in result.Errors)
+                    {
+                        response.ErrorMessages.Add(error.Description);
+                    }
+
+                    return response;
                 }
 
             }

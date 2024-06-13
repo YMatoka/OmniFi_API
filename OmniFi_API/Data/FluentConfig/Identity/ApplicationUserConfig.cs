@@ -9,6 +9,11 @@ namespace OmniFi_API.Data.FluentConfig.Identity
     {
         public void Configure(EntityTypeBuilder<ApplicationUser> builder)
         {
+
+            builder
+                .Property(x => x.Id)
+                .ValueGeneratedOnAdd();
+
             builder
                 .Property(x => x.FirstName)
                 .HasMaxLength (50)

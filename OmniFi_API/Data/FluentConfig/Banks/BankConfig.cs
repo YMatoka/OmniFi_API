@@ -10,6 +10,11 @@ namespace OmniFi_API.Data.FluentConfig.Banks
         public void Configure(EntityTypeBuilder<Bank> builder)
         {
             builder.HasKey(x => x.BankID);
+
+            builder
+                .Property(x => x.BankID)
+                .ValueGeneratedOnAdd();
+
             builder
                 .Property(x => x.BankName)
                 .HasMaxLength(30)

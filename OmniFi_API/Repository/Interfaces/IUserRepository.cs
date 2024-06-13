@@ -1,4 +1,5 @@
 ﻿using OmniFi_API.Dtos.Identity;
+using OmniFi_API.Models.Identity;
 
 namespace OmniFi_API.Repository.Interfaces
 {
@@ -7,6 +8,6 @@ namespace OmniFi_API.Repository.Interfaces
         bool IsUserExistsByEmail(string email);
         bool IsUserExistsByUserName(string username);
         Task<LoginResponseDTO?> Login(LoginRequestDTO loginRequestDTO);
-        Task<UserDTO?> Register(RegisterationRequestDTO registerationRequestDTO);
+        Task<IdentityResponse> Register(RegisterationRequestDTO registerationRequestDTO);
     }
 }

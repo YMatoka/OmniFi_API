@@ -10,6 +10,10 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
         {
             builder.HasKey(x => x.ApiCrendentialsID);
 
+            builder
+                .Property(x => x.ApiCrendentialsID)
+                .ValueGeneratedOnAdd();
+
             builder.Property(x => x.ApiKey)
                 .HasMaxLength(128)
                 .IsRequired();

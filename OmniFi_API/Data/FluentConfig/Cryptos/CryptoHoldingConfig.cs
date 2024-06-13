@@ -11,6 +11,10 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
         {
             builder.HasKey(x => x.CrytpoHoldingID);
 
+            builder
+                .Property(x => x.CrytpoHoldingID)
+                .ValueGeneratedOnAdd();
+
             builder.Property(x => x.CryptoCurrencySymbol)
                 .HasMaxLength(10)
                 .IsRequired();

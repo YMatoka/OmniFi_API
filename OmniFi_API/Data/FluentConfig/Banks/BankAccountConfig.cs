@@ -10,6 +10,12 @@ namespace OmniFi_API.Data.FluentConfig.Banks
         public void Configure(EntityTypeBuilder<BankAccount> builder)
         {
 
+            builder.HasKey(x => x.BankAccountID);
+
+            builder
+                .Property(x => x.BankAccountID)
+                .ValueGeneratedOnAdd();
+
             builder
                 .HasOne(x => x.User)
                 .WithMany(x => x.BankAccounts)

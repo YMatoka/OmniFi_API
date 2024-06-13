@@ -11,6 +11,10 @@ namespace OmniFi_API.Data.FluentConfig.Assets
             builder.HasKey(x => x.AssetPlatformID);
 
             builder
+                .Property(x => x.AssetPlatformID)
+                .ValueGeneratedOnAdd();
+
+            builder
                 .HasOne(x => x.Bank)
                 .WithOne(x => x.AssetPlatform)
                 .HasForeignKey<AssetPlatform>(x => x.BankID)

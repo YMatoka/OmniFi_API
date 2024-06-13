@@ -10,7 +10,11 @@ namespace OmniFi_API.Data.FluentConfig.Assets
         public void Configure(EntityTypeBuilder<AssetSource> builder)
         {
             builder.HasKey(x => x.AssetSourceID);
-      
+
+            builder
+                .Property(x => x.AssetSourceID)
+                .ValueGeneratedOnAdd();
+
             builder
                 .Property(x => x.AssetSourceName)
                 .HasMaxLength(30)
