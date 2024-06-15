@@ -12,7 +12,7 @@ using OmniFi_API.Data;
 namespace OmniFi_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240615182602_FirstMigration")]
+    [Migration("20240615214705_FirstMigration")]
     partial class FirstMigration
     {
         /// <inheritdoc />
