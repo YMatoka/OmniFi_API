@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OmniFi_API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class FirstMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -180,34 +180,6 @@ namespace OmniFi_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ApiCredentials",
-                columns: table => new
-                {
-                    ApiCrendentialsID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ApiKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ApiSecret = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CryptoExchangeID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApiCredentials", x => x.ApiCrendentialsID);
-                    table.ForeignKey(
-                        name: "FK_ApiCredentials_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ApiCredentials_CryptoExchanges_CryptoExchangeID",
-                        column: x => x.CryptoExchangeID,
-                        principalTable: "CryptoExchanges",
-                        principalColumn: "CryptoExchangeID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
@@ -366,34 +338,6 @@ namespace OmniFi_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BankCredentials",
-                columns: table => new
-                {
-                    BankCredientialID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    BankUserID = table.Column<int>(type: "int", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
-                    BankID = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BankCredentials", x => x.BankCredientialID);
-                    table.ForeignKey(
-                        name: "FK_BankCredentials_AspNetUsers_UserID",
-                        column: x => x.UserID,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BankCredentials_Banks_BankID",
-                        column: x => x.BankID,
-                        principalTable: "Banks",
-                        principalColumn: "BankID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CryptoExchangeAccounts",
                 columns: table => new
                 {
@@ -417,6 +361,72 @@ namespace OmniFi_API.Migrations
                         principalTable: "CryptoExchanges",
                         principalColumn: "CryptoExchangeID",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BankCredentials",
+                columns: table => new
+                {
+                    BankCredientialID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BankUserID = table.Column<int>(type: "int", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    BankAccountID = table.Column<int>(type: "int", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    BankID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BankCredentials", x => x.BankCredientialID);
+                    table.ForeignKey(
+                        name: "FK_BankCredentials_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_BankCredentials_BankAccounts_BankAccountID",
+                        column: x => x.BankAccountID,
+                        principalTable: "BankAccounts",
+                        principalColumn: "BankAccountID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BankCredentials_Banks_BankID",
+                        column: x => x.BankID,
+                        principalTable: "Banks",
+                        principalColumn: "BankID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ApiCredentials",
+                columns: table => new
+                {
+                    CryptoApiCredentialID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ApiKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ApiSecret = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    CryptoExchangeAccountID = table.Column<int>(type: "int", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CryptoExchangeID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApiCredentials", x => x.CryptoApiCredentialID);
+                    table.ForeignKey(
+                        name: "FK_ApiCredentials_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ApiCredentials_CryptoExchangeAccounts_CryptoExchangeAccountID",
+                        column: x => x.CryptoExchangeAccountID,
+                        principalTable: "CryptoExchangeAccounts",
+                        principalColumn: "ExchangeAccountID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ApiCredentials_CryptoExchanges_CryptoExchangeID",
+                        column: x => x.CryptoExchangeID,
+                        principalTable: "CryptoExchanges",
+                        principalColumn: "CryptoExchangeID");
                 });
 
             migrationBuilder.InsertData(
@@ -467,14 +477,20 @@ namespace OmniFi_API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ApiCredentials_ApplicationUserId",
+                table: "ApiCredentials",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApiCredentials_CryptoExchangeAccountID",
+                table: "ApiCredentials",
+                column: "CryptoExchangeAccountID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ApiCredentials_CryptoExchangeID",
                 table: "ApiCredentials",
                 column: "CryptoExchangeID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApiCredentials_UserId",
-                table: "ApiCredentials",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -572,14 +588,20 @@ namespace OmniFi_API.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BankCredentials_ApplicationUserId",
+                table: "BankCredentials",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BankCredentials_BankAccountID",
+                table: "BankCredentials",
+                column: "BankAccountID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BankCredentials_BankID",
                 table: "BankCredentials",
                 column: "BankID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BankCredentials_UserID",
-                table: "BankCredentials",
-                column: "UserID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CryptoExchangeAccounts_CryptoExchangeID",
@@ -617,9 +639,6 @@ namespace OmniFi_API.Migrations
                 name: "AssetTrackings");
 
             migrationBuilder.DropTable(
-                name: "BankAccounts");
-
-            migrationBuilder.DropTable(
                 name: "BankCredentials");
 
             migrationBuilder.DropTable(
@@ -638,13 +657,16 @@ namespace OmniFi_API.Migrations
                 name: "CryptoHoldings");
 
             migrationBuilder.DropTable(
+                name: "BankAccounts");
+
+            migrationBuilder.DropTable(
+                name: "CryptoExchanges");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Banks");
-
-            migrationBuilder.DropTable(
-                name: "CryptoExchanges");
 
             migrationBuilder.DropTable(
                 name: "FiatCurrencies");

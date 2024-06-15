@@ -55,7 +55,6 @@ namespace OmniFi_API.Data.FluentConfig.Currencies
                 },
                 new FiatCurrency
                 {
-
                     FiatCurrencyID = 4,
                     CurrencyCode = FiatCurrencyCodes.CHF,
                     CurrencyName = "Swiss Franc",

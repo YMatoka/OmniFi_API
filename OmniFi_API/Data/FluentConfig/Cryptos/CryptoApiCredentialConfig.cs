@@ -8,10 +8,10 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
     {
         public void Configure(EntityTypeBuilder<CryptoApiCredential> builder)
         {
-            builder.HasKey(x => x.ApiCrendentialsID);
+            builder.HasKey(x => x.CryptoApiCredentialID);
 
             builder
-                .Property(x => x.ApiCrendentialsID)
+                .Property(x => x.CryptoApiCredentialID)
                 .ValueGeneratedOnAdd();
 
             builder.Property(x => x.ApiKey)
@@ -23,14 +23,9 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
                 .IsRequired();
 
             builder
-                .HasOne(x => x.ApplicationUser)
-                .WithMany(x => x.ApiCredentials)
-                .HasForeignKey(x => x.UserId);
-
-            builder
-                .HasOne(x => x.CryptoExchange)
-                .WithMany(x => x.ApiCredentials)
-                .HasForeignKey(x => x.CryptoExchangeID);
+                .HasOne(x => x.CryptoExchangeAccount)
+                .WithOne(x => x.CryptoApiCredential)
+                .HasForeignKey<CryptoApiCredential>(x => x.CryptoExchangeAccountID);
         }
     }
 }

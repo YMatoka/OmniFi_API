@@ -253,7 +253,6 @@ namespace OmniFi_API_Tests.Repository.Identity
                     Email = "test@mail",
                     LastName = "testLastName",
                     Password = "1234",
-                    Role = Roles.User,
                     UserName="TestUserName"
                 },
 
@@ -262,7 +261,6 @@ namespace OmniFi_API_Tests.Repository.Identity
                     Email = "test1@mail",
                     LastName = "test1LastName",
                     Password = "1234",
-                    Role = Roles.User,
                     UserName="TestUserName1"
                 }
             ];
@@ -294,7 +292,7 @@ namespace OmniFi_API_Tests.Repository.Identity
                 {
                     FirstName = "test",
                     LastName = "test",
-                    UserName = loginRequestDTO!.UserName,
+                    UserName = loginRequestDTO!.UserNameOrEmail,
                     ID = "test"
                 });
 
@@ -309,7 +307,7 @@ namespace OmniFi_API_Tests.Repository.Identity
 
             // Assert
             Assert.That(result, Is.Not.Null);
-            Assert.That(result!.User.UserName, Is.EqualTo(loginRequestDTO.UserName));
+            Assert.That(result!.User.UserName, Is.EqualTo(loginRequestDTO.UserNameOrEmail));
             Assert.That(result!.Token, Is.Not.Null);
         }
 
@@ -318,15 +316,13 @@ namespace OmniFi_API_Tests.Repository.Identity
             return
             [
                 new LoginRequestDTO(){
-                    Email = "test@mail",
+                    UserNameOrEmail = "test@mail",
                     Password = "1234",
-                    UserName="TestUserName"
                 },
 
                 new LoginRequestDTO(){
-                    Email = "test1@mail",
+                    UserNameOrEmail = "test1@mail",
                     Password = "1234",
-                    UserName="TestUserName1"
                 }
             ];
         }

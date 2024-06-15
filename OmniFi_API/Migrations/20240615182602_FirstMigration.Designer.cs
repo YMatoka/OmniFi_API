@@ -12,8 +12,8 @@ using OmniFi_API.Data;
 namespace OmniFi_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240531005707_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20240615182602_FirstMigration")]
+    partial class FirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -307,7 +307,13 @@ namespace OmniFi_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankCredientialID"));
 
-                    b.Property<int>("BankID")
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("BankAccountID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BankID")
                         .HasColumnType("int");
 
                     b.Property<int>("BankUserID")
@@ -318,26 +324,25 @@ namespace OmniFi_API.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UserID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("BankCredientialID");
 
-                    b.HasIndex("BankID");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("BankAccountID")
+                        .IsUnique();
+
+                    b.HasIndex("BankID");
 
                     b.ToTable("BankCredentials");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoApiCredential", b =>
                 {
-                    b.Property<int>("ApiCrendentialsID")
+                    b.Property<int>("CryptoApiCredentialID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ApiCrendentialsID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CryptoApiCredentialID"));
 
                     b.Property<string>("ApiKey")
                         .IsRequired()
@@ -349,18 +354,23 @@ namespace OmniFi_API.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<int>("CryptoExchangeID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
+                    b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("ApiCrendentialsID");
+                    b.Property<int>("CryptoExchangeAccountID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CryptoExchangeID")
+                        .HasColumnType("int");
+
+                    b.HasKey("CryptoApiCredentialID");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("CryptoExchangeAccountID")
+                        .IsUnique();
 
                     b.HasIndex("CryptoExchangeID");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("ApiCredentials");
                 });
@@ -568,6 +578,7 @@ namespace OmniFi_API.Migrations
             modelBuilder.Entity("OmniFi_API.Models.Identity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
@@ -779,40 +790,40 @@ namespace OmniFi_API.Migrations
 
             modelBuilder.Entity("OmniFi_API.Models.Banks.BankCredential", b =>
                 {
-                    b.HasOne("OmniFi_API.Models.Banks.Bank", "Bank")
+                    b.HasOne("OmniFi_API.Models.Identity.ApplicationUser", null)
                         .WithMany("BankCredentials")
-                        .HasForeignKey("BankID")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("OmniFi_API.Models.Banks.BankAccount", "BankAccount")
+                        .WithOne("BankCredential")
+                        .HasForeignKey("OmniFi_API.Models.Banks.BankCredential", "BankAccountID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OmniFi_API.Models.Identity.ApplicationUser", "ApplicationUser")
+                    b.HasOne("OmniFi_API.Models.Banks.Bank", null)
                         .WithMany("BankCredentials")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BankID");
 
-                    b.Navigation("ApplicationUser");
-
-                    b.Navigation("Bank");
+                    b.Navigation("BankAccount");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoApiCredential", b =>
                 {
-                    b.HasOne("OmniFi_API.Models.Cryptos.CryptoExchange", "CryptoExchange")
+                    b.HasOne("OmniFi_API.Models.Identity.ApplicationUser", null)
                         .WithMany("ApiCredentials")
-                        .HasForeignKey("CryptoExchangeID")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("OmniFi_API.Models.Cryptos.CryptoExchangeAccount", "CryptoExchangeAccount")
+                        .WithOne("CryptoApiCredential")
+                        .HasForeignKey("OmniFi_API.Models.Cryptos.CryptoApiCredential", "CryptoExchangeAccountID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OmniFi_API.Models.Identity.ApplicationUser", "ApplicationUser")
+                    b.HasOne("OmniFi_API.Models.Cryptos.CryptoExchange", null)
                         .WithMany("ApiCredentials")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CryptoExchangeID");
 
-                    b.Navigation("ApplicationUser");
-
-                    b.Navigation("CryptoExchange");
+                    b.Navigation("CryptoExchangeAccount");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoExchangeAccount", b =>
@@ -864,6 +875,12 @@ namespace OmniFi_API.Migrations
                     b.Navigation("BankCredentials");
                 });
 
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
+                {
+                    b.Navigation("BankCredential")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoExchange", b =>
                 {
                     b.Navigation("ApiCredentials");
@@ -871,6 +888,12 @@ namespace OmniFi_API.Migrations
                     b.Navigation("AssetPlatform");
 
                     b.Navigation("cryptoExchangeAccounts");
+                });
+
+            modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoExchangeAccount", b =>
+                {
+                    b.Navigation("CryptoApiCredential")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoHolding", b =>

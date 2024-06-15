@@ -22,14 +22,9 @@ namespace OmniFi_API.Data.FluentConfig.Banks
                 .IsRequired();
 
             builder
-                .HasOne(x => x.ApplicationUser)
-                .WithMany(x => x.BankCredentials)
-                .HasForeignKey(x => x.UserID);
-
-            builder
-                .HasOne(x => x.Bank)
-                .WithMany(x => x.BankCredentials)
-                .HasForeignKey(x => x.BankID);
+                .HasOne(x => x.BankAccount)
+                .WithOne(x => x.BankCredential)
+                .HasForeignKey<BankCredential>(x => x.BankAccountID);
         }
     }
 }

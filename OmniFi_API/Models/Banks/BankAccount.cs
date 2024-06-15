@@ -10,6 +10,7 @@ namespace OmniFi_API.Models.Banks
         public required ApplicationUser User { get; set; }
         public int BankID { get; set; }
         public required Bank Bank { get; set; }
+        public required BankCredential BankCredential { get; set; }
 
     }
 }

@@ -9,6 +9,7 @@ namespace OmniFi_API.Models.Cryptos
         public required CryptoExchange CryptoExchange { get; set; }
         public required string UserID { get; set; }
         public required ApplicationUser User { get; set; }
+        public required CryptoApiCredential CryptoApiCredential { get; set; }
    
     }
 }
