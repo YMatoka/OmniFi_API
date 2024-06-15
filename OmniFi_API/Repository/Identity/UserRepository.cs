@@ -61,15 +61,16 @@ namespace OmniFi_API.Repository.Identity
         {
             ApplicationUser? user = null;
 
-            if (loginRequestDTO.UserName is not null)
+            if (loginRequestDTO.UserNameOrEmail is not null)
             {
                 user = _db.Users
-                    .FirstOrDefault(x => (x.UserName == loginRequestDTO.UserName));
-            }
-            else if (loginRequestDTO.Email is not null)
-            {
-                user = _db.Users
-                    .FirstOrDefault(x => (x.NormalizedEmail == loginRequestDTO.Email.ToUpper()));
+                    .FirstOrDefault(x => (x.UserName == loginRequestDTO.UserNameOrEmail));
+
+                if (user is null)
+                {
+                    user = _db.Users
+                        .FirstOrDefault(x => (x.NormalizedEmail == loginRequestDTO.UserNameOrEmail.ToUpper()));
+                }
             }
 
             if (user is null)

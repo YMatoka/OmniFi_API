@@ -10,6 +10,6 @@ namespace OmniFi_API.Dtos.Identity
         public required string Email { get; set; }
         public required string Password { get; set; }
         public string? FiatCurrencyCode { get; set; }
-        public required string Role { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }

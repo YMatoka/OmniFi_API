@@ -30,13 +30,16 @@ namespace OmniFi_API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
+
             var loginResponse = await _userRepository.Login(loginRequestDTO);
 
             if (loginResponse is null || loginResponse.User is null || string.IsNullOrEmpty(loginResponse.Token))
             {
                 _apiResponse.IsSucess = false;
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                _apiResponse.ErrorMessages.Add("username or password incorrect");
+                _apiResponse.ErrorMessages.Add($"Invalid credentials\n\n" +
+                    $"Your entered credentials may be incorrect or email sign-in is disabled for your account.\n\n" +
+                    $"Please check your credentials and try again.");
                 return BadRequest(_apiResponse);
             }
 
