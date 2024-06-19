@@ -26,8 +26,8 @@ namespace OmniFi_API_Tests.Repository.Identity
     [TestFixture]
     public class UserRepositoryTests
     {
-        private Mock<IApplicationDbContext>? _db;
-        private Mock<UserManager<ApplicationUser>>? _userManager;
+        private Mock<ApplicationDbContext>? _db;
+        private Mock<UserManager<OmniFi_API.Models.Identity.ApplicationUser>>? _userManager;
         private Mock<RoleManager<ApplicationRole>>? _roleManager;
         private Mock<IMapper>? _mapper;
         private Mock<IOptions<UserRepositoryOptions>>? _options;
@@ -37,18 +37,18 @@ namespace OmniFi_API_Tests.Repository.Identity
         [SetUp]
         public void Setup()
         {
-            _db = new Mock<IApplicationDbContext>();
+            _db = new Mock<ApplicationDbContext>();
 
-            _userManager = new Mock<UserManager<ApplicationUser>>(
-                new Mock<IUserStore<ApplicationUser>>().Object,
+            _userManager = new Mock<UserManager<OmniFi_API.Models.Identity.ApplicationUser>>(
+                new Mock<IUserStore<OmniFi_API.Models.Identity.ApplicationUser>>().Object,
                 new Mock<IOptions<IdentityOptions>>().Object,
-                new Mock<IPasswordHasher<ApplicationUser>>().Object,
-                new IUserValidator<ApplicationUser>[0],
-                new IPasswordValidator<ApplicationUser>[0],
+                new Mock<IPasswordHasher<OmniFi_API.Models.Identity.ApplicationUser>>().Object,
+                new IUserValidator<OmniFi_API.Models.Identity.ApplicationUser>[0],
+                new IPasswordValidator<OmniFi_API.Models.Identity.ApplicationUser>[0],
                 new Mock<ILookupNormalizer>().Object,
                 new Mock<IdentityErrorDescriber>().Object,
                 new Mock<IServiceProvider>().Object,
-                new Mock<ILogger<UserManager<ApplicationUser>>>().Object
+                new Mock<ILogger<UserManager<OmniFi_API.Models.Identity.ApplicationUser>>>().Object
                 );
 
             _roleManager = new Mock<RoleManager<ApplicationRole>>(
@@ -79,7 +79,7 @@ namespace OmniFi_API_Tests.Repository.Identity
         }
 
 
-        private static List<ApplicationUser> GetApplicationUsers()
+        private static List<OmniFi_API.Models.Identity.ApplicationUser> GetApplicationUsers()
         {
             var usedFiatCurrency = new FiatCurrency()
             {
@@ -88,9 +88,9 @@ namespace OmniFi_API_Tests.Repository.Identity
                 CurrencySymbol = "$"
             };
 
-            return new List<ApplicationUser>()
+            return new List<OmniFi_API.Models.Identity.ApplicationUser>()
             {
-                new ApplicationUser()
+                new OmniFi_API.Models.Identity.ApplicationUser()
                 {
                     Id = "testID",
                     UserName = "TestUserName",
@@ -100,7 +100,7 @@ namespace OmniFi_API_Tests.Repository.Identity
                     NormalizedEmail = "test@mail.com".ToUpper(),
                     LastName = "TestLastName"
                 },
-                new ApplicationUser()
+                new OmniFi_API.Models.Identity.ApplicationUser()
                 {
                     Id = "testID1",
                     UserName = "TestUserName1",
@@ -201,11 +201,11 @@ namespace OmniFi_API_Tests.Repository.Identity
         {
             // Arrange
             _userManager!
-                .Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()).Result)
+                .Setup(x => x.CreateAsync(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>(), It.IsAny<string>()).Result)
                 .Returns(IdentityResult.Success);
 
             _userManager!
-                .Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()).Result)
+                .Setup(x => x.AddToRoleAsync(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>(), It.IsAny<string>()).Result)
                 .Returns(IdentityResult.Success);
 
             _roleManager!
@@ -221,7 +221,7 @@ namespace OmniFi_API_Tests.Repository.Identity
                 .ReturnsDbSet(GetFiatCurrencies());
 
             _mapper!
-                .Setup(x => x.Map<UserDTO>(It.IsAny<ApplicationUser>()))
+                .Setup(x => x.Map<UserDTO>(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>()))
                 .Returns(new UserDTO()
                 {
                     FirstName = registerationRequestDTO.FirstName,
@@ -271,11 +271,11 @@ namespace OmniFi_API_Tests.Repository.Identity
         {
             // Arrange
             _userManager!
-                .Setup(x => x.GetRolesAsync(It.IsAny<ApplicationUser>()).Result)
+                .Setup(x => x.GetRolesAsync(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>()).Result)
                 .Returns(new List<string>() { Roles.User});
 
             _userManager!
-                .Setup(x => x.CheckPasswordAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()).Result)
+                .Setup(x => x.CheckPasswordAsync(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>(), It.IsAny<string>()).Result)
                 .Returns(true);
 
             _db!
@@ -287,7 +287,7 @@ namespace OmniFi_API_Tests.Repository.Identity
                 .ReturnsDbSet(GetFiatCurrencies());
 
             _mapper!
-                .Setup(x => x.Map<UserDTO>(It.IsAny<ApplicationUser>()))
+                .Setup(x => x.Map<UserDTO>(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>()))
                 .Returns(new UserDTO()
                 {
                     FirstName = "test",

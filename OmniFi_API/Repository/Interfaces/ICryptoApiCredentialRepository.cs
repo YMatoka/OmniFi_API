@@ -2,7 +2,7 @@
 
 namespace OmniFi_API.Repository.Interfaces
 {
-    public interface ICryptoApiCredential : IRepository<CryptoApiCredential>
+    public interface ICryptoApiCredentialRepository : IRepository<CryptoApiCredential>
     {
         Task UpdateAsync(CryptoApiCredential cryptoApiCredential);
     }

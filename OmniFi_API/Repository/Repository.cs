@@ -55,7 +55,7 @@ namespace OmniFi_API.Repository
             return await query.ToListAsync();
         }
 
-        public async Task<T?> GetAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, bool tracked = true)
+        public virtual async Task<T?> GetAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, bool tracked = true)
         {
             IQueryable<T> query = _dbSet;
             

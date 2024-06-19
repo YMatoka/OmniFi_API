@@ -12,8 +12,8 @@ using OmniFi_API.Data;
 namespace OmniFi_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240615182602_FirstMigration")]
-    partial class FirstMigration
+    [Migration("20240619005706_firstMIgration")]
+    partial class firstMIgration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -344,15 +344,13 @@ namespace OmniFi_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CryptoApiCredentialID"));
 
-                    b.Property<string>("ApiKey")
+                    b.Property<byte[]>("ApiKey")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("ApiSecret")
+                    b.Property<byte[]>("ApiSecret")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
@@ -372,7 +370,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasIndex("CryptoExchangeID");
 
-                    b.ToTable("ApiCredentials");
+                    b.ToTable("CryptoApiCredentials");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoExchange", b =>
@@ -530,6 +528,37 @@ namespace OmniFi_API.Migrations
                             CurrencyName = "Japanese Yen",
                             CurrencySymbol = "¥"
                         });
+                });
+
+            modelBuilder.Entity("OmniFi_API.Models.Encryption.AesKey", b =>
+                {
+                    b.Property<int>("AesKeyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AesKeyId"));
+
+                    b.Property<int?>("BankCredentialId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CryptoApiCredentialId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("Key")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.HasKey("AesKeyId");
+
+                    b.HasIndex("BankCredentialId")
+                        .IsUnique()
+                        .HasFilter("[BankCredentialId] IS NOT NULL");
+
+                    b.HasIndex("CryptoApiCredentialId")
+                        .IsUnique()
+                        .HasFilter("[CryptoApiCredentialId] IS NOT NULL");
+
+                    b.ToTable("AesKeys");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Identity.ApplicationRole", b =>
@@ -845,6 +874,21 @@ namespace OmniFi_API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("OmniFi_API.Models.Encryption.AesKey", b =>
+                {
+                    b.HasOne("OmniFi_API.Models.Banks.BankCredential", "BankCredential")
+                        .WithOne("AesKey")
+                        .HasForeignKey("OmniFi_API.Models.Encryption.AesKey", "BankCredentialId");
+
+                    b.HasOne("OmniFi_API.Models.Cryptos.CryptoApiCredential", "CryptoApiCredential")
+                        .WithOne("AesKey")
+                        .HasForeignKey("OmniFi_API.Models.Encryption.AesKey", "CryptoApiCredentialId");
+
+                    b.Navigation("BankCredential");
+
+                    b.Navigation("CryptoApiCredential");
+                });
+
             modelBuilder.Entity("OmniFi_API.Models.Identity.ApplicationUser", b =>
                 {
                     b.HasOne("OmniFi_API.Models.Currencies.FiatCurrency", "FiatCurrency")
@@ -881,6 +925,16 @@ namespace OmniFi_API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankCredential", b =>
+                {
+                    b.Navigation("AesKey");
+                });
+
+            modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoApiCredential", b =>
+                {
+                    b.Navigation("AesKey");
+                });
+
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoExchange", b =>
                 {
                     b.Navigation("ApiCredentials");
@@ -892,8 +946,7 @@ namespace OmniFi_API.Migrations
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoExchangeAccount", b =>
                 {
-                    b.Navigation("CryptoApiCredential")
-                        .IsRequired();
+                    b.Navigation("CryptoApiCredential");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoHolding", b =>

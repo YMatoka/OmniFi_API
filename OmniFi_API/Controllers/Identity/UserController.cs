@@ -10,7 +10,7 @@ using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
 
-namespace OmniFi_API.Controllers
+namespace OmniFi_API.Controllers.Identity
 {
     [Route($"api/{ControllerRouteNames.UserController}")]
     [ApiController]
@@ -25,10 +25,10 @@ namespace OmniFi_API.Controllers
             _apiResponse = new();
         }
 
-        [HttpPost("login")]
+        [HttpPost(nameof(Login))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDTO)
+        public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
 
             var loginResponse = await _userRepository.Login(loginRequestDTO);
@@ -49,13 +49,13 @@ namespace OmniFi_API.Controllers
             return Ok(_apiResponse);
         }
 
-        [HttpPost("register")]
+        [HttpPost(nameof(Register))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Register([FromBody] RegisterationRequestDTO registerationRequestDTO)
+        public async Task<ActionResult<ApiResponse>> Register([FromBody] RegisterationRequestDTO registerationRequestDTO)
         {
-            
+
             if (_userRepository.IsUserExistsByUserName(registerationRequestDTO.UserName))
             {
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
@@ -73,7 +73,7 @@ namespace OmniFi_API.Controllers
             }
 
             var response = await _userRepository.Register(registerationRequestDTO);
-            
+
             if (!response.IsSucceeded)
             {
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
@@ -90,7 +90,7 @@ namespace OmniFi_API.Controllers
         }
 
 
-        
+
 
 
     }

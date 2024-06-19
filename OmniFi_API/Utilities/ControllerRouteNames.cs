@@ -3,5 +3,6 @@
     public static class ControllerRouteNames
     {
        public const string UserController = "UsersAuth";
+       public const string CryptoExchangeController = "CryptoExchangeAccount";
     }
 }
