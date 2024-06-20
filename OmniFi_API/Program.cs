@@ -9,7 +9,6 @@ using OmniFi_API.Models.Encryption;
 using OmniFi_API.Models.Identity;
 using OmniFi_API.Options;
 using OmniFi_API.Options.Cryptos;
-using OmniFi_API.Options.Encryption;
 using OmniFi_API.Options.Identity;
 using OmniFi_API.Repository;
 using OmniFi_API.Repository.Cryptos;
@@ -32,7 +31,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("SecondSQLConnection"))
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"))
     );
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -40,6 +39,7 @@ builder.Services.AddScoped<IRepository<CryptoExchange>, Repository<CryptoExchang
 builder.Services.AddScoped<ICryptoExchangeAccountRepository, CryptoExchangeAccountRepository>();
 builder.Services.AddScoped<ICryptoApiCredentialRepository, CryptoApiCredentialRepository>();
 builder.Services.AddScoped<IRepository<AesKey>, Repository<AesKey>>();
+builder.Services.AddScoped<IRepository<AesIV>, Repository<AesIV>>();
 
 builder.Services.AddScoped<IStringEncryptionService, StringEncryptionService>();
 
@@ -52,9 +52,6 @@ builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 builder.Services.Configure<UserRepositoryOptions>(
     builder.Configuration.GetSection(UserRepositoryOptions.SectionName));
-
-builder.Services.Configure<StringEncryptionServiceOptions>(
-    builder.Configuration.GetSection(StringEncryptionServiceOptions.SectionName));
 
 builder.Services.Configure<CryptoApiCredentialOptions>(
     builder.Configuration.GetSection(CryptoApiCredentialOptions.SectionName));

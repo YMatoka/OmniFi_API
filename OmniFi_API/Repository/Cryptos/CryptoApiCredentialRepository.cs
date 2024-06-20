@@ -35,11 +35,6 @@ namespace OmniFi_API.Repository.Cryptos
 
             var credential = await GetAsync((x) => x.CryptoApiCredentialID == cryptoApiCredential.CryptoApiCredentialID,tracked:false);
 
-            using(var transaction = _db.Database.BeginTransaction())
-            {
-
-            }
-
         }
 
         public override async Task<CryptoApiCredential?> GetAsync(Expression<Func<CryptoApiCredential, bool>>? filter = null, string? includeProperties = null, bool tracked = true)

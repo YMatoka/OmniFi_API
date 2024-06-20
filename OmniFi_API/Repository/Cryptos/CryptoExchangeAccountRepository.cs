@@ -13,25 +13,31 @@ namespace OmniFi_API.Repository.Cryptos
         private readonly ApplicationDbContext _db;
         private readonly IStringEncryptionService _stringEncryptionService;
         private readonly ICryptoApiCredentialRepository _cryptoApiCredentialRepository;
-        private readonly IRepository<AesKey> _aesKeytRepository;
+        private readonly IRepository<AesKey> _aesKeyRepository;
+        private readonly IRepository<AesIV> _aesIVRepository;
 
         public CryptoExchangeAccountRepository(
             ApplicationDbContext db,
             IStringEncryptionService stringEncryptionService,
             ICryptoApiCredentialRepository cryptoApiCredentialRepository,
-            IRepository<AesKey> aesKeytRepository) : base(db)
+            IRepository<AesKey> aesKeytRepository,
+            IRepository<AesIV> aesIVRepository) : base(db)
         {
             _db = db;
             _stringEncryptionService = stringEncryptionService;
             _cryptoApiCredentialRepository = cryptoApiCredentialRepository;
-            _aesKeytRepository = aesKeytRepository;
+            _aesKeyRepository = aesKeytRepository;
+            _aesIVRepository = aesIVRepository;
         }
 
         public async Task CreateAsync(CryptoExchangeAccount cryptoExchangeAccount, CryptoExchangeAccountCreateDTO cryptoExchangeAccountCreateDTO)
         {
 
-                try
+            try
+            {
+                using (var transaction = _db.Database.BeginTransaction())
                 {
+
                     await base.CreateAsync(cryptoExchangeAccount);
 
                     var savedCryptoExchangeAccount = await base.GetAsync(
@@ -40,12 +46,13 @@ namespace OmniFi_API.Repository.Cryptos
                         tracked: false);
 
                     var encryptionKey = _stringEncryptionService.GenerateAesKey();
+                    var IV = _stringEncryptionService.GenerateAesIV();
 
                     var credential = new CryptoApiCredential()
                     {
-                        ApiKey = await _stringEncryptionService.EncryptAsync(cryptoExchangeAccountCreateDTO.ApiKey, encryptionKey),
-                        ApiSecret = await _stringEncryptionService.EncryptAsync(cryptoExchangeAccountCreateDTO.ApiSecret, encryptionKey),
-                        CryptoExchangeAccountID = cryptoExchangeAccount!.ExchangeAccountID,
+                        ApiKey = await _stringEncryptionService.EncryptAsync(cryptoExchangeAccountCreateDTO.ApiKey, encryptionKey, IV),
+                        ApiSecret = await _stringEncryptionService.EncryptAsync(cryptoExchangeAccountCreateDTO.ApiSecret, encryptionKey, IV),
+                        CryptoExchangeAccountID = savedCryptoExchangeAccount!.ExchangeAccountID,
                     };
 
                     await _cryptoApiCredentialRepository.CreateAsync(credential);
@@ -60,18 +67,37 @@ namespace OmniFi_API.Repository.Cryptos
                         CryptoApiCredentialId = credential!.CryptoApiCredentialID
                     };
 
-                    await _aesKeytRepository.CreateAsync(aesKey);
+                    await _aesKeyRepository.CreateAsync(aesKey);
 
-                    _db.Database.CommitTransaction();
+                    var aesIV = new AesIV()
+                    {
+                        IV = IV,
+                        CryptoApiCredentialId = credential!.CryptoApiCredentialID
+                    };
+
+                    await _aesIVRepository.CreateAsync(aesIV);
+
+                    var aesKeyRetrieved = await _aesKeyRepository.GetAsync(
+                        (x) => x.CryptoApiCredentialId == credential.CryptoApiCredentialID);
+
+                    var aesIVRetrieved = await _aesIVRepository.GetAsync(
+                        (x) => x.CryptoApiCredentialId == credential.CryptoApiCredentialID);
+
+
+                    var decryptedKey = await _stringEncryptionService.DecryptAsync(credential.ApiKey, aesKeyRetrieved!.Key, aesIVRetrieved!.IV);
+
+                    var decryptedSecretKEy = await _stringEncryptionService.DecryptAsync(credential.ApiSecret, aesKeyRetrieved!.Key, aesIVRetrieved!.IV);
+
+                    await transaction.CommitAsync();
 
                 }
-                catch (Exception)
-                {
 
-                    _db.Database.RollbackTransaction();
-                    throw;
-                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
+}
 

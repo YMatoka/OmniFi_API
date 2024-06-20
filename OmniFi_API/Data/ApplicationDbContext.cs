@@ -20,18 +20,24 @@ namespace OmniFi_API.Data
     {
         public override DbSet<ApplicationUser> Users { get; set; }
         public override DbSet<ApplicationRole> Roles { get; set; }
+
         public DbSet<AssetPlatform> AssetPlatforms { get; set; }
         public DbSet<AssetSource> AssetSources { get; set; }
         public DbSet<AssetTracking> AssetTrackings { get; set; }
+
         public DbSet<Bank> Banks { get; set; }
         public DbSet<BankAccount> BankAccounts { get; set; }
         internal DbSet<BankCredential> BankCredentials { get; set; }
+
         public DbSet<CryptoExchange> CryptoExchanges { get; set; }
         public DbSet<CryptoExchangeAccount> CryptoExchangeAccounts { get; set; }
         internal DbSet<CryptoApiCredential> CryptoApiCredentials { get; set; }
         public DbSet<CryptoHolding> CryptoHoldings { get; set; }
+
         public DbSet<FiatCurrency> FiatCurrencies { get; set; }
+
         internal DbSet<AesKey> AesKeys { get; set; }
+        internal DbSet<AesIV> AesIV { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -63,6 +69,7 @@ namespace OmniFi_API.Data
             modelBuilder.ApplyConfiguration(new ApplicationUserConfig());
 
             modelBuilder.ApplyConfiguration(new AesKeyConfig());
+            modelBuilder.ApplyConfiguration(new AesIVConfig());
         }
 
 

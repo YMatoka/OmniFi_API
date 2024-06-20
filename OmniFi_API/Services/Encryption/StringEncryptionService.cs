@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using OmniFi_API.Options.Encryption;
 using OmniFi_API.Services.Interfaces;
 using System.IO;
 using System.Security.Cryptography;
@@ -10,21 +9,12 @@ namespace OmniFi_API.Services.Encryption
     public class StringEncryptionService : IStringEncryptionService
     {
 
-        private readonly StringEncryptionServiceOptions _stringEncryptionServiceOptions;
-
-        public StringEncryptionService(IOptions<StringEncryptionServiceOptions> options)
-        {
-            _stringEncryptionServiceOptions = options.Value;
-        }
-
-        public async Task<string> DecryptAsync(byte[] encrypted, byte[] encryptionKey)
+        public async Task<string> DecryptAsync(byte[] encrypted, byte[] encryptionKey, byte[] IV)
         {
             using (Aes aes = Aes.Create())
             {
                 aes.Key = encryptionKey;
-                aes.IV = Encoding.Unicode.GetBytes(_stringEncryptionServiceOptions.IV);
-
-                //var IVAsString = Encoding.Unicode.GetString(aes.IV);
+                aes.IV = IV;
 
                 using (MemoryStream inputMemoryStream = new MemoryStream(encrypted))
                 {
@@ -41,14 +31,12 @@ namespace OmniFi_API.Services.Encryption
             }
         }
 
-        public async Task<byte[]> EncryptAsync(string clearText, byte[] encryptionKey)
+        public async Task<byte[]> EncryptAsync(string clearText, byte[] encryptionKey, byte[] IV)
         {
             using (Aes aes = Aes.Create())
             {
                 aes.Key = encryptionKey;
-                aes.IV = Encoding.Unicode.GetBytes(_stringEncryptionServiceOptions.IV);
-
-                //var IVAsString = Encoding.Unicode.GetString(aes.IV);
+                aes.IV = IV;
 
                 using (MemoryStream outputMemoryStream = new MemoryStream())
                 {
@@ -60,6 +48,14 @@ namespace OmniFi_API.Services.Encryption
 
                     return outputMemoryStream.ToArray();
                 }
+            }
+        }
+
+        public byte[] GenerateAesIV()
+        {
+            using(Aes aes = Aes.Create())
+            {
+                return aes.IV;
             }
         }
 

@@ -11,5 +11,6 @@ namespace OmniFi_API.Models.Cryptos
         public required int CryptoExchangeAccountID { get; set; }
         public CryptoExchangeAccount? CryptoExchangeAccount { get; set; }
         public AesKey? AesKey { get; set; }
+        public AesIV? AesIV { get; set; }
     }
 }

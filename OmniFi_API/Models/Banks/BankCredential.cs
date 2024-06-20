@@ -11,5 +11,6 @@ namespace OmniFi_API.Models.Banks
         public int BankAccountID { get; set; }
         public BankAccount? BankAccount { get; set; }
         public AesKey? AesKey { get; set; }
+        public AesIV? AesIV { get; set; }
     }
 }
