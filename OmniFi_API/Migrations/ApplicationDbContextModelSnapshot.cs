@@ -316,10 +316,9 @@ namespace OmniFi_API.Migrations
                     b.Property<int>("BankUserID")
                         .HasColumnType("int");
 
-                    b.Property<string>("Password")
+                    b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("BankCredientialID");
 
@@ -964,8 +963,7 @@ namespace OmniFi_API.Migrations
 
             modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
                 {
-                    b.Navigation("BankCredential")
-                        .IsRequired();
+                    b.Navigation("BankCredential");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Banks.BankCredential", b =>

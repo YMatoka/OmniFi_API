@@ -11,6 +11,10 @@ namespace OmniFi_API.Data.FluentConfig.Encryption
             builder.HasKey(builder => builder.AesKeyId);
 
             builder
+                .Property(x =>  x.AesKeyId)
+                .ValueGeneratedOnAdd();
+
+            builder
                 .Property(x => x.Key)
                 .IsRequired();
 

@@ -11,6 +11,10 @@ namespace OmniFi_API.Data.FluentConfig.Encryption
             builder.HasKey(x => x.AesIVId);
 
             builder
+                .Property(x => x.AesIVId)
+                .ValueGeneratedOnAdd();
+
+            builder
                 .HasOne(x => x.CryptoApiCredential)
                 .WithOne(x => x.AesIV)
                 .HasForeignKey<AesIV>(x => x.CryptoApiCredentialId)

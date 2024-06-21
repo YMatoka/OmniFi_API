@@ -4,7 +4,7 @@ using OmniFi_API.Repository.Interfaces;
 
 namespace OmniFi_API.Repository.Banks
 {
-    public class BankCredentialRepository : Repository<BankCredential>, IBankCredientalRepository
+    public class BankCredentialRepository : Repository<BankCredential>, IBankCredentialRepository
     {
         private readonly ApplicationDbContext _db;
 

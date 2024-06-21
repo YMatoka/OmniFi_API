@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OmniFi_API.Data;
 using OmniFi_API.Data.Interfaces;
 using OmniFi_API.Mapping;
+using OmniFi_API.Models.Banks;
 using OmniFi_API.Models.Cryptos;
 using OmniFi_API.Models.Encryption;
 using OmniFi_API.Models.Identity;
@@ -11,6 +12,7 @@ using OmniFi_API.Options;
 using OmniFi_API.Options.Cryptos;
 using OmniFi_API.Options.Identity;
 using OmniFi_API.Repository;
+using OmniFi_API.Repository.Banks;
 using OmniFi_API.Repository.Cryptos;
 using OmniFi_API.Repository.Identity;
 using OmniFi_API.Repository.Interfaces;
@@ -31,15 +33,19 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"))
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("SecondSQLConnection"))
     );
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRepository<CryptoExchange>, Repository<CryptoExchange>>();
-builder.Services.AddScoped<ICryptoExchangeAccountRepository, CryptoExchangeAccountRepository>();
-builder.Services.AddScoped<ICryptoApiCredentialRepository, CryptoApiCredentialRepository>();
+builder.Services.AddScoped<IRepository<Bank>, Repository<Bank>>();
 builder.Services.AddScoped<IRepository<AesKey>, Repository<AesKey>>();
 builder.Services.AddScoped<IRepository<AesIV>, Repository<AesIV>>();
+
+builder.Services.AddScoped<ICryptoExchangeAccountRepository, CryptoExchangeAccountRepository>();
+builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
+builder.Services.AddScoped<ICryptoApiCredentialRepository, CryptoApiCredentialRepository>();
+builder.Services.AddScoped<IBankCredentialRepository, BankCredentialRepository>();
 
 builder.Services.AddScoped<IStringEncryptionService, StringEncryptionService>();
 

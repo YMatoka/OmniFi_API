@@ -12,8 +12,8 @@ using OmniFi_API.Data;
 namespace OmniFi_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240620194749_AddAesIVEntity")]
-    partial class AddAesIVEntity
+    [Migration("20240621154559_FirstMigration")]
+    partial class FirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -319,10 +319,9 @@ namespace OmniFi_API.Migrations
                     b.Property<int>("BankUserID")
                         .HasColumnType("int");
 
-                    b.Property<string>("Password")
+                    b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("BankCredientialID");
 
@@ -967,8 +966,7 @@ namespace OmniFi_API.Migrations
 
             modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
                 {
-                    b.Navigation("BankCredential")
-                        .IsRequired();
+                    b.Navigation("BankCredential");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Banks.BankCredential", b =>

@@ -33,8 +33,6 @@ namespace OmniFi_API.Repository.Cryptos
 
             await base.CreateAsync(cryptoApiCredential);
 
-            var credential = await GetAsync((x) => x.CryptoApiCredentialID == cryptoApiCredential.CryptoApiCredentialID,tracked:false);
-
         }
 
         public override async Task<CryptoApiCredential?> GetAsync(Expression<Func<CryptoApiCredential, bool>>? filter = null, string? includeProperties = null, bool tracked = true)

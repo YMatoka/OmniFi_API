@@ -45,9 +45,9 @@ namespace OmniFi_API.Controllers.Cryptos
 
             if (user is null)
             {
-                _apiResponse.IsSucess = false;
+                _apiResponse.IsSuccess = false;
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                _apiResponse.ErrorMessages.Add($"the username or email {cryptoExchangeAccountCreateDTO.UsernameOrEmail} is invalid");
+                _apiResponse.ErrorMessages.Add($"the username or email '{cryptoExchangeAccountCreateDTO.UsernameOrEmail}' is invalid");
                 return BadRequest(_apiResponse);
             }
 
@@ -57,9 +57,9 @@ namespace OmniFi_API.Controllers.Cryptos
 
             if (cryptoExchange is null)
             {
-                _apiResponse.IsSucess = false;
+                _apiResponse.IsSuccess = false;
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                _apiResponse.ErrorMessages.Add($"the crypto exchange {cryptoExchangeAccountCreateDTO.CryptoExchangeName} does'nt exists in the database");
+                _apiResponse.ErrorMessages.Add($"the crypto exchange '{cryptoExchangeAccountCreateDTO.CryptoExchangeName}' does'nt exists in the database");
                 return BadRequest(_apiResponse);
             }
 
@@ -67,7 +67,7 @@ namespace OmniFi_API.Controllers.Cryptos
                 (x) => x.UserID == user.Id 
                 && x.CryptoExchangeID == cryptoExchange.CryptoExchangeID) is not null)
             {
-                _apiResponse.IsSucess = false;
+                _apiResponse.IsSuccess = false;
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 _apiResponse.ErrorMessages.Add($"the user '{user.UserName}' already have a '{cryptoExchange.ExchangeName}' account");
                 return BadRequest(_apiResponse);
@@ -86,7 +86,7 @@ namespace OmniFi_API.Controllers.Cryptos
             //var decryptedKey = await _stringEncryptionService.DecryptAsync( credential.ApiKey, aesKey!.Key);
             //var deryptedSecretdKey = await _stringEncryptionService.DecryptAsync(credential.ApiSecret, aesKey!.Key);
 
-            _apiResponse.IsSucess = true;
+            _apiResponse.IsSuccess = true;
             _apiResponse.StatusCode = HttpStatusCode.Created;
             return CreatedAtAction(nameof(Create), _apiResponse);
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OmniFi_API.Migrations
 {
     /// <inheritdoc />
-    public partial class firstMIgration : Migration
+    public partial class FirstMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -370,7 +370,7 @@ namespace OmniFi_API.Migrations
                     BankCredientialID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     BankUserID = table.Column<int>(type: "int", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    Password = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     BankAccountID = table.Column<int>(type: "int", nullable: false),
                     ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     BankID = table.Column<int>(type: "int", nullable: true)
@@ -427,6 +427,31 @@ namespace OmniFi_API.Migrations
                         column: x => x.CryptoExchangeID,
                         principalTable: "CryptoExchanges",
                         principalColumn: "CryptoExchangeID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AesIV",
+                columns: table => new
+                {
+                    AesIVId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IV = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    BankCredentialId = table.Column<int>(type: "int", nullable: true),
+                    CryptoApiCredentialId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AesIV", x => x.AesIVId);
+                    table.ForeignKey(
+                        name: "FK_AesIV_BankCredentials_BankCredentialId",
+                        column: x => x.BankCredentialId,
+                        principalTable: "BankCredentials",
+                        principalColumn: "BankCredientialID");
+                    table.ForeignKey(
+                        name: "FK_AesIV_CryptoApiCredentials_CryptoApiCredentialId",
+                        column: x => x.CryptoApiCredentialId,
+                        principalTable: "CryptoApiCredentials",
+                        principalColumn: "CryptoApiCredentialID");
                 });
 
             migrationBuilder.CreateTable(
@@ -500,6 +525,20 @@ namespace OmniFi_API.Migrations
                     { 4, "CHF", "Swiss Franc", "₣" },
                     { 5, "JPY", "Japanese Yen", "¥" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AesIV_BankCredentialId",
+                table: "AesIV",
+                column: "BankCredentialId",
+                unique: true,
+                filter: "[BankCredentialId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AesIV_CryptoApiCredentialId",
+                table: "AesIV",
+                column: "CryptoApiCredentialId",
+                unique: true,
+                filter: "[CryptoApiCredentialId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AesKeys_BankCredentialId",
@@ -656,6 +695,9 @@ namespace OmniFi_API.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AesIV");
+
             migrationBuilder.DropTable(
                 name: "AesKeys");
 

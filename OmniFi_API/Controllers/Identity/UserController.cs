@@ -35,7 +35,7 @@ namespace OmniFi_API.Controllers.Identity
 
             if (loginResponse is null || loginResponse.User is null || string.IsNullOrEmpty(loginResponse.Token))
             {
-                _apiResponse.IsSucess = false;
+                _apiResponse.IsSuccess = false;
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 _apiResponse.ErrorMessages.Add($"Invalid credentials\n\n" +
                     $"Your entered credentials may be incorrect or email sign-in is disabled for your account.\n\n" +
@@ -44,7 +44,7 @@ namespace OmniFi_API.Controllers.Identity
             }
 
             _apiResponse.StatusCode = HttpStatusCode.OK;
-            _apiResponse.IsSucess = true;
+            _apiResponse.IsSuccess = true;
             _apiResponse.Result = loginResponse;
             return Ok(_apiResponse);
         }
@@ -59,7 +59,7 @@ namespace OmniFi_API.Controllers.Identity
             if (_userRepository.IsUserExistsByUserName(registerationRequestDTO.UserName))
             {
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                _apiResponse.IsSucess = false;
+                _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages.Add($"username '{registerationRequestDTO.UserName}' already exists");
                 return BadRequest(_apiResponse);
             }
@@ -67,7 +67,7 @@ namespace OmniFi_API.Controllers.Identity
             if (_userRepository.IsUserExistsByEmail(registerationRequestDTO.Email))
             {
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                _apiResponse.IsSucess = false;
+                _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages.Add($"email '{registerationRequestDTO.Email}' already exists");
                 return BadRequest(_apiResponse);
             }
@@ -77,12 +77,12 @@ namespace OmniFi_API.Controllers.Identity
             if (!response.IsSucceeded)
             {
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                _apiResponse.IsSucess = false;
+                _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = response.ErrorMessages;
                 return BadRequest(_apiResponse);
             }
 
-            _apiResponse.IsSucess = true;
+            _apiResponse.IsSuccess = true;
             _apiResponse.StatusCode = HttpStatusCode.Created;
             _apiResponse.Result = response.User;
             return CreatedAtAction(nameof(Register), _apiResponse);
