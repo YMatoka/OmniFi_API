@@ -30,4 +30,8 @@
 		<Folder Include="Services\ApiRequest\" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="OmniFi_DTOs" Version="1.0.0" />
+	</ItemGroup>
+
 </Project>
