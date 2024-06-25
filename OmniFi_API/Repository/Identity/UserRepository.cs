@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OmniFi_API.Data;
 using OmniFi_API.Data.Interfaces;
-using OmniFi_API.Dtos.Identity;
+using OmniFi_DTOs.Dtos.Identity;
 using OmniFi_API.Models.Identity;
 using OmniFi_API.Options.Identity;
 using OmniFi_API.Repository.Interfaces;

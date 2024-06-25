@@ -1,4 +1,4 @@
-﻿using OmniFi_API.Dtos.Cryptos;
+﻿using OmniFi_DTOs.Dtos.Cryptos;
 using OmniFi_API.Models.Cryptos;
 
 namespace OmniFi_API.Repository.Interfaces

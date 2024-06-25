@@ -1,4 +1,4 @@
-﻿using OmniFi_API.Dtos.Banks;
+﻿using OmniFi_DTOs.Dtos.Banks;
 using OmniFi_API.Models.Banks;
 
 namespace OmniFi_API.Repository.Interfaces

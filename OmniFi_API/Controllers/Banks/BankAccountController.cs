@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OmniFi_API.Dtos.Banks;
+using OmniFi_DTOs.Dtos.Banks;
 using OmniFi_API.Models.Banks;
 using OmniFi_API.Models.Controllers;
 using OmniFi_API.Repository.Interfaces;

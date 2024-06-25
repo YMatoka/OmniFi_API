@@ -1,6 +1,6 @@
 ﻿using OmniFi_API.Data;
-using OmniFi_API.Dtos.Banks;
-using OmniFi_API.Dtos.Cryptos;
+using OmniFi_DTOs.Dtos.Banks;
+using OmniFi_DTOs.Dtos.Cryptos;
 using OmniFi_API.Models.Banks;
 using OmniFi_API.Models.Cryptos;
 using OmniFi_API.Models.Encryption;

@@ -1,4 +1,4 @@
-﻿using OmniFi_API.Dtos.Identity;
+﻿using OmniFi_DTOs.Dtos.Identity;
 
 namespace OmniFi_API.Models.Identity
 {

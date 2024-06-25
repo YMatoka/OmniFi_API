@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.VisualBasic;
-using OmniFi_API.Dtos.Assets;
-using OmniFi_API.Dtos.Banks;
-using OmniFi_API.Dtos.Cryptos;
-using OmniFi_API.Dtos.Identity;
+using OmniFi_DTOs.Dtos.Assets;
+using OmniFi_DTOs.Dtos.Banks;
+using OmniFi_DTOs.Dtos.Cryptos;
+using OmniFi_DTOs.Dtos.Identity;
 using OmniFi_API.Mapping.Converters;
 using OmniFi_API.Models.Assets;
 using OmniFi_API.Models.Banks;

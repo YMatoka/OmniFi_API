@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using OmniFi_API.Dtos.Assets;
+using OmniFi_DTOs.Dtos.Assets;
 using OmniFi_API.Models.Assets;
 using OmniFi_API.Models.Controllers;
 using OmniFi_API.Models.Cryptos;
@@ -11,6 +11,7 @@ using OmniFi_API.Repository;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
+using OmniFi_DTOs;
 
 namespace OmniFi_API.Controllers.Assets
 {

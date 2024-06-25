@@ -1,4 +1,4 @@
-﻿using OmniFi_API.Dtos.Identity;
+﻿using OmniFi_DTOs.Dtos.Identity;
 using OmniFi_API.Models.Identity;
 
 namespace OmniFi_API.Repository.Interfaces
