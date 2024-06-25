@@ -23,7 +23,7 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
             {
                 CryptoExchangeID = 1,
                 ExchangeName = CryptoExchangeNames.Binance,
-                ExchangeLogo = File.ReadAllBytes(".\\Ressources\\Images\\Logos\\BinanceLogo.png")
+                ImageUrl = "https://w7.pngwing.com/pngs/696/485/png-transparent-binance-logo-cryptocurrency-exchange-coin-text-logo-computer-wallpaper.png"
 
             });
 
@@ -31,7 +31,7 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
             {
                 CryptoExchangeID = 2,
                 ExchangeName = CryptoExchangeNames.CryptoDotCom,
-                ExchangeLogo = File.ReadAllBytes(".\\Ressources\\Images\\Logos\\CryptoDotComLogo.png")
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Crypto.com_logo.svg/2560px-Crypto.com_logo.svg.png"
 
             });
 
@@ -39,7 +39,7 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
             {
                 CryptoExchangeID = 3,
                 ExchangeName = CryptoExchangeNames.Kraken,
-                ExchangeLogo = File.ReadAllBytes(".\\Ressources\\Images\\Logos\\KrakenLogo.png")
+                ImageUrl = "https://logo-marque.com/wp-content/uploads/2021/03/Kraken-Logo.png"
 
             });
 

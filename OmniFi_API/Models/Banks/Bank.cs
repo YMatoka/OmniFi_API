@@ -6,7 +6,7 @@ namespace OmniFi_API.Models.Banks
     {
         public int BankID { get; set; }
         public required string BankName { get; set; }
-        public byte[]? BankLogo { get; set; }
+        public required string ImageUrl { get; set; }
         public ICollection<BankAccount>? BankAccounts { get; set; }
         public ICollection<BankCredential>? BankCredentials { get; set; }
         public AssetPlatform? AssetPlatform { get; set; }

@@ -15,11 +15,9 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
                 .ValueGeneratedOnAdd();
 
             builder.Property(x => x.ApiKey)
-                .HasMaxLength(128)
                 .IsRequired();
 
             builder.Property(x => x.ApiSecret)
-                .HasMaxLength(128)
                 .IsRequired();
 
             builder

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OmniFi_API.Data;
@@ -18,14 +19,14 @@ namespace OmniFi_API.Repository.Identity
     public class UserRepository : IUserRepository
     {
 
-        private readonly IApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IMapper _mapper;
         private readonly UserRepositoryOptions _options;
 
         public UserRepository(
-            IApplicationDbContext db,
+            ApplicationDbContext db,
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
             IMapper mapper,
@@ -62,16 +63,7 @@ namespace OmniFi_API.Repository.Identity
             ApplicationUser? user = null;
 
             if (loginRequestDTO.UserNameOrEmail is not null)
-            {
-                user = _db.Users
-                    .FirstOrDefault(x => (x.UserName == loginRequestDTO.UserNameOrEmail));
-
-                if (user is null)
-                {
-                    user = _db.Users
-                        .FirstOrDefault(x => (x.NormalizedEmail == loginRequestDTO.UserNameOrEmail.ToUpper()));
-                }
-            }
+                user = await GetUserAsync(loginRequestDTO.UserNameOrEmail);
 
             if (user is null)
                 return null;
@@ -105,6 +97,20 @@ namespace OmniFi_API.Repository.Identity
                 Role = roles.FirstOrDefault()!,
                 Token = tokenHandler.WriteToken(token)
             };
+        }
+
+        public async Task<ApplicationUser?> GetUserAsync(string usernameOrEmail, bool tracked = false)
+        {
+            IQueryable<ApplicationUser> query = _db.Users;
+
+            if (!tracked)
+            {
+                query.AsNoTracking();
+            }
+
+            return await query
+                .FirstOrDefaultAsync(x => 
+                (x.UserName == usernameOrEmail || x.NormalizedEmail == usernameOrEmail.ToUpper()));
         }
 
         public async Task<IdentityResponse> Register(RegisterationRequestDTO registerationRequestDTO)
@@ -169,7 +175,8 @@ namespace OmniFi_API.Repository.Identity
                 throw;
             }
 
-            return null;
+            response.IsSucceeded = false;
+            return response;
 
         }
     }

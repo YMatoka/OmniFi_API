@@ -21,14 +21,14 @@ namespace OmniFi_API.Data.FluentConfig.Banks
                 .IsRequired();
 
             builder
-                .Property(x => x.BankLogo)
+                .Property(x => x.ImageUrl)
                 .HasColumnType("varbinary(max)");
 
             builder.HasData(new Bank()
             {
                 BankID = 1,
                 BankName = BankNames.BoursoBank,
-                BankLogo = File.ReadAllBytes(".\\Ressources\\Images\\Logos\\BinanceLogo.png")
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/fr/thumb/3/3d/Logo-boursorama-banque.svg/1024px-Logo-boursorama-banque.svg.png"
             }); 
 
         }

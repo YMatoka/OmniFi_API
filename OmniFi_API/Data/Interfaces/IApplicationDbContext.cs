@@ -13,7 +13,7 @@ namespace OmniFi_API.Data.Interfaces
         DbSet<CryptoApiCredential> ApiCredentials { get; set; }
         DbSet<AssetPlatform> AssetPlatforms { get; set; }
         DbSet<AssetSource> AssetSources { get; set; }
-        DbSet<AssetTracking> AssetTrackings { get; set; }
+        DbSet<FinancialAsset> AssetTrackings { get; set; }
         DbSet<BankAccount> BankAccounts { get; set; }
         DbSet<BankCredential> BankCredentials { get; set; }
         DbSet<Bank> Banks { get; set; }
