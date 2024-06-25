@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.IdentityModel.Tokens;
 using OmniFi_DTOs.Dtos.Identity;
-using OmniFi_API.Models.Controllers;
+using OmniFi_DTOs.Dtos.Api;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;

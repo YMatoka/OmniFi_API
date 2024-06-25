@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using OmniFi_DTOs.Dtos.Cryptos;
-using OmniFi_API.Models.Controllers;
+using OmniFi_DTOs.Dtos.Api;
 using OmniFi_API.Models.Cryptos;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;

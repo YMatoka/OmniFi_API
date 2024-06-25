@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OmniFi_DTOs.Dtos.Banks;
 using OmniFi_API.Models.Banks;
-using OmniFi_API.Models.Controllers;
+using OmniFi_DTOs.Dtos.Api;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
