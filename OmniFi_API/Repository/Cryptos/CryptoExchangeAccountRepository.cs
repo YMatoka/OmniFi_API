@@ -8,9 +8,8 @@ using OmniFi_API.Services.Interfaces;
 
 namespace OmniFi_API.Repository.Cryptos
 {
-    public class CryptoExchangeAccountRepository : Repository<CryptoExchangeAccount>, ICryptoExchangeAccountRepository
+    public class CryptoExchangeAccountRepository : BaseRepository<CryptoExchangeAccount>, ICryptoExchangeAccountRepository
     {
-        private readonly ApplicationDbContext _db;
         private readonly IStringEncryptionService _stringEncryptionService;
         private readonly ICryptoApiCredentialRepository _cryptoApiCredentialRepository;
         private readonly IRepository<AesKey> _aesKeyRepository;
@@ -23,7 +22,6 @@ namespace OmniFi_API.Repository.Cryptos
             IRepository<AesKey> aesKeytRepository,
             IRepository<AesIV> aesIVRepository) : base(db)
         {
-            _db = db;
             _stringEncryptionService = stringEncryptionService;
             _cryptoApiCredentialRepository = cryptoApiCredentialRepository;
             _aesKeyRepository = aesKeytRepository;
@@ -35,7 +33,7 @@ namespace OmniFi_API.Repository.Cryptos
 
             try
             {
-                using (var transaction = _db.Database.BeginTransaction())
+                using (var transaction = db.Database.BeginTransaction())
                 {
 
                     await base.CreateAsync(cryptoExchangeAccount);

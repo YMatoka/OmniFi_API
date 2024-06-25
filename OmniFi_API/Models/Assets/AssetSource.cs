@@ -4,6 +4,7 @@
     {
         public int AssetSourceID { get; set; }
         public required string AssetSourceName { get; set;}
-        public ICollection<AssetTracking>? AssetTrackings { get; set; }
+        public ICollection<FinancialAsset>? FinancialAssets { get; set; }
+        public ICollection<FinancialAssetHistory>? FinancialAssetsHistory { get; set; }
     }
 }

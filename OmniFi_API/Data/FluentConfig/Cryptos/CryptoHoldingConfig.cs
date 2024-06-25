@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using OmniFi_API.Models.Assets;
 using OmniFi_API.Models.Cryptos;
 
 namespace OmniFi_API.Data.FluentConfig.Cryptos
@@ -9,10 +10,10 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
     {
         public void Configure(EntityTypeBuilder<CryptoHolding> builder)
         {
-            builder.HasKey(x => x.CrytpoHoldingID);
+            builder.HasKey(x => x.CryptoHoldingEntityId);
 
             builder
-                .Property(x => x.CrytpoHoldingID)
+                .Property(x => x.CryptoHoldingEntityId)
                 .ValueGeneratedOnAdd();
 
             builder.Property(x => x.CryptoCurrencySymbol)
@@ -27,6 +28,21 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
                 .Property(x => x.Amount)
                 .IsRequired()
                 .HasPrecision(27,18);
+
+            builder
+                .HasOne(x => x.FinancialAsset)
+                .WithOne(x => x.CryptoHolding)
+                .HasForeignKey<CryptoHolding>(x => x.FinancialAssetID)
+                .IsRequired();
+
+            builder.HasData(new CryptoHolding()
+            {
+                CryptoHoldingEntityId = 1,
+                CryptoCurrencyName = "Bitcoin",
+                CryptoCurrencySymbol = "BTC",
+                Amount = 2.33m,
+                FinancialAssetID = 2
+            });
         }
     }
 }

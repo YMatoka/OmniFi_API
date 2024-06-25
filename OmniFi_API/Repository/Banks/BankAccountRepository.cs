@@ -11,9 +11,8 @@ using System.Data;
 
 namespace OmniFi_API.Repository.Banks
 {
-    public class BankAccountRepository : Repository<BankAccount>, IBankAccountRepository
+    public class BankAccountRepository : BaseRepository<BankAccount>, IBankAccountRepository
     {
-        private readonly ApplicationDbContext _db;
         private readonly IStringEncryptionService _stringEncryptionService;
         private readonly IBankCredentialRepository _bankCredentialRepository;
         private readonly IRepository<AesKey> _aesKeyRepository;
@@ -26,7 +25,6 @@ namespace OmniFi_API.Repository.Banks
             IRepository<AesKey> aesKeyRepository,
             IRepository<AesIV> aesIVRepository) : base(db)
         {
-            _db = db;
             _stringEncryptionService = stringEncryptionService;
             _bankCredentialRepository = bankCredentialRepository;
             _aesKeyRepository = aesKeyRepository;
@@ -37,7 +35,7 @@ namespace OmniFi_API.Repository.Banks
         {
             try
             {
-                using (var transaction = _db.Database.BeginTransaction())
+                using (var transaction = db.Database.BeginTransaction())
                 {
                     await base.CreateAsync(bankAccount);
 

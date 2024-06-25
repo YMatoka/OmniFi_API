@@ -23,16 +23,18 @@ namespace OmniFi_API.Data
 
         public DbSet<AssetPlatform> AssetPlatforms { get; set; }
         public DbSet<AssetSource> AssetSources { get; set; }
-        public DbSet<AssetTracking> AssetTrackings { get; set; }
+        internal DbSet<FinancialAsset> FinancialAssets { get; set; }
+        internal DbSet<FinancialAssetHistory> FinancialAssetsHistory { get; set; }
 
         public DbSet<Bank> Banks { get; set; }
-        public DbSet<BankAccount> BankAccounts { get; set; }
+        internal DbSet<BankAccount> BankAccounts { get; set; }
         internal DbSet<BankCredential> BankCredentials { get; set; }
 
         public DbSet<CryptoExchange> CryptoExchanges { get; set; }
-        public DbSet<CryptoExchangeAccount> CryptoExchangeAccounts { get; set; }
+        internal DbSet<CryptoExchangeAccount> CryptoExchangeAccounts { get; set; }
         internal DbSet<CryptoApiCredential> CryptoApiCredentials { get; set; }
-        public DbSet<CryptoHolding> CryptoHoldings { get; set; }
+        internal DbSet<CryptoHolding> CryptoHoldings { get; set; }
+        internal DbSet<CryptoHoldingHistory> CryptoHoldingsHystory { get; set; }
 
         public DbSet<FiatCurrency> FiatCurrencies { get; set; }
 
@@ -41,7 +43,7 @@ namespace OmniFi_API.Data
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
+            
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -52,7 +54,8 @@ namespace OmniFi_API.Data
 
             modelBuilder.ApplyConfiguration(new AssetPlatformConfig());
             modelBuilder.ApplyConfiguration(new AssetSourceConfig());
-            modelBuilder.ApplyConfiguration(new AssetTrackingConfig());
+            modelBuilder.ApplyConfiguration(new FinancialAssetConfig());
+            modelBuilder.ApplyConfiguration(new FinancialAssetHistoryConfig());
 
             modelBuilder.ApplyConfiguration(new BankConfig());
             modelBuilder.ApplyConfiguration(new BankAccountConfig());
@@ -62,6 +65,7 @@ namespace OmniFi_API.Data
             modelBuilder.ApplyConfiguration(new CryptoExchangeConfig());
             modelBuilder.ApplyConfiguration(new CryptoApiCredentialConfig());
             modelBuilder.ApplyConfiguration(new CryptoHoldingConfig());
+            modelBuilder.ApplyConfiguration(new CryptoHoldingHistoryConfig());
 
             modelBuilder.ApplyConfiguration(new FiatCurrencyConfig());
 
@@ -71,7 +75,5 @@ namespace OmniFi_API.Data
             modelBuilder.ApplyConfiguration(new AesKeyConfig());
             modelBuilder.ApplyConfiguration(new AesIVConfig());
         }
-
-
     }
 }

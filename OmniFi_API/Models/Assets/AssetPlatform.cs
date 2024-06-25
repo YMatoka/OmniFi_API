@@ -10,6 +10,7 @@ namespace OmniFi_API.Models.Assets
         public Bank? Bank { get; set; }
         public int? CryptoExchangeID { get; set;}
         public CryptoExchange? CryptoExchange { get; set; }
-        public ICollection<AssetTracking>? AssetTrackings { get; set; }
+        public ICollection<FinancialAsset>? FinancialAssets { get; set; }
+        public ICollection<FinancialAssetHistory>? FinancialAssetsHistory { get; set; }
     }
 }

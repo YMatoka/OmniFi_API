@@ -1,20 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OmniFi_API.Data;
 using OmniFi_API.Repository.Interfaces;
+using OmniFi_API.Utilities;
 using System.Linq.Expressions;
 
 namespace OmniFi_API.Repository
 {
-    public class Repository<T> : IRepository<T> where T : class
+    public class BaseRepository<T> : IRepository<T> where T : class
     {
-        internal DbSet<T> _dbSet;
-        private readonly ApplicationDbContext _db;
-        public const char PropertiesSeparator = ';';
+        protected DbSet<T> _dbSet;
+        protected readonly ApplicationDbContext db;
 
-        public Repository(ApplicationDbContext db)
+        public BaseRepository(ApplicationDbContext db)
         {
-            _db = db;
-            _dbSet = _db.Set<T>();
+            this.db = db;
+           
+            _dbSet = this.db.Set<T>();
         }
         public virtual async Task CreateAsync(T entity)
         {
@@ -39,15 +40,16 @@ namespace OmniFi_API.Repository
 
             if(includeProperties is not null)
             {
-                foreach (var property in includeProperties.Split(PropertiesSeparator,StringSplitOptions.RemoveEmptyEntries))
+                foreach (var property in includeProperties.Split(
+                    EntityUtilities.PropertiesSeperator,StringSplitOptions.RemoveEmptyEntries))
                 {
-                    _dbSet.Include(property);
+                    await query.Include(property).LoadAsync();
                 }
             }
 
             if(pageSize is not null)
             {
-                _dbSet
+                query
                     .Skip((int)pageSize * (pageNumber - 1))
                     .Take((int)pageSize);
             }
@@ -66,7 +68,7 @@ namespace OmniFi_API.Repository
 
             if(includeProperties is not null)
             {
-                foreach(var property in includeProperties.Split(PropertiesSeparator, StringSplitOptions.RemoveEmptyEntries))
+                foreach(var property in includeProperties.Split(EntityUtilities.PropertiesSeperator, StringSplitOptions.RemoveEmptyEntries))
                 {
                     _dbSet.Include(property);
                 }
@@ -82,7 +84,7 @@ namespace OmniFi_API.Repository
 
         public async Task SaveAsync()
         {
-           await _db.SaveChangesAsync();
+           await db.SaveChangesAsync();
         }
     }
 }

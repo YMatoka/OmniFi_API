@@ -1,13 +1,12 @@
-﻿using OmniFi_API.Models.Assets;
+﻿using OmniFi_API.Models.Abstracts;
+using OmniFi_API.Models.Assets;
 
 namespace OmniFi_API.Models.Cryptos
 {
-    public class CryptoHolding
+    public class CryptoHolding : CryptoHoldingEntity
     {
-        public required int CrytpoHoldingID { get; set; }
-        public required string CryptoCurrencyName { get; set; }
-        public required string CryptoCurrencySymbol { get; set; }
-        public required decimal Amount { get; set; }
-        public required AssetTracking AssetTracking { get; set; }
+        public required int FinancialAssetID { get; set; }
+        public FinancialAsset? FinancialAsset { get; set; }
+        public ICollection<CryptoHoldingHistory>? CryptoHoldingsHistory { get; set; }
     }
 }

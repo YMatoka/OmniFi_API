@@ -4,19 +4,19 @@ using OmniFi_API.Repository.Interfaces;
 
 namespace OmniFi_API.Repository.Banks
 {
-    public class BankCredentialRepository : Repository<BankCredential>, IBankCredentialRepository
+    public class BankCredentialRepository : BaseRepository<BankCredential>, IBankCredentialRepository
     {
-        private readonly ApplicationDbContext _db;
+
 
         public BankCredentialRepository(ApplicationDbContext db) : base(db)
         {
-            _db = db;
+  
         }
 
         public async Task UpdateAsync(BankCredential bankCredential)
         {
-            _db.Update(bankCredential);
-            await _db.SaveChangesAsync();
+            db.Update(bankCredential);
+            await SaveAsync();
         }
     }
 }

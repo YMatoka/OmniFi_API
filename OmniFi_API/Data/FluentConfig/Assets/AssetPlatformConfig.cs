@@ -25,6 +25,33 @@ namespace OmniFi_API.Data.FluentConfig.Assets
                 .WithOne(x => x.AssetPlatform)
                 .HasForeignKey<AssetPlatform>(x => x.CryptoExchangeID)
                 .IsRequired(false);
+
+            builder.HasData(
+                new List<AssetPlatform>()
+                {
+                    new AssetPlatform()
+                    {
+                        AssetPlatformID = 1,
+                        BankID = 1
+                    },
+                    new AssetPlatform()
+                    {
+                        AssetPlatformID = 2,
+                        CryptoExchangeID = 1
+                    },
+                    new AssetPlatform()
+                    {
+                        AssetPlatformID = 3,
+                        CryptoExchangeID = 2
+                    },
+                    new AssetPlatform()
+                    {
+                        AssetPlatformID = 4,
+                        CryptoExchangeID = 3
+                    }
+                }
+            );
+
         }
     }
 }

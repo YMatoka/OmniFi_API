@@ -2,7 +2,6 @@
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using OmniFi_API.Data;
 using OmniFi_API.Models.Cryptos;
-using OmniFi_API.Options.Cryptos;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Services.Interfaces;
 using System.Linq.Expressions;
@@ -12,27 +11,15 @@ using System.Text;
 
 namespace OmniFi_API.Repository.Cryptos
 {
-    public class CryptoApiCredentialRepository : Repository<CryptoApiCredential>, ICryptoApiCredentialRepository
+    public class CryptoApiCredentialRepository : BaseRepository<CryptoApiCredential>, ICryptoApiCredentialRepository
     {
-        private readonly ApplicationDbContext _db;
-        private readonly CryptoApiCredentialOptions _options;
         private readonly IStringEncryptionService _stringEncryptionService;
         const int IvVectorByteSize = 16;
         public CryptoApiCredentialRepository(
             ApplicationDbContext db, 
-            IOptions<CryptoApiCredentialOptions> options, 
             IStringEncryptionService stringEncryptionService) : base(db)
         {
-            _db = db;
-            _options = options.Value;
             _stringEncryptionService = stringEncryptionService;
-        }
-
-        public override async Task CreateAsync(CryptoApiCredential cryptoApiCredential)
-        {
-
-            await base.CreateAsync(cryptoApiCredential);
-
         }
 
         public override async Task<CryptoApiCredential?> GetAsync(Expression<Func<CryptoApiCredential, bool>>? filter = null, string? includeProperties = null, bool tracked = true)
@@ -54,8 +41,8 @@ namespace OmniFi_API.Repository.Cryptos
 
         public async Task UpdateAsync(CryptoApiCredential cryptoApiCredential)
         {
-            _db.Update(cryptoApiCredential);
-            await _db.SaveChangesAsync();
+            db.Update(cryptoApiCredential);
+            await SaveAsync();
         }
 
         private string EncryptKey(string keyToEncrypt, string encryptionKey)
