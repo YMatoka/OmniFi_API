@@ -6,6 +6,8 @@ using System.Security.Cryptography;
 using System.Text;
 using NuGet.Common;
 using static OmniFi_API.Utilities.ApiTypes;
+using OmniFi_API.Models.Portfolio;
+using OmniFi_API.Utilities;
 
 namespace OmniFi_API.Services.Api
 {
@@ -13,6 +15,7 @@ namespace OmniFi_API.Services.Api
     {
         private const string DefaultBaseUrl = "https://api.crypto.com/exchange";
         private const string ConfigBaseUrlIndex = "ApiBaseUrls:CryptoDotCom";
+
 
         private readonly string _cryptoDotComBaseUrl;
 
@@ -29,7 +32,40 @@ namespace OmniFi_API.Services.Api
             _cryptoDotComBaseUrl = configuration.GetValue<string>(ConfigBaseUrlIndex) ?? DefaultBaseUrl;
         }
 
-        public Task<UserBalanceResponse?> GetUserBalanceAsync(string apiKey, string apiSecret)
+        public async Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(string apiKey, string apiSecret)
+        {
+            var userBalanceResponse = await GetUserBalance(apiKey, apiSecret);
+
+            return userBalanceResponse is not null ? 
+                ParseUserBalance(userBalanceResponse) : 
+                null;
+        }
+
+        private IEnumerable<PortfolioData> ParseUserBalance(UserBalanceResponse userBalanceResponse)
+        {
+            List<PortfolioData> portfolioDatas = new List<PortfolioData>();
+
+            foreach ( var balance in userBalanceResponse.result.data)
+            {
+                foreach(var position in balance.position_balances)
+                {
+                    portfolioDatas.Add(new PortfolioData()
+                    {
+                        AssetSourceName = AssetSourceNames.CryptoHolding,
+                        AssetPlatformName = CryptoExchangeNames.CryptoDotCom,
+                        Value = decimal.Parse(position.market_value),
+                        FiatCurrencyCode = balance.instrument_name,
+                        CryptoCurrencySymbol = position.instrument_name,
+                        Quantity = decimal.Parse(position.quantity)
+                    });
+                }
+            }
+
+            return portfolioDatas;
+
+        }
+
+        private async Task<UserBalanceResponse?> GetUserBalance(string apiKey, string apiSecret)
         {
             var cryptoDotComRequest = new CryptoDotComRequest()
             {
@@ -41,7 +77,7 @@ namespace OmniFi_API.Services.Api
 
             cryptoDotComRequest.Sig = GetSign(cryptoDotComRequest, apiKey, apiSecret);
 
-            return SendAsync<UserBalanceResponse>(new ApiRequest()
+            return await SendAsync<UserBalanceResponse>(new ApiRequest()
             {
                 ApiType = ApiType.POST,
 

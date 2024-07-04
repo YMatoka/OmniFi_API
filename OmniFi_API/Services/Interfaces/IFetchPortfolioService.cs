@@ -2,6 +2,6 @@
 {
     public interface IFetchPortfolioService
     {
-        public Task FetchPortfolio(string userName, );
+        public Task FetchPortfolio(string userName, string? bankName = null, string? cryptoExchangeName = null);
     }
 }

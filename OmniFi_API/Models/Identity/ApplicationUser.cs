@@ -15,8 +15,6 @@ namespace OmniFi_API.Models.Identity
         public DateTime UpdatedAt { get; set; }
         public ICollection<BankAccount>? BankAccounts { get; set; }
         public ICollection<CryptoExchangeAccount>? CryptoExchangeAccounts { get; set; }
-        public ICollection<CryptoApiCredential>? ApiCredentials { get; set; }
-        public ICollection<BankCredential>? BankCredentials { get; set; }
         public ICollection<FinancialAsset>? FinancialAssets { get; set; }
         public ICollection<FinancialAssetHistory>? FinancialAssetsHistory { get; set; }
         public int SelectedFiatCurrencyID { get; set; }

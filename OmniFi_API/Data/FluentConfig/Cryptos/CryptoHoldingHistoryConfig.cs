@@ -24,7 +24,7 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
                 .IsRequired();
 
             builder
-                .Property(x => x.Amount)
+                .Property(x => x.Quantity)
                 .IsRequired()
                 .HasPrecision(27, 18);
 
@@ -48,7 +48,7 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
                 CryptoHoldingId = 1,
                 CryptoCurrencyName = "Bitcoin",
                 CryptoCurrencySymbol = "BTC",
-                Amount = 2.33m,
+                Quantity = 2.33m,
                 FinancialAssetHistoryID = 2
             });
         }

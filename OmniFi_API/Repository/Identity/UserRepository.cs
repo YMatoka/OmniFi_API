@@ -109,8 +109,45 @@ namespace OmniFi_API.Repository.Identity
             }
 
             return await query
-                .FirstOrDefaultAsync(x => 
+                .FirstOrDefaultAsync(x =>
                 (x.UserName == usernameOrEmail || x.NormalizedEmail == usernameOrEmail.ToUpper()));
+        }
+
+        public async Task<ApplicationUser?> GetUserWithAccountInfosAsync(string usernameOrEmail, bool tracked = false)
+        {
+            IQueryable<ApplicationUser> query = _db.Users;
+
+            if (!tracked)
+            {
+                query.AsNoTracking();
+            }
+
+            query = query
+                .Where(x =>
+                (x.UserName == usernameOrEmail || x.NormalizedEmail == usernameOrEmail.ToUpper()));
+
+            //await query
+            //    .Include(x => x.BankAccounts)
+            //        .ThenInclude(x => x.Bank)
+            //    .LoadAsync();
+            //await query
+            //    .Include(x => x!.BankAccounts)
+            //        .ThenInclude(x => x!.Bank)
+            //    .Include(x => x!.BankAccounts)
+            //        .ThenInclude(x => x!.BankCredential)
+            //            .ThenInclude(x => x!.AesKey)
+            //        .ThenInclude(x => x!.BankCredential)
+            //            .ThenInclude(x => x!.AesIV)
+            //    .Include(x => x!.CryptoExchangeAccounts)
+            //        .ThenInclude(x => x!.CryptoExchange)
+            //    .Include(x => x!.CryptoExchangeAccounts)
+            //        .ThenInclude(x => x.CryptoApiCredential)
+            //            .ThenInclude(x => x.AesKey)
+            //        .ThenInclude(x => x.CryptoApiCredential)
+            //            .ThenInclude(x => x.AesIV)
+            //    .LoadAsync();
+
+            return query.FirstOrDefault();
         }
 
         public async Task<IdentityResponse> Register(RegisterationRequestDTO registerationRequestDTO)
@@ -156,11 +193,11 @@ namespace OmniFi_API.Repository.Identity
 
                     return response;
                 }
-                else if (!result.Succeeded) 
+                else if (!result.Succeeded)
                 {
                     response.IsSucceeded = false;
 
-                    foreach(var error in result.Errors)
+                    foreach (var error in result.Errors)
                     {
                         response.ErrorMessages.Add(error.Description);
                     }
