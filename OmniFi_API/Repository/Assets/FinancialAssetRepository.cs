@@ -9,17 +9,83 @@ namespace OmniFi_API.Repository.Assets
 {
     public class FinancialAssetRepository : BaseRepository<FinancialAsset>, IFinancialAssetRepository
     {
+        private readonly IFinancialAssetHistoryRepository _financialAssetHistoryRepository;
 
-
-        public FinancialAssetRepository(ApplicationDbContext db) : base(db)
+        public FinancialAssetRepository(ApplicationDbContext db, 
+            IFinancialAssetHistoryRepository financialAssetHistoryRepository) : base(db)
         {
-            
+            _financialAssetHistoryRepository = financialAssetHistoryRepository;
         }
 
-        public async Task UpdateAsync(FinancialAsset financialAsset)
+        public async Task UpdateAsync(FinancialAsset financialAsset, decimal newValue)
         {
-            db.Update(financialAsset);
-            await SaveAsync();
+            using(var transaction = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var actualDateTime = DateTime.UtcNow;
+
+                    var financialAssetHistory = new FinancialAssetHistory()
+                    {
+                        UserID = financialAsset.UserID,
+                        AssetPlatformID = financialAsset.AssetPlatformID,
+                        AssetSourceID = financialAsset.AssetSourceID,
+                        Value = financialAsset.Value,
+                        FiatCurrencyID = financialAsset.FiatCurrencyID,
+                        FinancialAssetId = financialAsset.FinancialEntityId,
+                        RecordedAt = actualDateTime
+                    };
+
+                    financialAsset.LastUpdatedAt = actualDateTime;
+                    financialAsset.Value = newValue;
+
+                    await _financialAssetHistoryRepository.CreateAsync(financialAssetHistory);
+
+                    db.Update(financialAsset);
+
+                    await SaveAsync();
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+
+            }
+        }
+
+        public async override Task CreateAsync(FinancialAsset financialAsset)
+        {
+            using (var transaction = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var financialAssetHistory = new FinancialAssetHistory()
+                    {
+                        UserID = financialAsset.UserID,
+                        AssetPlatformID = financialAsset.AssetPlatformID,
+                        AssetSourceID = financialAsset.AssetSourceID,
+                        Value = financialAsset.Value,
+                        FiatCurrencyID = financialAsset.FiatCurrencyID,
+                        FinancialAssetId = financialAsset.FinancialEntityId,
+                        RecordedAt = financialAsset.FirstRetrievedAt
+                    };
+
+                    await _financialAssetHistoryRepository.CreateAsync(financialAssetHistory);
+
+                    await base.CreateAsync(financialAsset);
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+
+            }
         }
 
         public async Task<FinancialAsset?> GetWithEntitiesAsync(Expression<Func<FinancialAsset, bool>>? filter = null, bool tracked = false)

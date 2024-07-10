@@ -8,7 +8,7 @@ namespace OmniFi_API.Repository.Interfaces
     {
         Task<IEnumerable<FinancialAsset>> GetAllWithEntitiesAsync(Expression<Func<FinancialAsset, bool>>? filter = null, bool tracked = false);
         Task<FinancialAsset?> GetWithEntitiesAsync(Expression<Func<FinancialAsset, bool>>? filter = null, bool tracked = false);
-        public Task UpdateAsync(FinancialAsset financialAsset); 
+        Task UpdateAsync(FinancialAsset financialAsset, decimal newValue);
     }
 
 }

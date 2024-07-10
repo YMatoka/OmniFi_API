@@ -5,6 +5,8 @@ using OmniFi_API.Models.Cryptos;
 using OmniFi_API.Models.Encryption;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Services.Interfaces;
+using System.Linq.Expressions;
+using System.Linq;
 
 namespace OmniFi_API.Repository.Cryptos
 {
@@ -76,6 +78,31 @@ namespace OmniFi_API.Repository.Cryptos
                 throw;
             }
         }
+
+        public async Task<CryptoExchangeAccount?> GetWithEntitiesAsync(Expression<Func<CryptoExchangeAccount,bool>> filter, bool tracked = false)
+        {
+            IQueryable<CryptoExchangeAccount> query = _dbSet;
+
+            if (!tracked)
+            {
+                query = query.AsNoTracking();
+            }
+
+            query = query.Where(filter);
+           
+            await query
+                .Include(x => x.CryptoExchange)
+                .Include(x => x.CryptoApiCredential)
+                    .ThenInclude(x => x!.AesIV)
+                .Include(x => x.CryptoApiCredential)
+                    .ThenInclude(x => x!.AesKey)
+                .LoadAsync();
+
+            return await query.FirstOrDefaultAsync();
+        }
+
+
+
     }
 }
 

@@ -8,6 +8,8 @@ using OmniFi_API.Repository.Cryptos;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Services.Interfaces;
 using System.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace OmniFi_API.Repository.Banks
 {
@@ -73,6 +75,28 @@ namespace OmniFi_API.Repository.Banks
             {
                 throw;
             }
+        }
+
+        public async Task<BankAccount?> GetWithEntitiesAsync(Expression<Func<BankAccount,bool>> filter, bool tracked = false)
+        {
+            IQueryable <BankAccount> query = _dbSet;
+
+            if (!tracked)
+            {
+                query = query.AsNoTracking();
+            }
+
+            query = query.Where(filter);
+
+            await query
+                .Include(x => x.Bank)
+                .Include(x => x.BankCredential)
+                    .ThenInclude(x => x!.AesIV)
+                 .Include(x => x.BankCredential)
+                    .ThenInclude(x => x!.AesKey)
+                .LoadAsync();
+
+            return await query.FirstOrDefaultAsync();
         }
     }
 }
