@@ -45,7 +45,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString(DefaultSQlConnection))
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString(SecondSQlConnection))
     .EnableSensitiveDataLogging()
     .EnableDetailedErrors()
     );

@@ -53,34 +53,34 @@ namespace OmniFi_API.Data.FluentConfig.Assets
                 .Property(x => x.RecordedAt)
                 .IsRequired();
 
-            builder.HasData(
-                new List<FinancialAssetHistory>()
-                {
-                    new FinancialAssetHistory()
-                    {
-                        FinancialEntityId = 1,
-                        FinancialAssetId = 1,
-                        UserID = "67769df3-3d88-437a-8be8-b1729f251b3c",
-                        AssetPlatformID = 1,
-                        AssetSourceID = 1,
-                        Value = 1000.66m,
-                        FiatCurrencyID = 2,
-                        RecordedAt = DateTime.UtcNow,
-                    },
+            //builder.HasData(
+            //    new List<FinancialAssetHistory>()
+            //    {
+            //        new FinancialAssetHistory()
+            //        {
+            //            FinancialEntityId = 1,
+            //            FinancialAssetId = 1,
+            //            UserID = "67769df3-3d88-437a-8be8-b1729f251b3c",
+            //            AssetPlatformID = 1,
+            //            AssetSourceID = 1,
+            //            Value = 1000.66m,
+            //            FiatCurrencyID = 2,
+            //            RecordedAt = DateTime.UtcNow,
+            //        },
 
-                    new FinancialAssetHistory()
-                    {
-                        FinancialEntityId = 2,
-                        FinancialAssetId = 2,
-                        UserID = "67769df3-3d88-437a-8be8-b1729f251b3c",
-                        AssetPlatformID = 2,
-                        AssetSourceID = 4,
-                        Value = 23000.66m,
-                        FiatCurrencyID = 2,
-                        RecordedAt = DateTime.UtcNow,
-                    },
-                }
-            );
+            //        new FinancialAssetHistory()
+            //        {
+            //            FinancialEntityId = 2,
+            //            FinancialAssetId = 2,
+            //            UserID = "67769df3-3d88-437a-8be8-b1729f251b3c",
+            //            AssetPlatformID = 2,
+            //            AssetSourceID = 4,
+            //            Value = 23000.66m,
+            //            FiatCurrencyID = 2,
+            //            RecordedAt = DateTime.UtcNow,
+            //        },
+            //    }
+            //);
         }
     }
 }

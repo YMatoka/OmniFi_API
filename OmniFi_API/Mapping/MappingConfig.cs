@@ -34,8 +34,6 @@ namespace OmniFi_API.Mapping
                 .ForMember(dest => dest.AssetPlatformName, conf => conf.ConvertUsing(new AssetPlatformConverter(), src => src.AssetPlatform))
                 .ForMember(dest => dest.AssetSourceName, conf => conf.ConvertUsing(new AssetSourceConverter(), src => src.AssetSource))
                 .ForMember(dest => dest.FiatCurrencyCode, conf => conf.ConvertUsing(new FiatCurrencyConverter(), src => src.FiatCurrency));
-
-
         }
     }
 

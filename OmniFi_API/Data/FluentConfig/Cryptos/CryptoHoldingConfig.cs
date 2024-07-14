@@ -35,14 +35,14 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
                 .HasForeignKey<CryptoHolding>(x => x.FinancialAssetID)
                 .IsRequired();
 
-            builder.HasData(new CryptoHolding()
-            {
-                CryptoHoldingEntityId = 1,
-                CryptoCurrencyName = "Bitcoin",
-                CryptoCurrencySymbol = "BTC",
-                Quantity = 2.33m,
-                FinancialAssetID = 2
-            });
+            //builder.HasData(new CryptoHolding()
+            //{
+            //    CryptoHoldingEntityId = 1,
+            //    CryptoCurrencyName = "Bitcoin",
+            //    CryptoCurrencySymbol = "BTC",
+            //    Quantity = 2.33m,
+            //    FinancialAssetID = 2
+            //});
         }
     }
 }

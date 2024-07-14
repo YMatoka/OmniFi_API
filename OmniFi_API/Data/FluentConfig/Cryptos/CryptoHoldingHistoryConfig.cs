@@ -42,15 +42,15 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired();
 
-            builder.HasData(new CryptoHoldingHistory()
-            {
-                CryptoHoldingEntityId = 1,
-                CryptoHoldingId = 1,
-                CryptoCurrencyName = "Bitcoin",
-                CryptoCurrencySymbol = "BTC",
-                Quantity = 2.33m,
-                FinancialAssetHistoryID = 2
-            });
+            //builder.HasData(new CryptoHoldingHistory()
+            //{
+            //    CryptoHoldingEntityId = 1,
+            //    CryptoHoldingId = 1,
+            //    CryptoCurrencyName = "Bitcoin",
+            //    CryptoCurrencySymbol = "BTC",
+            //    Quantity = 2.33m,
+            //    FinancialAssetHistoryID = 2
+            //});
         }
     }
 }
