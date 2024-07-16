@@ -41,7 +41,7 @@ namespace OmniFi_API.Controllers.Cryptos
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        //[Authorize(Roles = Roles.User)]
+        [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse>> Create([FromBody] CryptoExchangeAccountCreateDTO cryptoExchangeAccountCreateDTO)
         {
             try

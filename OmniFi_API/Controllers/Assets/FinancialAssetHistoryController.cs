@@ -100,7 +100,7 @@ namespace OmniFi_API.Controllers.Assets
                 if (financialAsset is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"the user '{username}' don't have a financial asset with the following Id '{financialAssetId}'");
+                    _apiResponse.AddErrorMessage($"the user '{username}' don't have a financial asset with the following id '{financialAssetId}'");
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_apiResponse);
                 }

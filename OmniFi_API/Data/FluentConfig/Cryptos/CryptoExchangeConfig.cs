@@ -31,7 +31,7 @@ namespace OmniFi_API.Data.FluentConfig.Cryptos
             {
                 CryptoExchangeID = 2,
                 ExchangeName = CryptoExchangeNames.CryptoDotCom,
-                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Crypto.com_logo.svg/2560px-Crypto.com_logo.svg.png"
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Cryptos.com_logo.svg/2560px-Cryptos.com_logo.svg.png"
 
             });
 

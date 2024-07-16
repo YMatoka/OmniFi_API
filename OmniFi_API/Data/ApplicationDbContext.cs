@@ -21,18 +21,19 @@ namespace OmniFi_API.Data
         public override DbSet<ApplicationUser> Users { get; set; }
         public override DbSet<ApplicationRole> Roles { get; set; }
 
-        public DbSet<AssetPlatform> AssetPlatforms { get; set; }
-        public DbSet<AssetSource> AssetSources { get; set; }
+        internal DbSet<AssetPlatform> AssetPlatforms { get; set; }
+        internal DbSet<AssetSource> AssetSources { get; set; }
         internal DbSet<FinancialAsset> FinancialAssets { get; set; }
         internal DbSet<FinancialAssetHistory> FinancialAssetsHistory { get; set; }
 
-        public DbSet<Bank> Banks { get; set; }
+        internal DbSet<Bank> Banks { get; set; }
         internal DbSet<BankAccount> BankAccounts { get; set; }
         internal DbSet<BankCredential> BankCredentials { get; set; }
 
         public DbSet<CryptoExchange> CryptoExchanges { get; set; }
         internal DbSet<CryptoExchangeAccount> CryptoExchangeAccounts { get; set; }
         internal DbSet<CryptoApiCredential> CryptoApiCredentials { get; set; }
+        internal DbSet<CryptoCurrency> CryptoCurrencies { get; set; }
         internal DbSet<CryptoHolding> CryptoHoldings { get; set; }
         internal DbSet<CryptoHoldingHistory> CryptoHoldingsHystory { get; set; }
 
@@ -64,6 +65,7 @@ namespace OmniFi_API.Data
             modelBuilder.ApplyConfiguration(new CryptoExchangeAccountConfig());
             modelBuilder.ApplyConfiguration(new CryptoExchangeConfig());
             modelBuilder.ApplyConfiguration(new CryptoApiCredentialConfig());
+            modelBuilder.ApplyConfiguration(new CryptoCurrencyConfig());
             modelBuilder.ApplyConfiguration(new CryptoHoldingConfig());
             modelBuilder.ApplyConfiguration(new CryptoHoldingHistoryConfig());
 

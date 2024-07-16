@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OmniFi_API.Migrations
 {
     /// <inheritdoc />
-    public partial class Firstmigration : Migration
+    public partial class FirstMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,6 +52,20 @@ namespace OmniFi_API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Banks", x => x.BankID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CryptoCurrencies",
+                columns: table => new
+                {
+                    CurrencyID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CurrencyName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CurrencySymbol = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CryptoCurrencies", x => x.CurrencyID);
                 });
 
             migrationBuilder.CreateTable(
@@ -402,13 +416,18 @@ namespace OmniFi_API.Migrations
                     CryptoHoldingEntityId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FinancialAssetID = table.Column<int>(type: "int", nullable: false),
-                    CryptoCurrencyName = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    CryptoCurrencySymbol = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    CryptoCurrencId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<decimal>(type: "decimal(27,18)", precision: 27, scale: 18, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CryptoHoldings", x => x.CryptoHoldingEntityId);
+                    table.ForeignKey(
+                        name: "FK_CryptoHoldings_CryptoCurrencies_CryptoCurrencId",
+                        column: x => x.CryptoCurrencId,
+                        principalTable: "CryptoCurrencies",
+                        principalColumn: "CurrencyID",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_CryptoHoldings_FinancialAssets_FinancialAssetID",
                         column: x => x.FinancialAssetID,
@@ -520,13 +539,18 @@ namespace OmniFi_API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FinancialAssetHistoryID = table.Column<int>(type: "int", nullable: false),
                     CryptoHoldingId = table.Column<int>(type: "int", nullable: false),
-                    CryptoCurrencyName = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    CryptoCurrencySymbol = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    CryptoCurrencId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<decimal>(type: "decimal(27,18)", precision: 27, scale: 18, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CryptoHoldingsHystory", x => x.CryptoHoldingEntityId);
+                    table.ForeignKey(
+                        name: "FK_CryptoHoldingsHystory_CryptoCurrencies_CryptoCurrencId",
+                        column: x => x.CryptoCurrencId,
+                        principalTable: "CryptoCurrencies",
+                        principalColumn: "CurrencyID",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_CryptoHoldingsHystory_CryptoHoldings_CryptoHoldingId",
                         column: x => x.CryptoHoldingId,
@@ -570,7 +594,7 @@ namespace OmniFi_API.Migrations
                 values: new object[,]
                 {
                     { 1, "Binance", "https://w7.pngwing.com/pngs/696/485/png-transparent-binance-logo-cryptocurrency-exchange-coin-text-logo-computer-wallpaper.png" },
-                    { 2, "Crypto.Com", "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Crypto.com_logo.svg/2560px-Crypto.com_logo.svg.png" },
+                    { 2, "Crypto.Com", "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Cryptos.com_logo.svg/2560px-Cryptos.com_logo.svg.png" },
                     { 3, "Kraken", "https://logo-marque.com/wp-content/uploads/2021/03/Kraken-Logo.png" }
                 });
 
@@ -726,10 +750,20 @@ namespace OmniFi_API.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CryptoHoldings_CryptoCurrencId",
+                table: "CryptoHoldings",
+                column: "CryptoCurrencId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CryptoHoldings_FinancialAssetID",
                 table: "CryptoHoldings",
                 column: "FinancialAssetID",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CryptoHoldingsHystory_CryptoCurrencId",
+                table: "CryptoHoldingsHystory",
+                column: "CryptoCurrencId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CryptoHoldingsHystory_CryptoHoldingId",
@@ -835,6 +869,9 @@ namespace OmniFi_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "CryptoExchangeAccounts");
+
+            migrationBuilder.DropTable(
+                name: "CryptoCurrencies");
 
             migrationBuilder.DropTable(
                 name: "FinancialAssets");

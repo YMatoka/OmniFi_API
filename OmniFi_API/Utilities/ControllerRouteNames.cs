@@ -9,5 +9,6 @@
        public const string CryptoExchangeController = "CryptoExchange";
        public const string FinancialAssetController = "FinancialAsset";
        public const string FinancialAssetHistoryController = "FinancialAssetHistory";
+       public const string PortfolioController = "PortfolioService";
     }
 }

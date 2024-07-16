@@ -11,12 +11,11 @@ namespace OmniFi_API.Services.Api
     public class BaseService : IBaseService
     {
         private readonly IHttpClientFactory _httpClient;
-        private const string ClientName = "OmniFi_API";
         private const string DefaultApiContentType = "application/json";
 
         public BaseService(IHttpClientFactory httpClient)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClient; 
         }
 
         public async Task<T?> SendAsync<T>(ApiRequest apiRequest)
@@ -27,6 +26,16 @@ namespace OmniFi_API.Services.Api
                 {
                     HttpRequestMessage message = new HttpRequestMessage();
                     message.Headers.Add("Accept", DefaultApiContentType);
+
+                    if(apiRequest.HeaderDictionary is not null)
+                    {
+                        foreach(var keyValuePair in apiRequest.HeaderDictionary)
+                        {
+                            message.Headers.Add(keyValuePair.Key, keyValuePair.Value);
+                        }
+                       
+                    }
+
                     message.RequestUri = new Uri(apiRequest.Url);
 
                     if(apiRequest.Data is not null)
@@ -42,7 +51,7 @@ namespace OmniFi_API.Services.Api
                     HttpResponseMessage? httpResponseMessage = null;
 
                     httpResponseMessage = await client.SendAsync(message);
-
+               
                     var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
 
                     var deserializeContent = JsonConvert.DeserializeObject<T>(responseContent);

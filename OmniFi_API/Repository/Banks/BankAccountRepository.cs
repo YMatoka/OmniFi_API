@@ -94,7 +94,7 @@ namespace OmniFi_API.Repository.Banks
                     .ThenInclude(x => x!.AesIV)
                  .Include(x => x.BankCredential)
                     .ThenInclude(x => x!.AesKey)
-                .LoadAsync();
+                .ToListAsync();
 
             return await query.FirstOrDefaultAsync();
         }

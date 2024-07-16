@@ -7,5 +7,6 @@ namespace OmniFi_API.Models.Api
         public required ApiType ApiType { get; set; }
         public required string Url { get; set; } 
         public object? Data { get; set; }
+        public Dictionary<string,string>? HeaderDictionary { get; set; }
     }
 }

@@ -12,8 +12,8 @@ using OmniFi_API.Data;
 namespace OmniFi_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240711171617_First migration")]
-    partial class Firstmigration
+    [Migration("20240715232559_FirstMigration")]
+    partial class FirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -427,6 +427,29 @@ namespace OmniFi_API.Migrations
                     b.ToTable("CryptoApiCredentials");
                 });
 
+            modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoCurrency", b =>
+                {
+                    b.Property<int>("CurrencyID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CurrencyID"));
+
+                    b.Property<string>("CurrencyName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CurrencySymbol")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.HasKey("CurrencyID");
+
+                    b.ToTable("CryptoCurrencies");
+                });
+
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoExchange", b =>
                 {
                     b.Property<int>("CryptoExchangeID")
@@ -459,7 +482,7 @@ namespace OmniFi_API.Migrations
                         {
                             CryptoExchangeID = 2,
                             ExchangeName = "Crypto.Com",
-                            ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Crypto.com_logo.svg/2560px-Crypto.com_logo.svg.png"
+                            ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Cryptos.com_logo.svg/2560px-Cryptos.com_logo.svg.png"
                         },
                         new
                         {
@@ -501,15 +524,8 @@ namespace OmniFi_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CryptoHoldingEntityId"));
 
-                    b.Property<string>("CryptoCurrencyName")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("CryptoCurrencySymbol")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int>("CryptoCurrencId")
+                        .HasColumnType("int");
 
                     b.Property<int>("FinancialAssetID")
                         .HasColumnType("int");
@@ -519,6 +535,8 @@ namespace OmniFi_API.Migrations
                         .HasColumnType("decimal(27,18)");
 
                     b.HasKey("CryptoHoldingEntityId");
+
+                    b.HasIndex("CryptoCurrencId");
 
                     b.HasIndex("FinancialAssetID")
                         .IsUnique();
@@ -534,15 +552,8 @@ namespace OmniFi_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CryptoHoldingEntityId"));
 
-                    b.Property<string>("CryptoCurrencyName")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("CryptoCurrencySymbol")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int>("CryptoCurrencId")
+                        .HasColumnType("int");
 
                     b.Property<int>("CryptoHoldingId")
                         .HasColumnType("int");
@@ -555,6 +566,8 @@ namespace OmniFi_API.Migrations
                         .HasColumnType("decimal(27,18)");
 
                     b.HasKey("CryptoHoldingEntityId");
+
+                    b.HasIndex("CryptoCurrencId");
 
                     b.HasIndex("CryptoHoldingId");
 
@@ -1035,17 +1048,31 @@ namespace OmniFi_API.Migrations
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoHolding", b =>
                 {
+                    b.HasOne("OmniFi_API.Models.Cryptos.CryptoCurrency", "CryptoCurrency")
+                        .WithMany("CryptoHoldings")
+                        .HasForeignKey("CryptoCurrencId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("OmniFi_API.Models.Assets.FinancialAsset", "FinancialAsset")
                         .WithOne("CryptoHolding")
                         .HasForeignKey("OmniFi_API.Models.Cryptos.CryptoHolding", "FinancialAssetID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CryptoCurrency");
+
                     b.Navigation("FinancialAsset");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoHoldingHistory", b =>
                 {
+                    b.HasOne("OmniFi_API.Models.Cryptos.CryptoCurrency", "CryptoCurrency")
+                        .WithMany("CryptoHoldingsHistory")
+                        .HasForeignKey("CryptoCurrencId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("OmniFi_API.Models.Cryptos.CryptoHolding", "CryptoHolding")
                         .WithMany("CryptoHoldingsHistory")
                         .HasForeignKey("CryptoHoldingId")
@@ -1057,6 +1084,8 @@ namespace OmniFi_API.Migrations
                         .HasForeignKey("OmniFi_API.Models.Cryptos.CryptoHoldingHistory", "FinancialAssetHistoryID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("CryptoCurrency");
 
                     b.Navigation("CryptoHolding");
 
@@ -1156,6 +1185,13 @@ namespace OmniFi_API.Migrations
                     b.Navigation("AesIV");
 
                     b.Navigation("AesKey");
+                });
+
+            modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoCurrency", b =>
+                {
+                    b.Navigation("CryptoHoldings");
+
+                    b.Navigation("CryptoHoldingsHistory");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoExchange", b =>

@@ -8,14 +8,17 @@ using NuGet.Common;
 using static OmniFi_API.Utilities.ApiTypes;
 using OmniFi_API.Models.Portfolio;
 using OmniFi_API.Utilities;
+using Newtonsoft.Json;
+using System.Net.Http;
+using Azure.Core;
+using OmniFi_API.Services.Api;
 
-namespace OmniFi_API.Services.Api
+namespace OmniFi_API.Services.Api.Cryptos
 {
     public class CryptoDotComService : BaseService, ICryptoDotComService
     {
         private const string DefaultBaseUrl = "https://api.crypto.com/exchange";
-        private const string ConfigBaseUrlIndex = "ApiBaseUrls:CryptoDotCom";
-
+        private const string ConfigBaseUrlIndex = "CryptoApiBaseUrls:CryptoDotCom";
 
         private readonly string _cryptoDotComBaseUrl;
 
@@ -36,8 +39,8 @@ namespace OmniFi_API.Services.Api
         {
             var userBalanceResponse = await GetUserBalance(apiKey, apiSecret);
 
-            return userBalanceResponse is not null ? 
-                ParseUserBalance(userBalanceResponse) : 
+            return userBalanceResponse is not null ?
+                ParseUserBalance(userBalanceResponse) :
                 null;
         }
 
@@ -45,9 +48,9 @@ namespace OmniFi_API.Services.Api
         {
             List<PortfolioData> portfolioDatas = new List<PortfolioData>();
 
-            foreach ( var balance in userBalanceResponse.result.data)
+            foreach (var balance in userBalanceResponse.result.data)
             {
-                foreach(var position in balance.position_balances)
+                foreach (var position in balance.position_balances)
                 {
                     portfolioDatas.Add(new PortfolioData()
                     {
@@ -69,13 +72,13 @@ namespace OmniFi_API.Services.Api
         {
             var cryptoDotComRequest = new CryptoDotComRequest()
             {
-                Id = 7,
-                Method = UserBalanceMethod,
-                Api_key = apiKey,
-                Nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                id = new Random().Next(1000, 9999),
+                method = UserBalanceMethod,
+                api_key = apiKey,
+                nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()
             };
 
-            cryptoDotComRequest.Sig = GetSign(cryptoDotComRequest, apiKey, apiSecret);
+            cryptoDotComRequest.sig = GetSign(cryptoDotComRequest, apiKey, apiSecret);
 
             return await SendAsync<UserBalanceResponse>(new ApiRequest()
             {
@@ -92,16 +95,17 @@ namespace OmniFi_API.Services.Api
         private string GetSign(CryptoDotComRequest request, string apiKey, string apiSecret)
         {
             string paramString = string.Join("",
-                request.Params.Keys.OrderBy(key => key)
-                .Select(key => key + request.Params[key]));
+                request.@params.Keys.OrderBy(key => key)
+                .Select(key => key + request.@params[key]));
 
-            string sigPayLoad = request.Method + request.Id + apiKey + paramString + request.Nonce;
+            string sigPayLoad = request.method + request.id + apiKey + paramString + request.nonce;
 
-            var hash = new HMACSHA256(Encoding.Unicode.GetBytes(apiSecret));
+            var hash = new HMACSHA256(Encoding.UTF8.GetBytes(apiSecret));
 
-            var computedHash = hash.ComputeHash(Encoding.Unicode.GetBytes(sigPayLoad));
+            var computedHash = hash.ComputeHash(Encoding.UTF8.GetBytes(sigPayLoad));
 
-            return Convert.ToHexString(computedHash);
+            return BitConverter.ToString(computedHash).Replace("-", "").ToLower();
         }
+
     }
 }

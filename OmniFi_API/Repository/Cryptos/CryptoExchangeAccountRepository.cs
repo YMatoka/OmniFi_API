@@ -98,7 +98,7 @@ namespace OmniFi_API.Repository.Cryptos
                     .ThenInclude(x => x!.AesKey)
                 .LoadAsync();
 
-            return await query.FirstOrDefaultAsync();
+            return query.FirstOrDefault();
         }
 
 
