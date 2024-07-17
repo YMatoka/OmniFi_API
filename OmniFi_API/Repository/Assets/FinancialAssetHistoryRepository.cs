@@ -38,6 +38,7 @@ namespace OmniFi_API.Repository.Assets
                 .Include(x => x.AssetPlatform)
                     .ThenInclude(x => x!.CryptoExchange)
                 .Include(x => x.CryptoHoldingHistory)
+                    .ThenInclude(x => x!.CryptoCurrency)
                 .Include(x => x.FiatCurrency)
                 .LoadAsync();
 

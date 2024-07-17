@@ -20,8 +20,13 @@ namespace OmniFi_API.Mapping
             CreateMap<ApplicationUser, UserDTO>().ReverseMap();
             CreateMap<Bank, BankDTO>();
             CreateMap<CryptoExchange, CryptoExchangeDTO>();
-            CreateMap<CryptoHolding, CryptoHoldingDTO>();
-            CreateMap<CryptoHoldingHistory, CryptoHoldingHistoryDTO>();
+
+
+            CreateMap<CryptoHolding, CryptoHoldingDTO>()
+                .ForMember(dest => dest.CryptoCurrencySymbol, conf => conf.ConvertUsing(new CryptoCurrencyConverter(), src => src.CryptoCurrency));
+
+            CreateMap<CryptoHoldingHistory, CryptoHoldingHistoryDTO>()
+                .ForMember(dest => dest.CryptoCurrencySymbol, conf => conf.ConvertUsing(new CryptoCurrencyConverter(), src => src.CryptoCurrency));
 
             CreateMap<FinancialAsset, FinancialAssetDTO>()
                 .ForMember(dest => dest.UserName, conf => conf.ConvertUsing(new UserConverter(), src => src.User))
