@@ -32,6 +32,7 @@ namespace OmniFi_API.Services.Portfolio
         private readonly IRepository<CryptoCurrency> _cryptoCurrencyRepository;
 
         private readonly ICryptoDotComService _cryptoDotComService;
+        private readonly IKrakenService _krakenService;
         private readonly IStringEncryptionService _stringEncryptionService;
         private readonly IFiatCurrencyService _fiatCurrencyService;
         private readonly ICryptoInfoService _cryptoInfoService;
@@ -55,7 +56,8 @@ namespace OmniFi_API.Services.Portfolio
             ICryptoApiCredentialRepository cryptoApiCredentialRepository,
             IFiatCurrencyService fiatCurrencyService,
             ICryptoInfoService cryptoInfoService,
-            IRepository<CryptoCurrency> cryptoCurrencyRepository)
+            IRepository<CryptoCurrency> cryptoCurrencyRepository,
+            IKrakenService krakenService)
         {
             _userRepository = userRepository;
             _financialAssetHistoryRepository = financialAssetHistoryRepository;
@@ -75,6 +77,7 @@ namespace OmniFi_API.Services.Portfolio
 
             _cryptoCurrencyRepository = cryptoCurrencyRepository;
             _ConversionRates = new();
+            _krakenService = krakenService;
         }
 
         public async Task FetchPortfolio(string userName, string? bankName = null, string? cryptoExchangeName = null)
@@ -307,6 +310,7 @@ namespace OmniFi_API.Services.Portfolio
                 case CryptoExchangeNames.Binance:
 
                 case CryptoExchangeNames.Kraken:
+                    return await _krakenService.GetUserBalanceAsync(apiKey, apiSecret);
 
                 default:
                     return null;

@@ -90,6 +90,9 @@ builder.Services.AddScoped<IFiatCurrencyService, FiatCurrencyService>();
 builder.Services.AddHttpClient<ICryptoInfoService, CryptoInfoService>();
 builder.Services.AddScoped<ICryptoInfoService, CryptoInfoService>();
 
+builder.Services.AddHttpClient<IKrakenService, KrakenService>();
+builder.Services.AddScoped<IKrakenService, KrakenService>();
+
 builder.Services
     .AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()

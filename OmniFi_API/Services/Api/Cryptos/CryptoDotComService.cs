@@ -29,6 +29,7 @@ namespace OmniFi_API.Services.Api.Cryptos
         private const string UserBalanceMethod = "private/user-balance";
         private const string ApiVersion = "v1";
 
+        private const string DefaultCurrency = FiatCurrencyCodes.USD;
 
         public CryptoDotComService(IHttpClientFactory httpClient, IConfiguration configuration) : base(httpClient)
         {
@@ -57,7 +58,7 @@ namespace OmniFi_API.Services.Api.Cryptos
                         AssetSourceName = AssetSourceNames.CryptoHolding,
                         AssetPlatformName = CryptoExchangeNames.CryptoDotCom,
                         Value = decimal.Parse(position.market_value),
-                        FiatCurrencyCode = balance.instrument_name,
+                        FiatCurrencyCode = DefaultCurrency,
                         CryptoCurrencySymbol = position.instrument_name,
                         Quantity = decimal.Parse(position.quantity)
                     });

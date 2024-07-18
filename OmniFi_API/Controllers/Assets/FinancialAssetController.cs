@@ -61,7 +61,9 @@ namespace OmniFi_API.Controllers.Assets
                 var financialAssets = await _financialAssetRepository
                     .GetAllWithEntitiesAsync((x) => x.UserID == user.Id);
 
-                var financialAssetDTOs = _mapper.Map<IEnumerable<FinancialAssetDTO>>(financialAssets);
+                var financialAssetDTOs = _mapper
+                    .Map<IEnumerable<FinancialAssetDTO>>(financialAssets)
+                    .OrderByDescending(x => x.Value);
 
                 _apiResponse.IsSuccess = true;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
