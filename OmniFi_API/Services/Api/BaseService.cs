@@ -51,8 +51,13 @@ namespace OmniFi_API.Services.Api
                     HttpResponseMessage? httpResponseMessage = null;
 
                     httpResponseMessage = await client.SendAsync(message);
-               
+                    
                     var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                    if (httpResponseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        throw new Exception(responseContent);
+                    }
 
                     var deserializeContent = JsonConvert.DeserializeObject<T>(responseContent);
 

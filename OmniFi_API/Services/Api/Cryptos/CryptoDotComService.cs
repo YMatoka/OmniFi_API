@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using Azure.Core;
 using OmniFi_API.Services.Api;
+using System.Globalization;
 
 namespace OmniFi_API.Services.Api.Cryptos
 {
@@ -40,7 +41,7 @@ namespace OmniFi_API.Services.Api.Cryptos
         {
             var userBalanceResponse = await GetUserBalance(apiKey, apiSecret);
 
-            return userBalanceResponse is not null ?
+            return userBalanceResponse?.result is not null ?
                 ParseUserBalance(userBalanceResponse) :
                 null;
         }
@@ -57,10 +58,10 @@ namespace OmniFi_API.Services.Api.Cryptos
                     {
                         AssetSourceName = AssetSourceNames.CryptoHolding,
                         AssetPlatformName = CryptoExchangeNames.CryptoDotCom,
-                        Value = decimal.Parse(position.market_value),
+                        Value = decimal.Parse(position.market_value, CultureInfo.InvariantCulture),
                         FiatCurrencyCode = DefaultCurrency,
                         CryptoCurrencySymbol = position.instrument_name,
-                        Quantity = decimal.Parse(position.quantity)
+                        Quantity = decimal.Parse(position.quantity, CultureInfo.InvariantCulture)
                     });
                 }
             }

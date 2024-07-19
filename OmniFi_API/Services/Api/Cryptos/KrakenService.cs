@@ -8,6 +8,7 @@ using static OmniFi_API.Utilities.ApiTypes;
 using System.Security.Cryptography;
 using System.Text;
 using OmniFi_API.Utilities;
+using System;
 
 namespace OmniFi_API.Services.Api.Cryptos
 {
@@ -36,7 +37,7 @@ namespace OmniFi_API.Services.Api.Cryptos
         {
             var userBalanceResponse = await GetUserBalance(ApiKey, ApiSecret);
 
-            return userBalanceResponse is not null ?
+            return userBalanceResponse?.result is not null ?
                 ParseUserBalance(userBalanceResponse) :
                 null;
         }
@@ -70,9 +71,16 @@ namespace OmniFi_API.Services.Api.Cryptos
         {
             Dictionary<string, string> headersParameters = new ();
 
+            var nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
             Dictionary<string,string> requestData = new ()
             {
-                [NonceKey] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()
+                [NonceKey] = nonce.ToString()
+            };
+
+            Dictionary<string, long> requestData2 = new()
+            {
+                [NonceKey] = nonce
             };
 
             var endpoint = Endpoint
@@ -86,7 +94,7 @@ namespace OmniFi_API.Services.Api.Cryptos
                 ApiType = ApiType.POST,
                 Url = _krakenBaseUrl + endpoint,
                 HeaderDictionary = headersParameters,
-                Data = requestData
+                Data = requestData2
             }); 
         }
 
@@ -96,23 +104,22 @@ namespace OmniFi_API.Services.Api.Cryptos
             string postData = string.Join("",
                 request.Select(x => x!.Key + "=" + x.Value));
 
-            byte[] decodedSecret = Convert.FromBase64String(apiSecret);
-            byte[] pathBytes = Encoding.UTF8.GetBytes(url);
-
             byte[] nonceAndPostData = Encoding.UTF8.GetBytes(request[NonceKey] + postData);
 
-            byte[] hash256 = SHA256.Create().ComputeHash(nonceAndPostData);
-
-            byte[] z = new byte[pathBytes.Length + hash256.Length];
-
-            pathBytes.CopyTo(z, 0);
-            hash256.CopyTo(z, pathBytes.Length);
-
-            using (var hmac = new HMACSHA512(decodedSecret))
+            using (var sha256 = SHA256.Create())
             {
-                byte[] signature = hmac.ComputeHash(z);
-                return Convert.ToBase64String(signature);
+                var hash256Bytes = sha256.ComputeHash(nonceAndPostData);
+                var hash256Str = Encoding.UTF8.GetString(hash256Bytes);
+
+                var pathBytes = Encoding.UTF8.GetBytes(url + hash256Str);
+
+                using (var hmacsha512 = new HMACSHA512(Convert.FromBase64String(apiSecret)))
+                {
+                    var hash512Bytes = hmacsha512.ComputeHash(pathBytes);
+                    return Convert.ToBase64String(hash512Bytes);
+                }
             }
+
         }
 
     }

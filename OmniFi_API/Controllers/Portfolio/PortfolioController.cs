@@ -33,6 +33,7 @@ namespace OmniFi_API.Controllers.Portfolio
         [HttpPost("{username}",  Name = nameof(FetchPortfolio))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse>> FetchPortfolio(string username)
         {
