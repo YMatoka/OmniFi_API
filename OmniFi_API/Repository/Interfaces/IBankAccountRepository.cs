@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 
 namespace OmniFi_API.Repository.Interfaces
 {
-    public interface IBankAccountRepository : IRepository<BankAccount>
+    public interface IBankAccountRepository : IRepository<BankSubAccount>
     {
-        public Task CreateAsync(BankAccount bankAccount, BankAccountCreateDTO bankAccountCreateDTO);
-        Task<BankAccount?> GetWithEntitiesAsync(Expression<Func<BankAccount,bool>> filter, bool tracked = false);
+        public Task CreateAsync(BankSubAccount bankAccount, BankAccountCreateDTO bankAccountCreateDTO);
+        Task<BankSubAccount?> GetWithEntitiesAsync(Expression<Func<BankSubAccount,bool>> filter, bool tracked = false);
     }
 }

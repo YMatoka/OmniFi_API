@@ -4,7 +4,7 @@ using OmniFi_API.Repository.Interfaces;
 
 namespace OmniFi_API.Repository.Banks
 {
-    public class BankCredentialRepository : BaseRepository<BankCredential>, IBankCredentialRepository
+    public class BankCredentialRepository : BaseRepository<BankAccount>, IBankCredentialRepository
     {
 
 
@@ -13,7 +13,7 @@ namespace OmniFi_API.Repository.Banks
   
         }
 
-        public async Task UpdateAsync(BankCredential bankCredential)
+        public async Task UpdateAsync(BankAccount bankCredential)
         {
             db.Update(bankCredential);
             await SaveAsync();

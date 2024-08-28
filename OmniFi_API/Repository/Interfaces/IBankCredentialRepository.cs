@@ -3,8 +3,8 @@ using OmniFi_API.Models.Cryptos;
 
 namespace OmniFi_API.Repository.Interfaces
 {
-    public interface IBankCredentialRepository : IRepository<BankCredential>
+    public interface IBankCredentialRepository : IRepository<BankAccount>
     {
-        Task UpdateAsync(BankCredential bankCredential);
+        Task UpdateAsync(BankAccount bankCredential);
     }
 }

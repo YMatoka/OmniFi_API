@@ -3,14 +3,14 @@ using OmniFi_API.Models.Identity;
 
 namespace OmniFi_API.Models.Banks
 {
-    public class BankCredential
+    public class BankAccount
     {
-        public int BankCredientialID { get; set; }
-        public int BankUserID { get; set; }
-        public required byte[] Password { get; set; }
-        public required int BankAccountID { get; set; }
-        public BankAccount? BankAccount { get; set; }
-        public AesKey? AesKey { get; set; }
-        public AesIV? AesIV { get; set; }
+        public int BankAccountID { get; set; }
+        public required string UserID { get; set; }
+        public ApplicationUser? User { get; set; }
+        public required string RequisitionId { get; set; }
+        public required int BankSubAccountID { get; set; }
+        public ICollection<BankSubAccount>? BankSubAccounts { get; set; }
+
     }
 }

@@ -2,7 +2,7 @@
 
 namespace OmniFi_API.Services.Interfaces
 {
-    public interface IKrakenService
+    public interface IFinancialAssetService
     {
         public Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(string ApiKey, string ApiSecret);
     }

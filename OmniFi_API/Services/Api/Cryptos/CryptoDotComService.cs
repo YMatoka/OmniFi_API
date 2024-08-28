@@ -16,7 +16,7 @@ using System.Globalization;
 
 namespace OmniFi_API.Services.Api.Cryptos
 {
-    public class CryptoDotComService : BaseService, ICryptoDotComService
+    public class CryptoDotComService : BaseService, IFinancialAssetService
     {
         private const string DefaultBaseUrl = "https://api.crypto.com/exchange";
         private const string ConfigBaseUrlIndex = "CryptoApiBaseUrls:CryptoDotCom";
@@ -31,6 +31,9 @@ namespace OmniFi_API.Services.Api.Cryptos
         private const string ApiVersion = "v1";
 
         private const string DefaultCurrency = FiatCurrencyCodes.USD;
+
+        private const string AcceptTypeFormatKey = "Accept";
+        private const string AcceptTypeFormat = MediaTypes.JsonMediaType;
 
         public CryptoDotComService(IHttpClientFactory httpClient, IConfiguration configuration) : base(httpClient)
         {

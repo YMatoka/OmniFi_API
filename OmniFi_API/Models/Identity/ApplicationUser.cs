@@ -13,7 +13,7 @@ namespace OmniFi_API.Models.Identity
         public required string LastName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public ICollection<BankAccount>? BankAccounts { get; set; }
+        public ICollection<BankSubAccount>? BankAccounts { get; set; }
         public ICollection<CryptoExchangeAccount>? CryptoExchangeAccounts { get; set; }
         public ICollection<FinancialAsset>? FinancialAssets { get; set; }
         public ICollection<FinancialAssetHistory>? FinancialAssetsHistory { get; set; }

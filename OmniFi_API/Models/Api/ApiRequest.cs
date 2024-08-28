@@ -8,5 +8,6 @@ namespace OmniFi_API.Models.Api
         public required string Url { get; set; } 
         public object? Data { get; set; }
         public Dictionary<string,string>? HeaderDictionary { get; set; }
+        public string? MediaType { get; set; }  
     }
 }

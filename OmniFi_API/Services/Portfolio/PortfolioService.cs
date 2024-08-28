@@ -1,5 +1,7 @@
-﻿using OmniFi_API.DTOs.CoinMarketCap;
+﻿using Microsoft.AspNetCore.DataProtection;
+using OmniFi_API.DTOs.CoinMarketCap;
 using OmniFi_API.DTOs.FreeCurrency;
+using OmniFi_API.Factory.Interfaces;
 using OmniFi_API.Models.Assets;
 using OmniFi_API.Models.Banks;
 using OmniFi_API.Models.Cryptos;
@@ -8,6 +10,7 @@ using OmniFi_API.Models.Identity;
 using OmniFi_API.Models.Portfolio;
 using OmniFi_API.Repository.Identity;
 using OmniFi_API.Repository.Interfaces;
+using OmniFi_API.Services.Api.Cryptos;
 using OmniFi_API.Services.Interfaces;
 using OmniFi_API.Utilities;
 using System.Diagnostics.Metrics;
@@ -31,14 +34,16 @@ namespace OmniFi_API.Services.Portfolio
         private readonly IRepository<AssetSource> _assetSourceRepository;
         private readonly IRepository<CryptoCurrency> _cryptoCurrencyRepository;
 
-        private readonly ICryptoDotComService _cryptoDotComService;
-        private readonly IKrakenService _krakenService;
         private readonly IStringEncryptionService _stringEncryptionService;
         private readonly IFiatCurrencyService _fiatCurrencyService;
         private readonly ICryptoInfoService _cryptoInfoService;
 
+        private readonly IFinancialAssetServiceFactory _financialAssetServiceFactory;
+
+
         private Dictionary<string, decimal> _ConversionRates;
         private IEnumerable<CryptoInfo>? _cryptoInfos;
+
 
         public PortfolioService(
             IUserRepository userRepository,
@@ -46,7 +51,6 @@ namespace OmniFi_API.Services.Portfolio
             IFinancialAssetRepository financialAssetRepository,
             ICryptoExchangeAccountRepository cryptoExchangeAccountRepository,
             IBankAccountRepository bankAccountRepository,
-            ICryptoDotComService cryptoDotComService,
             IStringEncryptionService stringEncryptionService,
             IRepository<FiatCurrency> fiatCurrencyRepository,
             IRepository<AssetPlatform> assetPlatformRepository,
@@ -57,14 +61,13 @@ namespace OmniFi_API.Services.Portfolio
             IFiatCurrencyService fiatCurrencyService,
             ICryptoInfoService cryptoInfoService,
             IRepository<CryptoCurrency> cryptoCurrencyRepository,
-            IKrakenService krakenService)
+            IFinancialAssetServiceFactory financialAssetServiceFactory)
         {
             _userRepository = userRepository;
             _financialAssetHistoryRepository = financialAssetHistoryRepository;
             _financialAssetRepository = financialAssetRepository;
             _cryptoExchangeAccountRepository = cryptoExchangeAccountRepository;
             _bankAccountRepository = bankAccountRepository;
-            _cryptoDotComService = cryptoDotComService;
             _stringEncryptionService = stringEncryptionService;
             _fiatCurrencyRepository = fiatCurrencyRepository;
             _assetPlatformRepository = assetPlatformRepository;
@@ -77,12 +80,12 @@ namespace OmniFi_API.Services.Portfolio
 
             _cryptoCurrencyRepository = cryptoCurrencyRepository;
             _ConversionRates = new();
-            _krakenService = krakenService;
+            _financialAssetServiceFactory = financialAssetServiceFactory;
         }
 
         public async Task FetchPortfolio(string userName, string? bankName = null, string? cryptoExchangeName = null)
         {
-            List<BankAccount> bankAccounts = new();
+            List<BankSubAccount> bankAccounts = new();
             List<CryptoExchangeAccount> cryptoExchangeAccounts = new();
 
             var user = await _userRepository.GetWithAllAccountsAsync(userName);
@@ -149,7 +152,7 @@ namespace OmniFi_API.Services.Portfolio
             }
         }
 
-        private async Task FetchBankPortfolio(BankAccount bankAccount, ApplicationUser user)
+        private async Task FetchBankPortfolio(BankSubAccount bankAccount, ApplicationUser user)
         {
             var portFolioDatas = await GetBankPortfolioDataAsync(bankAccount);
 
@@ -162,7 +165,7 @@ namespace OmniFi_API.Services.Portfolio
             }
         }
 
-        private async Task<IEnumerable<PortfolioData>?> GetBankPortfolioDataAsync(BankAccount bankAccount)
+        private async Task<IEnumerable<PortfolioData>?> GetBankPortfolioDataAsync(BankSubAccount bankAccount)
         {
             throw new NotImplementedException();
         }
@@ -305,12 +308,19 @@ namespace OmniFi_API.Services.Portfolio
             switch (cryptoExchangeAccount.CryptoExchange!.ExchangeName)
             {
                 case CryptoExchangeNames.CryptoDotCom:
-                    return await _cryptoDotComService.GetUserBalanceAsync(apiKey, apiSecret);
+                    return await _financialAssetServiceFactory
+                        .GetFinancialAssetRetriever(CryptoExchangeNames.CryptoDotCom)
+                        .GetUserBalanceAsync(apiKey, apiSecret);;
 
                 case CryptoExchangeNames.Binance:
+                    return await _financialAssetServiceFactory
+                        .GetFinancialAssetRetriever(CryptoExchangeNames.Binance)
+                        .GetUserBalanceAsync(apiKey, apiSecret);
 
                 case CryptoExchangeNames.Kraken:
-                    return await _krakenService.GetUserBalanceAsync(apiKey, apiSecret);
+                    return await _financialAssetServiceFactory
+                        .GetFinancialAssetRetriever(CryptoExchangeNames.Kraken)
+                        .GetUserBalanceAsync(apiKey, apiSecret);
 
                 default:
                     return null;

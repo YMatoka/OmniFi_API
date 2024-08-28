@@ -4,14 +4,14 @@ using OmniFi_API.Models.Banks;
 
 namespace OmniFi_API.Data.FluentConfig.Banks
 {
-    public class BankCredentialConfig : IEntityTypeConfiguration<BankCredential>
+    public class BankCredentialConfig : IEntityTypeConfiguration<BankAccount>
     {
-        public void Configure(EntityTypeBuilder<BankCredential> builder)
+        public void Configure(EntityTypeBuilder<BankAccount> builder)
         {
-            builder.HasKey(x => x.BankCredientialID);
+            builder.HasKey(x => x.BankAccountID);
 
             builder
-                .Property(x => x.BankCredientialID)
+                .Property(x => x.BankAccountID)
                 .ValueGeneratedOnAdd();
 
             builder
@@ -19,13 +19,13 @@ namespace OmniFi_API.Data.FluentConfig.Banks
                 .IsRequired();
 
             builder
-                .Property(x => x.Password)
+                .Property(x => x.RequisitionId)
                 .IsRequired();
 
             builder
                 .HasOne(x => x.BankAccount)
                 .WithOne(x => x.BankCredential)
-                .HasForeignKey<BankCredential>(x => x.BankAccountID);
+                .HasForeignKey<BankAccount>(x => x.BankAccountID);
         }
     }
 }

@@ -13,7 +13,7 @@ using System.Linq.Expressions;
 
 namespace OmniFi_API.Repository.Banks
 {
-    public class BankAccountRepository : BaseRepository<BankAccount>, IBankAccountRepository
+    public class BankAccountRepository : BaseRepository<BankSubAccount>, IBankAccountRepository
     {
         private readonly IStringEncryptionService _stringEncryptionService;
         private readonly IBankCredentialRepository _bankCredentialRepository;
@@ -33,7 +33,7 @@ namespace OmniFi_API.Repository.Banks
             _aesIVRepository = aesIVRepository;
         }
 
-        public async Task CreateAsync(BankAccount bankAccount, BankAccountCreateDTO bankAccountCreateDTO)
+        public async Task CreateAsync(BankSubAccount bankAccount, BankAccountCreateDTO bankAccountCreateDTO)
         {
             try
             {
@@ -44,9 +44,9 @@ namespace OmniFi_API.Repository.Banks
                     var encryptionKey = _stringEncryptionService.GenerateAesKey();
                     var IV = _stringEncryptionService.GenerateAesIV();
 
-                    var credential = new BankCredential()
+                    var credential = new BankAccount()
                     {
-                        Password = await _stringEncryptionService.EncryptAsync(bankAccountCreateDTO.Password, encryptionKey, IV),
+                        RequisitionId = await _stringEncryptionService.EncryptAsync(bankAccountCreateDTO.Password, encryptionKey, IV),
                         BankAccountID = bankAccount.BankAccountID
                     };
 
@@ -55,7 +55,7 @@ namespace OmniFi_API.Repository.Banks
                     var aesKey = new AesKey()
                     {
                         Key = encryptionKey,
-                        BankCredentialId = credential.BankCredientialID
+                        BankCredentialId = credential.BankAccountID
                     };
 
                     await _aesKeyRepository.CreateAsync(aesKey);
@@ -63,7 +63,7 @@ namespace OmniFi_API.Repository.Banks
                     var aesIV = new AesIV()
                     {
                         IV = IV,
-                        BankCredentialId = credential!.BankCredientialID
+                        BankCredentialId = credential!.BankAccountID
                     };
 
                     await _aesIVRepository.CreateAsync(aesIV);
@@ -77,9 +77,9 @@ namespace OmniFi_API.Repository.Banks
             }
         }
 
-        public async Task<BankAccount?> GetWithEntitiesAsync(Expression<Func<BankAccount,bool>> filter, bool tracked = false)
+        public async Task<BankSubAccount?> GetWithEntitiesAsync(Expression<Func<BankSubAccount,bool>> filter, bool tracked = false)
         {
-            IQueryable <BankAccount> query = _dbSet;
+            IQueryable <BankSubAccount> query = _dbSet;
 
             if (!tracked)
             {

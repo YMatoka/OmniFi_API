@@ -8,7 +8,7 @@ namespace OmniFi_API.Models.Encryption
         public int AesIVId { get; set; }
         public required byte[] IV { get; set; }
         public int? BankCredentialId { get; set; }
-        public BankCredential? BankCredential { get; set; }
+        public BankAccount? BankCredential { get; set; }
         public int? CryptoApiCredentialId { get; set; }
         public CryptoApiCredential? CryptoApiCredential { get; set; }
     }

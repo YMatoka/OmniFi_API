@@ -14,8 +14,8 @@ namespace OmniFi_API.Data.Interfaces
         DbSet<AssetPlatform> AssetPlatforms { get; set; }
         DbSet<AssetSource> AssetSources { get; set; }
         DbSet<FinancialAsset> AssetTrackings { get; set; }
-        DbSet<BankAccount> BankAccounts { get; set; }
-        DbSet<BankCredential> BankCredentials { get; set; }
+        DbSet<BankSubAccount> BankAccounts { get; set; }
+        DbSet<BankAccount> BankCredentials { get; set; }
         DbSet<Bank> Banks { get; set; }
         DbSet<CryptoExchangeAccount> CryptoExchangeAccounts { get; set; }
         DbSet<CryptoExchange> CryptoExchanges { get; set; }

@@ -33,6 +33,10 @@ using OmniFi_API.Options.Currencies;
 using OmniFi_API.Services.Api.Cryptos;
 using OmniFi_API.Services.Api.Currencies;
 using OmniFi_API.Options.Cryptos;
+using OmniFi_API.Utilities;
+using OmniFi_API.Factory.Interfaces;
+using OmniFi_API.Factory;
+using OmniFi_API.Options.Banks;
 
 const string DefaultSQlConnection = "DefaultSQLConnection";
 const string SecondSQlConnection = "SecondSQLConnection";
@@ -50,7 +54,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString(SecondSQlConnection))
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString(DefaultSQlConnection))
     .EnableSensitiveDataLogging()
     .EnableDetailedErrors()
     );
@@ -81,8 +85,9 @@ builder.Services.AddScoped<ICryptoHoldingRepository, CryptoHoldingRepository>();
 builder.Services.AddScoped<IStringEncryptionService, StringEncryptionService>();
 builder.Services.AddScoped<IFetchPortfolioService, PortfolioService>();
 
-builder.Services.AddHttpClient<ICryptoDotComService, CryptoDotComService>();
-builder.Services.AddScoped<ICryptoDotComService, CryptoDotComService>();
+
+builder.Services.AddHttpClient<IFinancialAssetService, BinanceService>();
+builder.Services.AddScoped<IFinancialAssetService, BinanceService>();
 
 builder.Services.AddHttpClient<IFiatCurrencyService, FiatCurrencyService>();
 builder.Services.AddScoped<IFiatCurrencyService, FiatCurrencyService>();
@@ -90,8 +95,18 @@ builder.Services.AddScoped<IFiatCurrencyService, FiatCurrencyService>();
 builder.Services.AddHttpClient<ICryptoInfoService, CryptoInfoService>();
 builder.Services.AddScoped<ICryptoInfoService, CryptoInfoService>();
 
-builder.Services.AddHttpClient<IKrakenService, KrakenService>();
-builder.Services.AddScoped<IKrakenService, KrakenService>();
+builder.Services.AddHttpClient<CryptoDotComService>();
+builder.Services.AddScoped<CryptoDotComService>();
+
+builder.Services.AddHttpClient<KrakenService>();
+builder.Services.AddScoped<KrakenService>();
+
+builder.Services.AddHttpClient<BinanceService>();
+builder.Services.AddScoped<BinanceService>();
+
+builder.Services.AddScoped<IFinancialAssetServiceFactory, FinancialAssetServiceFactory>();
+
+
 
 builder.Services
     .AddIdentity<ApplicationUser, ApplicationRole>()
@@ -108,6 +123,9 @@ builder.Services.Configure<FiatCurrencyServiceOptions>(
 
 builder.Services.Configure<CryptoInfoServiceOptions>(
     builder.Configuration.GetSection(CryptoInfoServiceOptions.SectionName));
+
+builder.Services.Configure<BankInfoServiceOptions>(builder.Configuration.GetSection(
+    BankInfoServiceOptions.SectionName));
 
 var secretKey = builder.Configuration.GetValue<string>(SecretKeySection);
 

@@ -340,7 +340,7 @@ namespace OmniFi_API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankSubAccount", b =>
                 {
                     b.Property<int>("BankAccountID")
                         .ValueGeneratedOnAdd()
@@ -364,13 +364,13 @@ namespace OmniFi_API.Migrations
                     b.ToTable("BankAccounts");
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankCredential", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
                 {
-                    b.Property<int>("BankCredientialID")
+                    b.Property<int>("BankAccountID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankCredientialID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankAccountID"));
 
                     b.Property<int>("BankAccountID")
                         .HasColumnType("int");
@@ -381,11 +381,11 @@ namespace OmniFi_API.Migrations
                     b.Property<int>("BankUserID")
                         .HasColumnType("int");
 
-                    b.Property<byte[]>("Password")
+                    b.Property<byte[]>("RequisitionId")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.HasKey("BankCredientialID");
+                    b.HasKey("BankAccountID");
 
                     b.HasIndex("BankAccountID")
                         .IsUnique();
@@ -978,7 +978,7 @@ namespace OmniFi_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankSubAccount", b =>
                 {
                     b.HasOne("OmniFi_API.Models.Banks.Bank", "Bank")
                         .WithMany("BankAccounts")
@@ -997,11 +997,11 @@ namespace OmniFi_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankCredential", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
                 {
-                    b.HasOne("OmniFi_API.Models.Banks.BankAccount", "BankAccount")
-                        .WithOne("BankCredential")
-                        .HasForeignKey("OmniFi_API.Models.Banks.BankCredential", "BankAccountID")
+                    b.HasOne("OmniFi_API.Models.Banks.BankSubAccount", "BankSubAccount")
+                        .WithOne("BankAccount")
+                        .HasForeignKey("OmniFi_API.Models.Banks.BankAccount", "BankAccountID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1009,7 +1009,7 @@ namespace OmniFi_API.Migrations
                         .WithMany("BankCredentials")
                         .HasForeignKey("BankID");
 
-                    b.Navigation("BankAccount");
+                    b.Navigation("BankSubAccount");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoApiCredential", b =>
@@ -1094,7 +1094,7 @@ namespace OmniFi_API.Migrations
 
             modelBuilder.Entity("OmniFi_API.Models.Encryption.AesIV", b =>
                 {
-                    b.HasOne("OmniFi_API.Models.Banks.BankCredential", "BankCredential")
+                    b.HasOne("OmniFi_API.Models.Banks.BankAccount", "BankAccount")
                         .WithOne("AesIV")
                         .HasForeignKey("OmniFi_API.Models.Encryption.AesIV", "BankCredentialId");
 
@@ -1102,14 +1102,14 @@ namespace OmniFi_API.Migrations
                         .WithOne("AesIV")
                         .HasForeignKey("OmniFi_API.Models.Encryption.AesIV", "CryptoApiCredentialId");
 
-                    b.Navigation("BankCredential");
+                    b.Navigation("BankAccount");
 
                     b.Navigation("CryptoApiCredential");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Encryption.AesKey", b =>
                 {
-                    b.HasOne("OmniFi_API.Models.Banks.BankCredential", "BankCredential")
+                    b.HasOne("OmniFi_API.Models.Banks.BankAccount", "BankAccount")
                         .WithOne("AesKey")
                         .HasForeignKey("OmniFi_API.Models.Encryption.AesKey", "BankCredentialId");
 
@@ -1117,7 +1117,7 @@ namespace OmniFi_API.Migrations
                         .WithOne("AesKey")
                         .HasForeignKey("OmniFi_API.Models.Encryption.AesKey", "CryptoApiCredentialId");
 
-                    b.Navigation("BankCredential");
+                    b.Navigation("BankAccount");
 
                     b.Navigation("CryptoApiCredential");
                 });
@@ -1168,12 +1168,12 @@ namespace OmniFi_API.Migrations
                     b.Navigation("BankCredentials");
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankSubAccount", b =>
                 {
-                    b.Navigation("BankCredential");
+                    b.Navigation("BankAccount");
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankCredential", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
                 {
                     b.Navigation("AesIV");
 

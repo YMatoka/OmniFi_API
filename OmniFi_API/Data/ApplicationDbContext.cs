@@ -7,6 +7,7 @@ using OmniFi_API.Data.FluentConfig.Currencies;
 using OmniFi_API.Data.FluentConfig.Encryption;
 using OmniFi_API.Data.FluentConfig.Identity;
 using OmniFi_API.Data.Interfaces;
+using OmniFi_API.Models.Api;
 using OmniFi_API.Models.Assets;
 using OmniFi_API.Models.Banks;
 using OmniFi_API.Models.Cryptos;
@@ -27,8 +28,8 @@ namespace OmniFi_API.Data
         internal DbSet<FinancialAssetHistory> FinancialAssetsHistory { get; set; }
 
         internal DbSet<Bank> Banks { get; set; }
-        internal DbSet<BankAccount> BankAccounts { get; set; }
-        internal DbSet<BankCredential> BankCredentials { get; set; }
+        internal DbSet<BankSubAccount> BankAccounts { get; set; }
+        internal DbSet<BankAccount> BankCredentials { get; set; }
 
         public DbSet<CryptoExchange> CryptoExchanges { get; set; }
         internal DbSet<CryptoExchangeAccount> CryptoExchangeAccounts { get; set; }
@@ -36,6 +37,8 @@ namespace OmniFi_API.Data
         internal DbSet<CryptoCurrency> CryptoCurrencies { get; set; }
         internal DbSet<CryptoHolding> CryptoHoldings { get; set; }
         internal DbSet<CryptoHoldingHistory> CryptoHoldingsHystory { get; set; }
+
+        internal DbSet<BankDataApiCredential> BankDataApiCredentials { get; set; }
 
         public DbSet<FiatCurrency> FiatCurrencies { get; set; }
 

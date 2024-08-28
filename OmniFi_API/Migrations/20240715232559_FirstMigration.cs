@@ -498,7 +498,7 @@ namespace OmniFi_API.Migrations
                         name: "FK_AesIV_BankCredentials_BankCredentialId",
                         column: x => x.BankCredentialId,
                         principalTable: "BankCredentials",
-                        principalColumn: "BankCredientialID");
+                        principalColumn: "BankAccountID");
                     table.ForeignKey(
                         name: "FK_AesIV_CryptoApiCredentials_CryptoApiCredentialId",
                         column: x => x.CryptoApiCredentialId,
@@ -523,7 +523,7 @@ namespace OmniFi_API.Migrations
                         name: "FK_AesKeys_BankCredentials_BankCredentialId",
                         column: x => x.BankCredentialId,
                         principalTable: "BankCredentials",
-                        principalColumn: "BankCredientialID");
+                        principalColumn: "BankAccountID");
                     table.ForeignKey(
                         name: "FK_AesKeys_CryptoApiCredentials_CryptoApiCredentialId",
                         column: x => x.CryptoApiCredentialId,

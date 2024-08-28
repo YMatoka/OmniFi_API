@@ -5,9 +5,9 @@ using OmniFi_API.Models.Banks;
 
 namespace OmniFi_API.Data.FluentConfig.Banks
 {
-    public class BankAccountConfig : IEntityTypeConfiguration<BankAccount>
+    public class BankAccountConfig : IEntityTypeConfiguration<BankSubAccount>
     {
-        public void Configure(EntityTypeBuilder<BankAccount> builder)
+        public void Configure(EntityTypeBuilder<BankSubAccount> builder)
         {
 
             builder.HasKey(x => x.BankAccountID);

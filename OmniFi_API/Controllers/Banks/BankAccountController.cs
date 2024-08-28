@@ -71,7 +71,7 @@ namespace OmniFi_API.Controllers.Banks
                     return BadRequest(_apiResponse);
                 }
 
-                var bankAccount = new BankAccount()
+                var bankAccount = new BankSubAccount()
                 {
                     BankID = bank.BankID,
                     UserID = user.Id
