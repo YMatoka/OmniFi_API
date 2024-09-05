@@ -168,7 +168,7 @@ namespace OmniFi_API.Services.Api.Cryptos
                 {
                     AssetSourceName = AssetSourceNames.CryptoHolding,
                     AssetPlatformName = CryptoExchangeNames.Kraken,
-                    Value = value,
+                    Balance = value,
                     FiatCurrencyCode = PairDefaultCurrency,
                     CryptoCurrencySymbol = 
                         _cryptoSymbolEquivalence.ContainsKey(cryptoCurrencySymbol) ?

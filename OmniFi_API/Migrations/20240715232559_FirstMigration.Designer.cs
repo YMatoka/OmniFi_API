@@ -123,7 +123,7 @@ namespace OmniFi_API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Value")
+                    b.Property<string>("Balance")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
@@ -247,7 +247,7 @@ namespace OmniFi_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<decimal>("Value")
+                    b.Property<decimal>("Balance")
                         .HasPrecision(21, 2)
                         .HasColumnType("decimal(21,2)");
 
@@ -291,7 +291,7 @@ namespace OmniFi_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<decimal>("Value")
+                    b.Property<decimal>("Balance")
                         .HasPrecision(21, 2)
                         .HasColumnType("decimal(21,2)");
 

@@ -5,12 +5,13 @@ namespace OmniFi_API.Models.Banks
 {
     public class BankAccount
     {
-        public int BankAccountID { get; set; }
+        public int BankAccountId { get; set; }
         public required string UserID { get; set; }
         public ApplicationUser? User { get; set; }
         public required string RequisitionId { get; set; }
-        public required int BankSubAccountID { get; set; }
         public ICollection<BankSubAccount>? BankSubAccounts { get; set; }
+        public required int BankId { get; set; }
+        public Bank? Bank { get; set; }
 
     }
 }

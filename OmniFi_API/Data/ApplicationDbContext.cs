@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using OmniFi_API.Data.FluentConfig.Api.Banks;
 using OmniFi_API.Data.FluentConfig.Assets;
 using OmniFi_API.Data.FluentConfig.Banks;
 using OmniFi_API.Data.FluentConfig.Cryptos;
@@ -8,6 +9,7 @@ using OmniFi_API.Data.FluentConfig.Encryption;
 using OmniFi_API.Data.FluentConfig.Identity;
 using OmniFi_API.Data.Interfaces;
 using OmniFi_API.Models.Api;
+using OmniFi_API.Models.Api.Banks;
 using OmniFi_API.Models.Assets;
 using OmniFi_API.Models.Banks;
 using OmniFi_API.Models.Cryptos;
@@ -39,11 +41,13 @@ namespace OmniFi_API.Data
         internal DbSet<CryptoHoldingHistory> CryptoHoldingsHystory { get; set; }
 
         internal DbSet<BankDataApiCredential> BankDataApiCredentials { get; set; }
+        internal DbSet<BankAgreement> BankAgreements { get; set; }
 
         public DbSet<FiatCurrency> FiatCurrencies { get; set; }
 
         internal DbSet<AesKey> AesKeys { get; set; }
         internal DbSet<AesIV> AesIV { get; set; }
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -63,7 +67,10 @@ namespace OmniFi_API.Data
 
             modelBuilder.ApplyConfiguration(new BankConfig());
             modelBuilder.ApplyConfiguration(new BankAccountConfig());
-            modelBuilder.ApplyConfiguration(new BankCredentialConfig());
+            modelBuilder.ApplyConfiguration(new BankSubAccountConfig());
+
+            modelBuilder.ApplyConfiguration(new BankDataApiCredentialConfig());
+            modelBuilder.ApplyConfiguration(new BankAgreementConfig());
 
             modelBuilder.ApplyConfiguration(new CryptoExchangeAccountConfig());
             modelBuilder.ApplyConfiguration(new CryptoExchangeConfig());
@@ -76,6 +83,8 @@ namespace OmniFi_API.Data
 
             modelBuilder.ApplyConfiguration(new ApplicationRoleConfig());
             modelBuilder.ApplyConfiguration(new ApplicationUserConfig());
+
+
 
             modelBuilder.ApplyConfiguration(new AesKeyConfig());
             modelBuilder.ApplyConfiguration(new AesIVConfig());

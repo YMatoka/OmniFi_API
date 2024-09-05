@@ -43,7 +43,7 @@ namespace OmniFi_API.Repository.Assets
                     var actualDateTime = DateTime.UtcNow;
 
                     financialAsset.LastUpdatedAt = actualDateTime;
-                    financialAsset.Value = portfolioData.Value;
+                    financialAsset.Value = portfolioData.Balance;
 
                     db.Update(financialAsset);
 

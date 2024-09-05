@@ -102,7 +102,7 @@ namespace OmniFi_API.Services.Api.Cryptos
                     AssetSourceName = AssetSourceNames.CryptoHolding,
                     CryptoCurrencySymbol = balance.asset,
                     Quantity = sumedConvertedBalance,
-                    Value = value,
+                    Balance = value,
                     FiatCurrencyCode = BinanceDefaultCurrency
                 });
 

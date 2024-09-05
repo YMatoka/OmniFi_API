@@ -5,15 +5,15 @@ using OmniFi_API.Models.Banks;
 
 namespace OmniFi_API.Data.FluentConfig.Banks
 {
-    public class BankAccountConfig : IEntityTypeConfiguration<BankSubAccount>
+    public class BankAccountConfig : IEntityTypeConfiguration<BankAccount>
     {
-        public void Configure(EntityTypeBuilder<BankSubAccount> builder)
+        public void Configure(EntityTypeBuilder<BankAccount> builder)
         {
 
-            builder.HasKey(x => x.BankAccountID);
+            builder.HasKey(x => x.BankAccountId);
 
             builder
-                .Property(x => x.BankAccountID)
+                .Property(x => x.BankAccountId)
                 .ValueGeneratedOnAdd();
 
             builder
@@ -24,7 +24,7 @@ namespace OmniFi_API.Data.FluentConfig.Banks
             builder
                 .HasOne(x => x.Bank)
                 .WithMany(x => x.BankAccounts)
-                .HasForeignKey(x => x.BankID);
+                .HasForeignKey(x => x.BankId);
         }
     }
 }

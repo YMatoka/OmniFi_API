@@ -21,9 +21,9 @@ namespace OmniFi_API.Data.FluentConfig.Encryption
                 .IsRequired(false);
 
             builder
-                .HasOne(x => x.BankCredential)
+                .HasOne(x => x.BankDataApiCredential)
                 .WithOne(x => x.AesIV)
-                .HasForeignKey<AesIV>(x => x.BankCredentialId)
+                .HasForeignKey<AesIV>(x => x.BankDataApiCredentialId)
                 .IsRequired(false);
            
         }

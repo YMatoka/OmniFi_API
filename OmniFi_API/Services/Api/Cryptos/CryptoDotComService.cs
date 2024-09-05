@@ -61,7 +61,7 @@ namespace OmniFi_API.Services.Api.Cryptos
                     {
                         AssetSourceName = AssetSourceNames.CryptoHolding,
                         AssetPlatformName = CryptoExchangeNames.CryptoDotCom,
-                        Value = decimal.Parse(position.market_value, CultureInfo.InvariantCulture),
+                        Balance = decimal.Parse(position.market_value, CultureInfo.InvariantCulture),
                         FiatCurrencyCode = DefaultCurrency,
                         CryptoCurrencySymbol = position.instrument_name,
                         Quantity = decimal.Parse(position.quantity, CultureInfo.InvariantCulture)

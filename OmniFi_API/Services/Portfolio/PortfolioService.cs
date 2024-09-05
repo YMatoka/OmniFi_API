@@ -349,7 +349,7 @@ namespace OmniFi_API.Services.Portfolio
 
                 if (_ConversionRates.ContainsKey(portfolioData.FiatCurrencyCode))
                 {
-                    portfolioData.Value = portfolioData.Value * _ConversionRates[portfolioData.FiatCurrencyCode];
+                    portfolioData.Balance = portfolioData.Balance * _ConversionRates[portfolioData.FiatCurrencyCode];
                 }
                 
             }
@@ -403,7 +403,7 @@ namespace OmniFi_API.Services.Portfolio
                     FiatCurrencyID = fiatCurrency!.FiatCurrencyID,
                     FirstRetrievedAt = DateTime.UtcNow,
                     LastUpdatedAt = DateTime.UtcNow,
-                    Value = portfolioData.Value
+                    Value = portfolioData.Balance
                 }, 
                 portfolioData); 
                 
