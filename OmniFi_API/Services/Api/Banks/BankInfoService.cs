@@ -1,11 +1,13 @@
 ﻿using Microsoft.CodeAnalysis.Options;
 using Microsoft.Extensions.Options;
+using OmniFi_API.Models.Portfolio;
 using OmniFi_API.Options.Banks;
+using OmniFi_API.Services.Interfaces;
 using OmniFi_API.Utilities;
 
 namespace OmniFi_API.Services.Api.Banks
 {
-    public class BankInfoService
+    public class BankInfoService : BaseService, IFinancialAssetService
     {
         private readonly BankInfoServiceOptions _options;
 
@@ -55,11 +57,15 @@ namespace OmniFi_API.Services.Api.Banks
 
         private const string AccountIdTag = "{AccountIdTag}";
         private const string AccountsDataMethod = $"/api/v2/accounts/{AccountIdTag}/";
-        
 
-        public BankInfoService(IOptions<BankInfoServiceOptions> options)
+        public BankInfoService(IHttpClientFactory httpClientFactory, IOptions<BankInfoServiceOptions> options, IConfiguration configuration): base(httpClientFactory) 
         {
             _options = options.Value;
+        }
+
+        public Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(string ApiKey, string ApiSecret)
+        {
+            throw new NotImplementedException();
         }
     }
 }

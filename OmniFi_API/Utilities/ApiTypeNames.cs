@@ -1,10 +1,7 @@
 ﻿namespace OmniFi_API.Utilities
 {
-    public static class ApiTypeNames
+    public static class ApiNames
     {
-        public const string CryptoDotComBalance = "CryptoDotComBalance";
-        public const string KrakenBalance = "KrakenBalance";
-        public const string BinanceSpotBalance = "BinanceSpotBalance";
-        public const string BinanceFuturesBalance = "BinanceFuturesBalance";
+        public const string GoCardless = "GoCardless";
     }
 }

@@ -17,8 +17,8 @@ namespace OmniFi_API.Services.Api.Cryptos
         private const string DefaultSpotBaseUrl = "https://api.binance.com";
         private const string DefaultFuturesBaseUrl = "https://testnet.binancefuture.com";
 
-        private const string ConfigSpotBaseUrlIndex = "CryptoApiBaseUrls:BinanceSpot";
-        private const string ConfigFuturesBaseUrlIndex = "CryptoApiBaseUrls:BinanceFutures";
+        private const string ConfigSpotBaseUrlIndex = "ApiBaseUrls:BinanceSpot";
+        private const string ConfigFuturesBaseUrlIndex = "ApiBaseUrls:BinanceFutures";
 
         private readonly string _binanceSpotBaseUrl;
         private readonly string _binanceFuturesBaseUrl;

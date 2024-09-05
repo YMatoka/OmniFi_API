@@ -13,7 +13,7 @@ using System.Linq.Expressions;
 
 namespace OmniFi_API.Repository.Banks
 {
-    public class BankAccountRepository : BaseRepository<BankSubAccount>, IBankAccountRepository
+    public class BankAccountRepository : BaseRepository<BankAccount>, IBankAccountRepository
     {
         private readonly IStringEncryptionService _stringEncryptionService;
         private readonly IBankCredentialRepository _bankCredentialRepository;

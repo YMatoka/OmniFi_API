@@ -85,7 +85,7 @@ namespace OmniFi_API.Services.Portfolio
 
         public async Task FetchPortfolio(string userName, string? bankName = null, string? cryptoExchangeName = null)
         {
-            List<BankSubAccount> bankAccounts = new();
+            List<BankAccount> bankAccounts = new();
             List<CryptoExchangeAccount> cryptoExchangeAccounts = new();
 
             var user = await _userRepository.GetWithAllAccountsAsync(userName);
@@ -133,7 +133,7 @@ namespace OmniFi_API.Services.Portfolio
                     foreach (var bankAccount in user.BankAccounts)
                     {
                         var account = await _bankAccountRepository.GetWithEntitiesAsync(
-                            x => x.UserID == user.Id && x.BankID == bankAccount.BankID);
+                            x => x.UserID == user.Id && x.BankId == bankAccount.BankId);
 
                         if (account is not null)
                             bankAccounts.Add(account);
@@ -152,7 +152,7 @@ namespace OmniFi_API.Services.Portfolio
             }
         }
 
-        private async Task FetchBankPortfolio(BankSubAccount bankAccount, ApplicationUser user)
+        private async Task FetchBankPortfolio(BankAccount bankAccount, ApplicationUser user)
         {
             var portFolioDatas = await GetBankPortfolioDataAsync(bankAccount);
 
@@ -165,7 +165,7 @@ namespace OmniFi_API.Services.Portfolio
             }
         }
 
-        private async Task<IEnumerable<PortfolioData>?> GetBankPortfolioDataAsync(BankSubAccount bankAccount)
+        private async Task<IEnumerable<PortfolioData>?> GetBankPortfolioDataAsync(BankAccount bankAccount)
         {
             throw new NotImplementedException();
         }
