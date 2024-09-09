@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Options;
 using OmniFi_API.DTOs.CoinMarketCap;
 using OmniFi_API.DTOs.FreeCurrency;
 using OmniFi_API.Factory.Interfaces;
@@ -8,6 +9,7 @@ using OmniFi_API.Models.Cryptos;
 using OmniFi_API.Models.Currencies;
 using OmniFi_API.Models.Identity;
 using OmniFi_API.Models.Portfolio;
+using OmniFi_API.Options.Banks;
 using OmniFi_API.Repository.Identity;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Services.Api.Cryptos;
@@ -39,7 +41,7 @@ namespace OmniFi_API.Services.Portfolio
         private readonly ICryptoInfoService _cryptoInfoService;
 
         private readonly IFinancialAssetServiceFactory _financialAssetServiceFactory;
-
+        private readonly BankInfoServiceOptions _bankInfoServiceOptions;
 
         private Dictionary<string, decimal> _ConversionRates;
         private IEnumerable<CryptoInfo>? _cryptoInfos;
@@ -61,7 +63,8 @@ namespace OmniFi_API.Services.Portfolio
             IFiatCurrencyService fiatCurrencyService,
             ICryptoInfoService cryptoInfoService,
             IRepository<CryptoCurrency> cryptoCurrencyRepository,
-            IFinancialAssetServiceFactory financialAssetServiceFactory)
+            IFinancialAssetServiceFactory financialAssetServiceFactory,
+            IOptions<BankInfoServiceOptions> options)
         {
             _userRepository = userRepository;
             _financialAssetHistoryRepository = financialAssetHistoryRepository;
@@ -81,6 +84,7 @@ namespace OmniFi_API.Services.Portfolio
             _cryptoCurrencyRepository = cryptoCurrencyRepository;
             _ConversionRates = new();
             _financialAssetServiceFactory = financialAssetServiceFactory;
+            _bankInfoServiceOptions = options.Value;
         }
 
         public async Task FetchPortfolio(string userName, string? bankName = null, string? cryptoExchangeName = null)
@@ -167,13 +171,22 @@ namespace OmniFi_API.Services.Portfolio
 
         private async Task<IEnumerable<PortfolioData>?> GetBankPortfolioDataAsync(BankAccount bankAccount)
         {
-            throw new NotImplementedException();
+           switch (bankAccount.Bank!.BankName)
+            {
+                case BankNames.BoursoBank:
+                    return await _financialAssetServiceFactory
+                        .GetFinancialAssetRetriever(BankNames.BoursoBank)
+                        .GetUserBalanceAsync(_bankInfoServiceOptions.ApiKey, _bankInfoServiceOptions.ApiSecret, bankAccount.UserID) ;
+                default:
+                    return null;
+            }
         }
 
 
         private async Task FetchCryptoPortfolio(CryptoExchangeAccount cryptoExchangeAccount, ApplicationUser user)
         {
             var portFolioDatas = await GetCryptoPortfolioDataAsync(cryptoExchangeAccount);
+
 
             if (portFolioDatas is not null)
             {

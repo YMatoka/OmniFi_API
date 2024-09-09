@@ -19,7 +19,7 @@ namespace OmniFi_API.Services.Api.Cryptos
     public class CryptoDotComService : BaseService, IFinancialAssetService
     {
         private const string DefaultBaseUrl = "https://api.crypto.com/exchange";
-        private const string ConfigBaseUrlIndex = "ApiBaseUrls:CryptoDotCom";
+        private const string ConfigBaseUrlIndex = "CryptoApiBaseUrls:CryptoDotCom";
 
         private readonly string _cryptoDotComBaseUrl;
 

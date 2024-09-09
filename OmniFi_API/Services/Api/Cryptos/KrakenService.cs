@@ -19,7 +19,7 @@ namespace OmniFi_API.Services.Api.Cryptos
     public class KrakenService : BaseService, IFinancialAssetService
     {
         private const string DefaultBaseUrl = "https://api.kraken.com";
-        private const string ConfigBaseUrlIndex = "ApiBaseUrls:Kraken";
+        private const string ConfigBaseUrlIndex = "CryptoApiBaseUrls:Kraken";
 
         private readonly string _krakenBaseUrl;
 

@@ -9,6 +9,8 @@ namespace OmniFi_API.Models.Banks
         public required string UserID { get; set; }
         public ApplicationUser? User { get; set; }
         public required string RequisitionId { get; set; }
+        public DateTime RequisitionCreatedAt  { get; set; }
+        public double RequisitionDurationInDays { get; set; }
         public ICollection<BankSubAccount>? BankSubAccounts { get; set; }
         public required int BankId { get; set; }
         public Bank? Bank { get; set; }

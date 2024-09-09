@@ -6,12 +6,10 @@ namespace OmniFi_API.Models.Api.Banks
     {
         public int BankDataApiId { get; set; }
         public required string AccessToken { get; set; }
-        public decimal AccessExpires { get; set; }
+        public double AccessExpires { get; set; }
         public required string RefreshToken { get; set; }
-        public decimal RefreshExpires { get; set; }
+        public double RefreshExpires { get; set; }
         public DateTime AccessTokenCreatedAt { get; set; }
         public DateTime RefreshokenCreatedAt { get; set; }
-        public AesKey? AesKey { get; set; }
-        public AesIV? AesIV { get; set; }
     }
 }

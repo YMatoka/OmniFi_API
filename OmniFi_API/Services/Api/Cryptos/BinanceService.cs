@@ -17,8 +17,8 @@ namespace OmniFi_API.Services.Api.Cryptos
         private const string DefaultSpotBaseUrl = "https://api.binance.com";
         private const string DefaultFuturesBaseUrl = "https://testnet.binancefuture.com";
 
-        private const string ConfigSpotBaseUrlIndex = "ApiBaseUrls:BinanceSpot";
-        private const string ConfigFuturesBaseUrlIndex = "ApiBaseUrls:BinanceFutures";
+        private const string ConfigSpotBaseUrlIndex = "CryptoApiBaseUrls:BinanceSpot";
+        private const string ConfigFuturesBaseUrlIndex = "CryptoApiBaseUrls:BinanceFutures";
 
         private readonly string _binanceSpotBaseUrl;
         private readonly string _binanceFuturesBaseUrl;
@@ -66,8 +66,6 @@ namespace OmniFi_API.Services.Api.Cryptos
         private IEnumerable<PortfolioData>? ParseUserSpotBalance(UserBalanceResponse userBalanceResponse, Dictionary<string, decimal> tickerPrices)
         {
             List<PortfolioData>? result = new();
-
-          
 
             foreach (var balance in userBalanceResponse.balances)
             {

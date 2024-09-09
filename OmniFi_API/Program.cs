@@ -37,6 +37,8 @@ using OmniFi_API.Utilities;
 using OmniFi_API.Factory.Interfaces;
 using OmniFi_API.Factory;
 using OmniFi_API.Options.Banks;
+using OmniFi_API.Models.Api.Banks;
+using OmniFi_API.Repository.Api.Banks;
 
 const string DefaultSQlConnection = "DefaultSQLConnection";
 const string SecondSQlConnection = "SecondSQLConnection";
@@ -73,7 +75,10 @@ builder.Services.AddScoped<IRepository<CryptoExchange>, BaseRepository<CryptoExc
 builder.Services.AddScoped<IRepository<AssetSource>, BaseRepository<AssetSource>>();
 builder.Services.AddScoped<IRepository<CryptoHoldingHistory>, BaseRepository<CryptoHoldingHistory>>();
 builder.Services.AddScoped<IRepository<CryptoCurrency>, BaseRepository<CryptoCurrency>>();
+builder.Services.AddScoped<IRepository<BankSubAccount>, BaseRepository<BankSubAccount>>();
+builder.Services.AddScoped<IRepository<BankAgreement>, BaseRepository<BankAgreement>>();
 
+builder.Services.AddScoped<IBankDataApiRepository, BankDataApiCredentialRepository>();
 builder.Services.AddScoped<ICryptoExchangeAccountRepository, CryptoExchangeAccountRepository>();
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
 builder.Services.AddScoped<ICryptoApiCredentialRepository, CryptoApiCredentialRepository>();
