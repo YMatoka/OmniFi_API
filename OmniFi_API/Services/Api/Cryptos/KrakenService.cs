@@ -48,7 +48,11 @@ namespace OmniFi_API.Services.Api.Cryptos
             _krakenBaseUrl = configuration.GetValue<string>(ConfigBaseUrlIndex) ?? DefaultBaseUrl;
         }
 
-        public async Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(string ApiKey, string ApiSecret)
+        public async Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(
+            string ApiKey, 
+            string ApiSecret, 
+            string? accountId = null, 
+            string? platformName = null)
         {
             var userBalanceResponse = await GetUserBalance(ApiKey, ApiSecret);
 

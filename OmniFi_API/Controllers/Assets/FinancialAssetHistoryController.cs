@@ -7,6 +7,7 @@ using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.ComponentModel.DataAnnotations;
 
 namespace OmniFi_API.Controllers.Assets
 {
@@ -33,20 +34,20 @@ namespace OmniFi_API.Controllers.Assets
         }
 
 
-        [HttpGet("{username}", Name = nameof(GetAllFinancialHistoryAsset))]
+        [HttpGet(nameof(GetAllFinancialHistoryAsset))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> GetAllFinancialHistoryAsset(string username)
+        public async Task<ActionResult<ApiResponse>> GetAllFinancialHistoryAsset([Required] string usernameOrEmail)
         {
             try
             {
-                var user = await _userRepository.GetUserAsync(username);
+                var user = await _userRepository.GetUserAsync(usernameOrEmail);
 
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"the username '{username}' does not exists");
+                    _apiResponse.AddErrorMessage($"the username or email '{usernameOrEmail}' does not exists");
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_apiResponse);
                 }
@@ -74,13 +75,15 @@ namespace OmniFi_API.Controllers.Assets
             }
         }
 
-        [HttpGet("{username}/{financialAssetId:int}",  Name = nameof(GetFinancialHistoryByAssetId))]
+        [HttpGet(nameof(GetFinancialHistoryByAssetId))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> GetFinancialHistoryByAssetId(string username, int financialAssetId)
+        public async Task<ActionResult<ApiResponse>> GetFinancialHistoryByAssetId(
+            [Required] string username, 
+            [Required] int financialAssetId)
         {
             try
             {
@@ -89,7 +92,7 @@ namespace OmniFi_API.Controllers.Assets
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"the username '{username}' does not exists");
+                    _apiResponse.AddErrorMessage($"the usernameOrEmail '{username}' does not exists");
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_apiResponse);
                 }

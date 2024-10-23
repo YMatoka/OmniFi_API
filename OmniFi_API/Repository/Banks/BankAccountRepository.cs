@@ -10,76 +10,23 @@ using OmniFi_API.Services.Interfaces;
 using System.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using OmniFi_API.Models.Api.Banks;
+using System.Linq;
 
 namespace OmniFi_API.Repository.Banks
 {
     public class BankAccountRepository : BaseRepository<BankAccount>, IBankAccountRepository
     {
-        private readonly IStringEncryptionService _stringEncryptionService;
-        private readonly IBankCredentialRepository _bankCredentialRepository;
-        private readonly IRepository<AesKey> _aesKeyRepository;
-        private readonly IRepository<AesIV> _aesIVRepository;
 
         public BankAccountRepository(
-            ApplicationDbContext db,
-            IStringEncryptionService stringEncryptionService,
-            IBankCredentialRepository bankCredentialRepository,
-            IRepository<AesKey> aesKeyRepository,
-            IRepository<AesIV> aesIVRepository) : base(db)
+            ApplicationDbContext db) : base(db)
         {
-            _stringEncryptionService = stringEncryptionService;
-            _bankCredentialRepository = bankCredentialRepository;
-            _aesKeyRepository = aesKeyRepository;
-            _aesIVRepository = aesIVRepository;
+
         }
 
-        public async Task CreateAsync(BankSubAccount bankAccount, BankAccountCreateDTO bankAccountCreateDTO)
+        public async Task<BankAccount?> GetWithEntitiesAsync(Expression<Func<BankAccount,bool>> filter, bool tracked = false)
         {
-            try
-            {
-                using (var transaction = db.Database.BeginTransaction())
-                {
-                    await base.CreateAsync(bankAccount);
-
-                    var encryptionKey = _stringEncryptionService.GenerateAesKey();
-                    var IV = _stringEncryptionService.GenerateAesIV();
-
-                    var credential = new BankAccount()
-                    {
-                        RequisitionId = await _stringEncryptionService.EncryptAsync(bankAccountCreateDTO.Password, encryptionKey, IV),
-                        BankAccountID = bankAccount.BankAccountID
-                    };
-
-                    await _bankCredentialRepository.CreateAsync(credential);
-
-                    var aesKey = new AesKey()
-                    {
-                        Key = encryptionKey,
-                        BankCredentialId = credential.BankAccountID
-                    };
-
-                    await _aesKeyRepository.CreateAsync(aesKey);
-
-                    var aesIV = new AesIV()
-                    {
-                        IV = IV,
-                        BankCredentialId = credential!.BankAccountID
-                    };
-
-                    await _aesIVRepository.CreateAsync(aesIV);
-
-                    await transaction.CommitAsync();
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<BankSubAccount?> GetWithEntitiesAsync(Expression<Func<BankSubAccount,bool>> filter, bool tracked = false)
-        {
-            IQueryable <BankSubAccount> query = _dbSet;
+            IQueryable <BankAccount> query = _dbSet;
 
             if (!tracked)
             {
@@ -90,13 +37,44 @@ namespace OmniFi_API.Repository.Banks
 
             await query
                 .Include(x => x.Bank)
-                .Include(x => x.BankCredential)
-                    .ThenInclude(x => x!.AesIV)
-                 .Include(x => x.BankCredential)
-                    .ThenInclude(x => x!.AesKey)
-                .ToListAsync();
+                .Include(x => x.User)
+                .Include(x => x.BankSubAccounts)
+                .LoadAsync();
+
 
             return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task UpdateAsync(BankAccount bankAccount, BankRequisition bankRequisition)
+        {
+
+            bankAccount.RequisitionId = bankRequisition.Id;
+            bankAccount.RequisitionCreatedAt = DateTime.UtcNow;
+
+            await UpdateAsync(bankAccount);
+
+        }
+
+        public async Task UpdateAsync(BankAccount bankAccount)
+        {
+            db.Update(bankAccount);
+            await SaveAsync();
+        }
+
+        public async Task UpdateAsync(BankAccount bankAccount, bool isAccessGranted)
+        {
+            bankAccount.IsAccessGranted = isAccessGranted;
+
+            if(isAccessGranted)
+                bankAccount.AccessGrantedAt = DateTime.UtcNow;
+
+            await UpdateAsync(bankAccount);
+        }
+
+        public async Task UpdateAsync(BankAccount bankAccount, string requisitionId)
+        {
+            bankAccount.RequisitionId = requisitionId;
+            await UpdateAsync(bankAccount);
         }
     }
 }

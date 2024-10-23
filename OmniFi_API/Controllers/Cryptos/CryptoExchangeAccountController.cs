@@ -12,6 +12,8 @@ using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Services.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using System.ComponentModel.DataAnnotations;
 
 namespace OmniFi_API.Controllers.Cryptos
 {
@@ -42,7 +44,7 @@ namespace OmniFi_API.Controllers.Cryptos
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> Create([FromBody] CryptoExchangeAccountCreateDTO cryptoExchangeAccountCreateDTO)
+        public async Task<ActionResult<ApiResponse>> Create([FromBody] CryptoExchangeAccountCreateDTO  cryptoExchangeAccountCreateDTO)
         {
             try
             {
@@ -104,6 +106,66 @@ namespace OmniFi_API.Controllers.Cryptos
 
 
 
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Roles= Roles.User)]
+        public async Task<ActionResult<ApiResponse>> Delete(
+            [Required] string usernameOrMail,
+            [Required] string cryptoExchangeName)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserAsync(usernameOrMail);
+
+                if (user is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.AddErrorMessage($"the username or email '{usernameOrMail}' is invalid");
+                    return BadRequest(_apiResponse);
+                }
+
+                var cryptoExchange = await _cryptoExchangeRepository.GetAsync(
+                    filter: (x) => x.ExchangeName.ToUpper() == cryptoExchangeName.ToUpper(),
+                    tracked: false);
+
+                if (cryptoExchange is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeName}' does'nt exists in the database");
+                    return BadRequest(_apiResponse);
+                }
+
+
+                var cryptoExchangeAccount = await _cryptoExchangeAccountRepository
+                    .GetWithEntitiesAsync(filter: x => x.CryptoExchange!.ExchangeName == cryptoExchangeName &&
+                    x.User!.Id == user.Id, tracked:true);
+
+                if (cryptoExchangeAccount is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.AddErrorMessage($"the user '{user.UserName}' doesn't have a '{cryptoExchangeName}' account in the database");
+                    return BadRequest(_apiResponse);
+                }
+
+                await _cryptoExchangeAccountRepository.RemoveAsync(cryptoExchangeAccount);
+
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.AddErrorMessage(ex.Message);
+                return _apiResponse;
+            }
         }
 
     }

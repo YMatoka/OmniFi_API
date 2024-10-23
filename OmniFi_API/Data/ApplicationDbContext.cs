@@ -30,8 +30,8 @@ namespace OmniFi_API.Data
         internal DbSet<FinancialAssetHistory> FinancialAssetsHistory { get; set; }
 
         internal DbSet<Bank> Banks { get; set; }
-        internal DbSet<BankSubAccount> BankAccounts { get; set; }
-        internal DbSet<BankAccount> BankCredentials { get; set; }
+        internal DbSet<BankSubAccount> BankSubAccounts { get; set; }
+        internal DbSet<BankAccount> BankAccounts { get; set; }
 
         public DbSet<CryptoExchange> CryptoExchanges { get; set; }
         internal DbSet<CryptoExchangeAccount> CryptoExchangeAccounts { get; set; }

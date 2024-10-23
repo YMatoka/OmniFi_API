@@ -17,6 +17,7 @@ using OmniFi_API.Services.Interfaces;
 using OmniFi_API.Utilities;
 using System.Diagnostics.Metrics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace OmniFi_API.Services.Portfolio
 {
@@ -35,10 +36,12 @@ namespace OmniFi_API.Services.Portfolio
         private readonly IRepository<FiatCurrency> _fiatCurrencyRepository;
         private readonly IRepository<AssetSource> _assetSourceRepository;
         private readonly IRepository<CryptoCurrency> _cryptoCurrencyRepository;
+        private readonly IRepository<BankSubAccount> _bankSubAccountRepository;
 
         private readonly IStringEncryptionService _stringEncryptionService;
         private readonly IFiatCurrencyService _fiatCurrencyService;
         private readonly ICryptoInfoService _cryptoInfoService;
+        private readonly IBankInfoService _bankInfoService;
 
         private readonly IFinancialAssetServiceFactory _financialAssetServiceFactory;
         private readonly BankInfoServiceOptions _bankInfoServiceOptions;
@@ -46,6 +49,7 @@ namespace OmniFi_API.Services.Portfolio
         private Dictionary<string, decimal> _ConversionRates;
         private IEnumerable<CryptoInfo>? _cryptoInfos;
 
+        private readonly IEqualityComparer<BankSubAccount> _bankSubAccountEqualityComparer;
 
         public PortfolioService(
             IUserRepository userRepository,
@@ -64,7 +68,8 @@ namespace OmniFi_API.Services.Portfolio
             ICryptoInfoService cryptoInfoService,
             IRepository<CryptoCurrency> cryptoCurrencyRepository,
             IFinancialAssetServiceFactory financialAssetServiceFactory,
-            IOptions<BankInfoServiceOptions> options)
+            IOptions<BankInfoServiceOptions> options,
+            IBankInfoService bankInfoService)
         {
             _userRepository = userRepository;
             _financialAssetHistoryRepository = financialAssetHistoryRepository;
@@ -85,6 +90,7 @@ namespace OmniFi_API.Services.Portfolio
             _ConversionRates = new();
             _financialAssetServiceFactory = financialAssetServiceFactory;
             _bankInfoServiceOptions = options.Value;
+            _bankInfoService = bankInfoService;
         }
 
         public async Task FetchPortfolio(string userName, string? bankName = null, string? cryptoExchangeName = null)
@@ -122,9 +128,10 @@ namespace OmniFi_API.Services.Portfolio
                 {
                     foreach (var exchangeAccount in user.CryptoExchangeAccounts)
                     {
+            
                         var account = await _cryptoExchangeAccountRepository.GetWithEntitiesAsync(
                             x => x.UserID == user.Id && x.CryptoExchangeID == exchangeAccount.CryptoExchangeID,
-                            tracked : true);
+                            tracked: true);
 
                         if (account is not null)
                             cryptoExchangeAccounts.Add(account);
@@ -136,8 +143,9 @@ namespace OmniFi_API.Services.Portfolio
                 {
                     foreach (var bankAccount in user.BankAccounts)
                     {
+
                         var account = await _bankAccountRepository.GetWithEntitiesAsync(
-                            x => x.UserID == user.Id && x.BankId == bankAccount.BankId);
+                            x => x.UserID == user.Id && x.BankId == bankAccount.BankId, tracked : true);
 
                         if (account is not null)
                             bankAccounts.Add(account);
@@ -150,14 +158,31 @@ namespace OmniFi_API.Services.Portfolio
                 await FetchCryptoPortfolio(exchangeAccount, user);
             }
 
-            foreach (var account in bankAccounts)
+            foreach (var bankAccount in bankAccounts)
             {
-                await FetchBankPortfolio(account, user);
+                await CheckBankAccess(bankAccount);
+
+                if(bankAccount.IsAccessGranted && bankAccount.BankSubAccounts is not null)
+                    await FetchBankPortfolio(bankAccount, user);
+            }
+        }
+
+        private async Task CheckBankAccess(BankAccount bankAccount)
+        {
+            if (bankAccount.IsAccessGranted)
+            {
+                if(DateTime.Compare(
+                        bankAccount.AccessGrantedAt.AddDays(bankAccount.AccessDurationInDays),
+                        DateTime.UtcNow) < 0)
+                {
+                    await _bankAccountRepository.UpdateAsync(bankAccount, isAccessGranted: false);
+                }
             }
         }
 
         private async Task FetchBankPortfolio(BankAccount bankAccount, ApplicationUser user)
         {
+
             var portFolioDatas = await GetBankPortfolioDataAsync(bankAccount);
 
             if (portFolioDatas is not null)
@@ -169,17 +194,35 @@ namespace OmniFi_API.Services.Portfolio
             }
         }
 
-        private async Task<IEnumerable<PortfolioData>?> GetBankPortfolioDataAsync(BankAccount bankAccount)
+        private async Task<IEnumerable<PortfolioData>?> GetBankPortfolioDataAsync(
+            BankAccount bankAccount)
         {
-           switch (bankAccount.Bank!.BankName)
+
+            List<PortfolioData> portfolioDatas = new List<PortfolioData>();
+
+            if(bankAccount.Bank is null)
+                return null;
+
+            if (bankAccount.BankSubAccounts is null)
+                return null;
+        
+            var financialAssetRetriever = _financialAssetServiceFactory
+                        .GetFinancialAssetRetriever(bankAccount.Bank.BankName);
+
+            foreach (var subBankAccount in bankAccount.BankSubAccounts)
             {
-                case BankNames.BoursoBank:
-                    return await _financialAssetServiceFactory
-                        .GetFinancialAssetRetriever(BankNames.BoursoBank)
-                        .GetUserBalanceAsync(_bankInfoServiceOptions.ApiKey, _bankInfoServiceOptions.ApiSecret, bankAccount.UserID) ;
-                default:
-                    return null;
+
+                var datas = await financialAssetRetriever.GetUserBalanceAsync(
+                    _bankInfoServiceOptions.ApiKey,
+                    _bankInfoServiceOptions.ApiSecret,
+                    subBankAccount.BankSubAccountID,
+                    bankAccount.Bank.BankName);
+
+                if (datas is not null)
+                    portfolioDatas.AddRange(datas);
             }
+            
+            return portfolioDatas;
         }
 
 
@@ -257,7 +300,7 @@ namespace OmniFi_API.Services.Portfolio
             foreach (var fiatSymbol in fiatSymbolList)
             {
                 var cryptoCurrency = await _fiatCurrencyRepository
-                    .GetAsync(x => x.CurrencySymbol == fiatSymbol);
+                    .GetAsync(x => x.CurrencyCode == fiatSymbol);
 
                 if (cryptoCurrency is null)
                     result.Add(fiatSymbol);
@@ -386,27 +429,31 @@ namespace OmniFi_API.Services.Portfolio
 
                 // ?? add fiat currency service to add currency does not exists in the database
                 var fiatCurrency = _ConversionRates.ContainsKey(portfolioData.FiatCurrencyCode) ?
-                    await _fiatCurrencyRepository.GetAsync(
-                    x => x.CurrencyCode == SelectedFiatCurrency.CurrencyCode) :
-                    await _fiatCurrencyRepository.GetAsync(
-                    x => x.CurrencyCode == portfolioData.FiatCurrencyCode);
+                    await _fiatCurrencyRepository.GetAsync(x => x.CurrencyCode == SelectedFiatCurrency.CurrencyCode) :
+                    await _fiatCurrencyRepository.GetAsync(x => x.CurrencyCode == portfolioData.FiatCurrencyCode);
 
-             
-                var bank = await _bankRepository.GetAsync(x => x.BankName == portfolioData.AssetPlatformName);
-                var cryptoExchange = await _cryptoExchangeRepository.GetAsync(x => x.ExchangeName == portfolioData.AssetPlatformName);
+
+                switch (portfolioData.AssetSourceName)
+                {
+                    case AssetSourceNames.CryptoHolding:
+                        var cryptoExchange = await _cryptoExchangeRepository.GetAsync(x => x.ExchangeName == portfolioData.AssetPlatformName);
+                        if (cryptoExchange is not null)
+                        {
+                            assetPlatform = await _assetPlatformRepository.GetAsync(
+                                x => x.CryptoExchangeID == cryptoExchange.CryptoExchangeID);
+                        }
+                        break;
+                    default:
+                        var bank = await _bankRepository.GetAsync(x => x.BankName == portfolioData.AssetPlatformName);
+                        if (bank is not null)
+                        {
+                            assetPlatform = await _assetPlatformRepository.GetAsync(
+                                x => x.BankID == bank.BankID);
+                        }
+                        break;
+                }
+
                 var assetSource = await _assetSourceRepository.GetAsync(x => x.AssetSourceName == portfolioData.AssetSourceName);
-
-                if (bank is not null)
-                {
-                    assetPlatform = await _assetPlatformRepository.GetAsync(
-                        x => x.BankID == bank.BankID);
-                }
-
-                if (cryptoExchange is not null)
-                {
-                    assetPlatform = await _assetPlatformRepository.GetAsync(
-                        x => x.CryptoExchangeID == cryptoExchange.CryptoExchangeID);
-                }
 
                 await _financialAssetRepository.CreateAsync(new FinancialAsset()
                 {
@@ -416,7 +463,7 @@ namespace OmniFi_API.Services.Portfolio
                     FiatCurrencyID = fiatCurrency!.FiatCurrencyID,
                     FirstRetrievedAt = DateTime.UtcNow,
                     LastUpdatedAt = DateTime.UtcNow,
-                    Value = portfolioData.Balance
+                    Amount = portfolioData.Balance
                 }, 
                 portfolioData); 
                 

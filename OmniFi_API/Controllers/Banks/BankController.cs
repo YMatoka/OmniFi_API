@@ -7,6 +7,7 @@ using OmniFi_DTOs.Dtos.Api;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
+using System.ComponentModel.DataAnnotations;
 
 namespace OmniFi_API.Controllers.Banks
 {
@@ -26,11 +27,11 @@ namespace OmniFi_API.Controllers.Banks
         }
 
 
-        [HttpGet("{id:int}", Name = nameof(GetBank))]
+        [HttpGet(nameof(GetBank))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ApiResponse>> GetBank(int id)
+        public async Task<ActionResult<ApiResponse>> GetBank([Required] int id)
         {
             try
             {

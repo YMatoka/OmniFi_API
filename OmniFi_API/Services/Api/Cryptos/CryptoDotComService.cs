@@ -40,7 +40,11 @@ namespace OmniFi_API.Services.Api.Cryptos
             _cryptoDotComBaseUrl = configuration.GetValue<string>(ConfigBaseUrlIndex) ?? DefaultBaseUrl;
         }
 
-        public async Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(string apiKey, string apiSecret)
+        public async Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(
+            string apiKey, 
+            string apiSecret, 
+            string? accountId = null, 
+            string? platformName = null)
         {
             var userBalanceResponse = await GetUserBalance(apiKey, apiSecret);
 

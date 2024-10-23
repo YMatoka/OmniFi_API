@@ -53,9 +53,13 @@ namespace OmniFi_API.Services.Api.Cryptos
                 .GetValue<string>(ConfigFuturesBaseUrlIndex) ?? DefaultFuturesBaseUrl;
         }
 
-        public async Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(string ApiKey, string ApiSecret)
+        public async Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(
+            string apiKey, 
+            string apiSecret, 
+            string? accountId = null, 
+            string? platformName = null)
         {
-            var userBalanceResponse = await GetUserSpotBalance(ApiKey, ApiSecret);
+            var userBalanceResponse = await GetUserSpotBalance(apiKey, apiSecret);
 
             return userBalanceResponse is not null ?
                 ParseUserSpotBalance(userBalanceResponse, await GetPairsTicker()) :

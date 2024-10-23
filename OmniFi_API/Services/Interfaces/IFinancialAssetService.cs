@@ -4,8 +4,7 @@ namespace OmniFi_API.Services.Interfaces
 {
     public interface IFinancialAssetService
     {
-        public Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(string ApiKey, string ApiSecret);
-
-        public Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(string ApiKey, string ApiSecret, string UserId);
+        public Task<IEnumerable<PortfolioData>?> GetUserBalanceAsync(string apiKey, string apiSecret, string? accountId = null, string? platformName = null);
+    
     }
 }

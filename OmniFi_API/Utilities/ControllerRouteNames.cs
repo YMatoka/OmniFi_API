@@ -4,7 +4,7 @@
     {
        public const string UserController = "UsersAuth";
        public const string CryptoExchangeAccountController = "CryptoExchangeAccount";
-       public const string BankAccountController = "BankSubAccount";
+       public const string BankAccountController = "BankAccount";
        public const string BankController = "Bank";
        public const string CryptoExchangeController = "CryptoExchange";
        public const string FinancialAssetController = "FinancialAsset";

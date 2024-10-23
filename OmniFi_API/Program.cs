@@ -39,6 +39,9 @@ using OmniFi_API.Factory;
 using OmniFi_API.Options.Banks;
 using OmniFi_API.Models.Api.Banks;
 using OmniFi_API.Repository.Api.Banks;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using OmniFi_API.Services.Api.Banks;
+using OmniFi_API.Comparers;
 
 const string DefaultSQlConnection = "DefaultSQLConnection";
 const string SecondSQlConnection = "SecondSQLConnection";
@@ -56,7 +59,9 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString(DefaultSQlConnection))
+    options => options
+    .UseSqlServer(builder.Configuration.GetConnectionString(DefaultSQlConnection))
+    .EnableDetailedErrors()
     .EnableSensitiveDataLogging()
     .EnableDetailedErrors()
     );
@@ -87,18 +92,13 @@ builder.Services.AddScoped<IFinancialAssetRepository, FinancialAssetRepository>(
 builder.Services.AddScoped<IFinancialAssetHistoryRepository, FinancialAssetHistoryRepository>();
 builder.Services.AddScoped<ICryptoHoldingRepository, CryptoHoldingRepository>();
 
+builder.Services.AddScoped<IEqualityComparer<BankSubAccount>, BankSubAccountComparer>();
+
 builder.Services.AddScoped<IStringEncryptionService, StringEncryptionService>();
 builder.Services.AddScoped<IFetchPortfolioService, PortfolioService>();
 
-
-builder.Services.AddHttpClient<IFinancialAssetService, BinanceService>();
-builder.Services.AddScoped<IFinancialAssetService, BinanceService>();
-
-builder.Services.AddHttpClient<IFiatCurrencyService, FiatCurrencyService>();
-builder.Services.AddScoped<IFiatCurrencyService, FiatCurrencyService>();
-
-builder.Services.AddHttpClient<ICryptoInfoService, CryptoInfoService>();
-builder.Services.AddScoped<ICryptoInfoService, CryptoInfoService>();
+builder.Services.AddHttpClient<BinanceService>();
+builder.Services.AddScoped< BinanceService>();
 
 builder.Services.AddHttpClient<CryptoDotComService>();
 builder.Services.AddScoped<CryptoDotComService>();
@@ -106,8 +106,27 @@ builder.Services.AddScoped<CryptoDotComService>();
 builder.Services.AddHttpClient<KrakenService>();
 builder.Services.AddScoped<KrakenService>();
 
+builder.Services.AddHttpClient<BankInfoService>();
+builder.Services.AddScoped<BankInfoService>();
+
+builder.Services.AddHttpClient<IBankInfoService, BankInfoService>();
+builder.Services.AddScoped<IBankInfoService, BankInfoService>();
+
+builder.Services.AddHttpClient<BankInfoService>();
+builder.Services.AddScoped<BankInfoService>();
+
+builder.Services.AddHttpClient<IFiatCurrencyService, FiatCurrencyService>();
+builder.Services.AddScoped<IFiatCurrencyService, FiatCurrencyService>();
+
+builder.Services.AddHttpClient<ICryptoInfoService, CryptoInfoService>();
+builder.Services.AddScoped<ICryptoInfoService, CryptoInfoService>();
+
+
+
 builder.Services.AddHttpClient<BinanceService>();
 builder.Services.AddScoped<BinanceService>();
+
+
 
 builder.Services.AddScoped<IFinancialAssetServiceFactory, FinancialAssetServiceFactory>();
 
@@ -131,6 +150,9 @@ builder.Services.Configure<CryptoInfoServiceOptions>(
 
 builder.Services.Configure<BankInfoServiceOptions>(builder.Configuration.GetSection(
     BankInfoServiceOptions.SectionName));
+
+builder.Services.Configure<GocardlessBankInfoOptions>(builder.Configuration.GetSection(
+    GocardlessBankInfoOptions.SectionName));
 
 var secretKey = builder.Configuration.GetValue<string>(SecretKeySection);
 

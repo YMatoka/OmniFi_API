@@ -12,6 +12,7 @@ using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
 using OmniFi_DTOs;
+using System.ComponentModel.DataAnnotations;
 
 namespace OmniFi_API.Controllers.Assets
 {
@@ -38,23 +39,23 @@ namespace OmniFi_API.Controllers.Assets
             _assetPlatform = assetPlatform;
         }
 
-        [HttpGet("{username}",  Name = nameof(GetFinancialAssets))]
+        [HttpGet(nameof(GetFinancialAssets))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> GetFinancialAssets(string username)
+        public async Task<ActionResult<ApiResponse>> GetFinancialAssets([Required] string usernameOrEmail)
         {
             try
             {
-                var user = await _userRepository.GetUserAsync(username);
+                var user = await _userRepository.GetUserAsync(usernameOrEmail);
 
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage($"the username '{username}' does not exists");
+                    _apiResponse.AddErrorMessage($"the usernameOrEmail or email '{usernameOrEmail}' does not exists");
                     return NotFound(_apiResponse);
                 }
 
@@ -63,7 +64,7 @@ namespace OmniFi_API.Controllers.Assets
 
                 var financialAssetDTOs = _mapper
                     .Map<IEnumerable<FinancialAssetDTO>>(financialAssets)
-                    .OrderByDescending(x => x.Value);
+                    .OrderByDescending(x => x.Amount);
 
                 _apiResponse.IsSuccess = true;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
@@ -80,23 +81,63 @@ namespace OmniFi_API.Controllers.Assets
             }
         }
 
-        [HttpGet("{username}/{financialAssetId:int}", Name = nameof(GetFinancialAssetsByAssetId))]
+        [HttpGet(nameof(GetAggregatedFinancialAssets))]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> GetFinancialAssetsByAssetId(string username, int financialAssetId)
+        public async Task<ActionResult<ApiResponse>> GetAggregatedFinancialAssets([FromQuery] string usernameOrEmail)
         {
             try
             {
-                var user = await _userRepository.GetUserAsync(username);
+                var user = await _userRepository.GetUserAsync(usernameOrEmail);
 
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage($"the username '{username}' does not exists");
+                    _apiResponse.AddErrorMessage($"the usernameOrEmail or email '{usernameOrEmail}' does not exists");
+                    return NotFound(_apiResponse);
+                }
+
+                var financialAssets = await _financialAssetRepository
+                    .GetAllWithEntitiesAsync((x) => x.UserID == user.Id);
+
+                _apiResponse.Result = (new AggregatedFinancialAssetsDTO()
+                {
+                    FinancialAssetsAggregatedAmount = financialAssets.Sum(x => x.Amount)
+                });
+
+                return Ok(_apiResponse);
+                
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.AddErrorMessage(ex.Message);
+                return _apiResponse;
+            }
+        }
+
+        [HttpGet(nameof(GetFinancialAssetsByAssetId))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Roles = Roles.User)]
+        public async Task<ActionResult<ApiResponse>> GetFinancialAssetsByAssetId(
+            [Required] string usernameOrEmail,
+            [Required] int financialAssetId)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserAsync(usernameOrEmail);
+
+                if (user is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage($"the username or email '{usernameOrEmail}' does not exists");
                     return NotFound(_apiResponse);
                 }
 
@@ -107,7 +148,7 @@ namespace OmniFi_API.Controllers.Assets
                 if (financialAsset is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"the user '{username}' don't have a financial asset with the following id '{financialAssetId}'");
+                    _apiResponse.AddErrorMessage($"the user '{user.UserName}' don't have a financial asset with the following id '{financialAssetId}'");
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_apiResponse);
                 }

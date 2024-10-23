@@ -13,6 +13,10 @@ namespace OmniFi_API.Data.FluentConfig.Banks
             builder.HasKey(x => x.BankSubAccountID);
 
             builder
+                .Property(x => x.BankSubAccountID)
+                .ValueGeneratedOnAdd();
+
+            builder
                 .HasOne(x => x.BankAccount)
                 .WithMany(x => x.BankSubAccounts)
                 .HasForeignKey(x => x.BankAccountID);

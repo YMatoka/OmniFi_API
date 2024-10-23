@@ -45,7 +45,7 @@ namespace OmniFi_API.Data.FluentConfig.Assets
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder
-                .Property(x => x.Value)
+                .Property(x => x.Amount)
                 .IsRequired()
                 .HasPrecision(21, 2);
 

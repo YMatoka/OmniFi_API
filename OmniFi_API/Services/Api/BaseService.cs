@@ -1,6 +1,5 @@
 ﻿using Azure;
 using Newtonsoft.Json;
-using Npgsql.Internal;
 using OmniFi_API.Models.Api;
 using OmniFi_API.Services.Interfaces;
 using OmniFi_API.Utilities;
@@ -79,19 +78,14 @@ namespace OmniFi_API.Services.Api
 
                     var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
 
-                    if (httpResponseMessage.StatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        throw new Exception(responseContent);
-                    }
-
                     var deserializeContent = JsonConvert.DeserializeObject<T>(responseContent);
 
                     return deserializeContent;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 

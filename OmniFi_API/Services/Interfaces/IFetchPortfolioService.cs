@@ -1,7 +1,9 @@
-﻿namespace OmniFi_API.Services.Interfaces
+﻿using OmniFi_API.Models.Identity;
+
+namespace OmniFi_API.Services.Interfaces
 {
     public interface IFetchPortfolioService
     {
-        public Task FetchPortfolio(string userName, string? bankName = null, string? cryptoExchangeName = null);
+        public Task FetchPortfolio(string user, string? bankName = null, string? cryptoExchangeName = null);
     }
 }

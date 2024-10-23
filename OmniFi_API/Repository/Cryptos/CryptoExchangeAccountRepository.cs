@@ -7,6 +7,7 @@ using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Services.Interfaces;
 using System.Linq.Expressions;
 using System.Linq;
+using OmniFi_API.Models.Banks;
 
 namespace OmniFi_API.Repository.Cryptos
 {
@@ -101,8 +102,26 @@ namespace OmniFi_API.Repository.Cryptos
             return query.FirstOrDefault();
         }
 
+        //async Task ICryptoExchangeAccountRepository.RemoveAsync(CryptoExchangeAccount cryptoExchangeAccount)
+        //{
+        //    try
+        //    {
+        //        using (var transaction = db.Database.BeginTransaction())
+        //        {
 
+        //           // await _cryptoApiCredentialRepository.RemoveAsync(cryptoExchangeAccount.CryptoApiCredential);
+        //            await RemoveAsync(cryptoExchangeAccount);
 
+        //            await transaction.CommitAsync();
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+ 
+        //}
     }
 }
 

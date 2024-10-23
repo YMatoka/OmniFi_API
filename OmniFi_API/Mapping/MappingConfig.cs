@@ -10,6 +10,8 @@ using OmniFi_API.Models.Banks;
 using OmniFi_API.Models.Cryptos;
 using OmniFi_API.Models.Currencies;
 using OmniFi_API.Models.Identity;
+using OmniFi_API.Models.Api.Banks;
+using OmniFi_API.DTOs.GoCardless;
 
 namespace OmniFi_API.Mapping
 {
@@ -21,24 +23,28 @@ namespace OmniFi_API.Mapping
             CreateMap<Bank, BankDTO>();
             CreateMap<CryptoExchange, CryptoExchangeDTO>();
 
+            CreateMap<RequisitionResponse, BankRequisition>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.id))
+                .ForMember(dest => dest.RedirectUrl, opt => opt.MapFrom(src => src.redirect))
+                .ForMember(dest => dest.Link, opt => opt.MapFrom(src => src.link));
 
             CreateMap<CryptoHolding, CryptoHoldingDTO>()
-                .ForMember(dest => dest.CryptoCurrencySymbol, conf => conf.ConvertUsing(new CryptoCurrencyConverter(), src => src.CryptoCurrency));
+                .ForMember(dest => dest.CryptoCurrencySymbol, opt => opt.ConvertUsing(new CryptoCurrencyConverter(), src => src.CryptoCurrency));
 
             CreateMap<CryptoHoldingHistory, CryptoHoldingHistoryDTO>()
-                .ForMember(dest => dest.CryptoCurrencySymbol, conf => conf.ConvertUsing(new CryptoCurrencyConverter(), src => src.CryptoCurrency));
+                .ForMember(dest => dest.CryptoCurrencySymbol, opt => opt.ConvertUsing(new CryptoCurrencyConverter(), src => src.CryptoCurrency));
 
             CreateMap<FinancialAsset, FinancialAssetDTO>()
-                .ForMember(dest => dest.UserName, conf => conf.ConvertUsing(new UserConverter(), src => src.User))
-                .ForMember(dest => dest.AssetPlatformName, conf => conf.ConvertUsing(new AssetPlatformConverter(), src => src.AssetPlatform))
-                .ForMember(dest => dest.AssetSourceName, conf => conf.ConvertUsing(new AssetSourceConverter(), src => src.AssetSource))
-                .ForMember(dest => dest.FiatCurrencyCode, conf => conf.ConvertUsing(new FiatCurrencyConverter(), src => src.FiatCurrency));
+                .ForMember(dest => dest.UserName, opt => opt.ConvertUsing(new UserConverter(), src => src.User))
+                .ForMember(dest => dest.AssetPlatformName, opt => opt.ConvertUsing(new AssetPlatformConverter(), src => src.AssetPlatform))
+                .ForMember(dest => dest.AssetSourceName, opt => opt.ConvertUsing(new AssetSourceConverter(), src => src.AssetSource))
+                .ForMember(dest => dest.FiatCurrencyCode, opt => opt.ConvertUsing(new FiatCurrencyConverter(), src => src.FiatCurrency));
 
             CreateMap<FinancialAssetHistory, FinancialAssetHistoryDTO>()
-                .ForMember(dest => dest.UserName, conf => conf.ConvertUsing(new UserConverter(), src => src.User))
-                .ForMember(dest => dest.AssetPlatformName, conf => conf.ConvertUsing(new AssetPlatformConverter(), src => src.AssetPlatform))
-                .ForMember(dest => dest.AssetSourceName, conf => conf.ConvertUsing(new AssetSourceConverter(), src => src.AssetSource))
-                .ForMember(dest => dest.FiatCurrencyCode, conf => conf.ConvertUsing(new FiatCurrencyConverter(), src => src.FiatCurrency));
+                .ForMember(dest => dest.UserName, opt => opt.ConvertUsing(new UserConverter(), src => src.User))
+                .ForMember(dest => dest.AssetPlatformName, opt => opt.ConvertUsing(new AssetPlatformConverter(), src => src.AssetPlatform))
+                .ForMember(dest => dest.AssetSourceName, opt => opt.ConvertUsing(new AssetSourceConverter(), src => src.AssetSource))
+                .ForMember(dest => dest.FiatCurrencyCode, opt => opt.ConvertUsing(new FiatCurrencyConverter(), src => src.FiatCurrency));
         }
     }
 

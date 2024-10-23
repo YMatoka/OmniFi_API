@@ -12,7 +12,7 @@ using OmniFi_API.Data;
 namespace OmniFi_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240715232559_FirstMigration")]
+    [Migration("20241005143749_FirstMigration")]
     partial class FirstMigration
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace OmniFi_API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.5")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -123,12 +123,80 @@ namespace OmniFi_API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Balance")
+                    b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("OmniFi_API.Models.Api.Banks.BankAgreement", b =>
+                {
+                    b.Property<int>("BankAgreementId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankAgreementId"));
+
+                    b.Property<string>("AccessScope")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BankId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BankInstitutionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("BankAgreementId");
+
+                    b.HasIndex("BankId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BankAgreements");
+                });
+
+            modelBuilder.Entity("OmniFi_API.Models.Api.Banks.BankDataApiCredential", b =>
+                {
+                    b.Property<int>("BankDataApiId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankDataApiId"));
+
+                    b.Property<double>("AccessExpires")
+                        .HasColumnType("float");
+
+                    b.Property<string>("AccessToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("AccessTokenCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("RefreshExpires")
+                        .HasColumnType("float");
+
+                    b.Property<string>("RefreshToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RefreshokenCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("BankDataApiId");
+
+                    b.ToTable("BankDataApiCredentials");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Assets.AssetPlatform", b =>
@@ -228,6 +296,10 @@ namespace OmniFi_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FinancialEntityId"));
 
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(21, 2)
+                        .HasColumnType("decimal(21,2)");
+
                     b.Property<int>("AssetPlatformID")
                         .HasColumnType("int");
 
@@ -246,10 +318,6 @@ namespace OmniFi_API.Migrations
                     b.Property<string>("UserID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Balance")
-                        .HasPrecision(21, 2)
-                        .HasColumnType("decimal(21,2)");
 
                     b.HasKey("FinancialEntityId");
 
@@ -272,6 +340,10 @@ namespace OmniFi_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FinancialEntityId"));
 
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(21, 2)
+                        .HasColumnType("decimal(21,2)");
+
                     b.Property<int>("AssetPlatformID")
                         .HasColumnType("int");
 
@@ -290,10 +362,6 @@ namespace OmniFi_API.Migrations
                     b.Property<string>("UserID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Balance")
-                        .HasPrecision(21, 2)
-                        .HasColumnType("decimal(21,2)");
 
                     b.HasKey("FinancialEntityId");
 
@@ -340,59 +408,60 @@ namespace OmniFi_API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankSubAccount", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
                 {
-                    b.Property<int>("BankAccountID")
+                    b.Property<int>("BankAccountId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankAccountID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankAccountId"));
 
-                    b.Property<int>("BankID")
+                    b.Property<double>("AccessDurationInDays")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("AccessGrantedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("BankId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsAccessGranted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("RequisitionCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RequisitionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("BankAccountID");
+                    b.HasKey("BankAccountId");
 
-                    b.HasIndex("BankID");
+                    b.HasIndex("BankId");
 
                     b.HasIndex("UserID");
 
                     b.ToTable("BankAccounts");
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankSubAccount", b =>
                 {
-                    b.Property<int>("BankAccountID")
+                    b.Property<string>("BankSubAccountID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankAccountID"));
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("BankAccountID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BankID")
-                        .HasColumnType("int");
+                    b.HasKey("BankSubAccountID");
 
-                    b.Property<int>("BankUserID")
-                        .HasColumnType("int");
+                    b.HasIndex("BankAccountID");
 
-                    b.Property<byte[]>("RequisitionId")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.HasKey("BankAccountID");
-
-                    b.HasIndex("BankAccountID")
-                        .IsUnique();
-
-                    b.HasIndex("BankID");
-
-                    b.ToTable("BankCredentials");
+                    b.ToTable("BankSubAccounts");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoApiCredential", b =>
@@ -650,7 +719,7 @@ namespace OmniFi_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AesIVId"));
 
-                    b.Property<int?>("BankCredentialId")
+                    b.Property<int?>("BankDataApiCredentialId")
                         .HasColumnType("int");
 
                     b.Property<int?>("CryptoApiCredentialId")
@@ -662,9 +731,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasKey("AesIVId");
 
-                    b.HasIndex("BankCredentialId")
-                        .IsUnique()
-                        .HasFilter("[BankCredentialId] IS NOT NULL");
+                    b.HasIndex("BankDataApiCredentialId");
 
                     b.HasIndex("CryptoApiCredentialId")
                         .IsUnique()
@@ -681,7 +748,7 @@ namespace OmniFi_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AesKeyId"));
 
-                    b.Property<int?>("BankCredentialId")
+                    b.Property<int?>("BankDataApiCredentialId")
                         .HasColumnType("int");
 
                     b.Property<int?>("CryptoApiCredentialId")
@@ -693,9 +760,7 @@ namespace OmniFi_API.Migrations
 
                     b.HasKey("AesKeyId");
 
-                    b.HasIndex("BankCredentialId")
-                        .IsUnique()
-                        .HasFilter("[BankCredentialId] IS NOT NULL");
+                    b.HasIndex("BankDataApiCredentialId");
 
                     b.HasIndex("CryptoApiCredentialId")
                         .IsUnique()
@@ -885,6 +950,25 @@ namespace OmniFi_API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OmniFi_API.Models.Api.Banks.BankAgreement", b =>
+                {
+                    b.HasOne("OmniFi_API.Models.Banks.Bank", "Bank")
+                        .WithMany("BankAgreements")
+                        .HasForeignKey("BankId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OmniFi_API.Models.Identity.ApplicationUser", "User")
+                        .WithMany("BankAgreements")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bank");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("OmniFi_API.Models.Assets.AssetPlatform", b =>
                 {
                     b.HasOne("OmniFi_API.Models.Banks.Bank", "Bank")
@@ -978,11 +1062,11 @@ namespace OmniFi_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankSubAccount", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
                 {
                     b.HasOne("OmniFi_API.Models.Banks.Bank", "Bank")
                         .WithMany("BankAccounts")
-                        .HasForeignKey("BankID")
+                        .HasForeignKey("BankId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -997,19 +1081,15 @@ namespace OmniFi_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
+            modelBuilder.Entity("OmniFi_API.Models.Banks.BankSubAccount", b =>
                 {
-                    b.HasOne("OmniFi_API.Models.Banks.BankSubAccount", "BankSubAccount")
-                        .WithOne("BankAccount")
-                        .HasForeignKey("OmniFi_API.Models.Banks.BankAccount", "BankAccountID")
+                    b.HasOne("OmniFi_API.Models.Banks.BankAccount", "BankAccount")
+                        .WithMany("BankSubAccounts")
+                        .HasForeignKey("BankAccountID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OmniFi_API.Models.Banks.Bank", null)
-                        .WithMany("BankCredentials")
-                        .HasForeignKey("BankID");
-
-                    b.Navigation("BankSubAccount");
+                    b.Navigation("BankAccount");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoApiCredential", b =>
@@ -1094,30 +1174,30 @@ namespace OmniFi_API.Migrations
 
             modelBuilder.Entity("OmniFi_API.Models.Encryption.AesIV", b =>
                 {
-                    b.HasOne("OmniFi_API.Models.Banks.BankAccount", "BankAccount")
-                        .WithOne("AesIV")
-                        .HasForeignKey("OmniFi_API.Models.Encryption.AesIV", "BankCredentialId");
+                    b.HasOne("OmniFi_API.Models.Api.Banks.BankDataApiCredential", "BankDataApiCredential")
+                        .WithMany()
+                        .HasForeignKey("BankDataApiCredentialId");
 
                     b.HasOne("OmniFi_API.Models.Cryptos.CryptoApiCredential", "CryptoApiCredential")
                         .WithOne("AesIV")
                         .HasForeignKey("OmniFi_API.Models.Encryption.AesIV", "CryptoApiCredentialId");
 
-                    b.Navigation("BankAccount");
+                    b.Navigation("BankDataApiCredential");
 
                     b.Navigation("CryptoApiCredential");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Encryption.AesKey", b =>
                 {
-                    b.HasOne("OmniFi_API.Models.Banks.BankAccount", "BankAccount")
-                        .WithOne("AesKey")
-                        .HasForeignKey("OmniFi_API.Models.Encryption.AesKey", "BankCredentialId");
+                    b.HasOne("OmniFi_API.Models.Api.Banks.BankDataApiCredential", "BankDataApiCredential")
+                        .WithMany()
+                        .HasForeignKey("BankDataApiCredentialId");
 
                     b.HasOne("OmniFi_API.Models.Cryptos.CryptoApiCredential", "CryptoApiCredential")
                         .WithOne("AesKey")
                         .HasForeignKey("OmniFi_API.Models.Encryption.AesKey", "CryptoApiCredentialId");
 
-                    b.Navigation("BankAccount");
+                    b.Navigation("BankDataApiCredential");
 
                     b.Navigation("CryptoApiCredential");
                 });
@@ -1165,19 +1245,12 @@ namespace OmniFi_API.Migrations
 
                     b.Navigation("BankAccounts");
 
-                    b.Navigation("BankCredentials");
-                });
-
-            modelBuilder.Entity("OmniFi_API.Models.Banks.BankSubAccount", b =>
-                {
-                    b.Navigation("BankAccount");
+                    b.Navigation("BankAgreements");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Banks.BankAccount", b =>
                 {
-                    b.Navigation("AesIV");
-
-                    b.Navigation("AesKey");
+                    b.Navigation("BankSubAccounts");
                 });
 
             modelBuilder.Entity("OmniFi_API.Models.Cryptos.CryptoApiCredential", b =>
@@ -1225,6 +1298,8 @@ namespace OmniFi_API.Migrations
             modelBuilder.Entity("OmniFi_API.Models.Identity.ApplicationUser", b =>
                 {
                     b.Navigation("BankAccounts");
+
+                    b.Navigation("BankAgreements");
 
                     b.Navigation("CryptoExchangeAccounts");
 

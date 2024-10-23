@@ -6,6 +6,7 @@ using OmniFi_API.Models.Cryptos;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
+using System.ComponentModel.DataAnnotations;
 
 namespace OmniFi_API.Controllers.Cryptos
 {
@@ -24,11 +25,11 @@ namespace OmniFi_API.Controllers.Cryptos
             _apiResponse = new ApiResponse();
         }
 
-        [HttpGet("{id:int}", Name = nameof(GetCryptoExchange))]
+        [HttpGet(nameof(GetCryptoExchange))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse>> GetCryptoExchange(int id)
+        public async Task<ActionResult<ApiResponse>> GetCryptoExchange([Required] int id)
         {
             try
             {

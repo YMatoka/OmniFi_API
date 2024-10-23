@@ -14,7 +14,7 @@ namespace OmniFi_API.Models.Abstracts
         public AssetPlatform? AssetPlatform { get; set; }
         public required int AssetSourceID { get; set; }
         public AssetSource? AssetSource { get; set; }
-        public required decimal Value { get; set; }
+        public required decimal Amount { get; set; }
         public required int FiatCurrencyID { get; set; }
         public FiatCurrency? FiatCurrency { get; set; }
     }

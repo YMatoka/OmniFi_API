@@ -6,6 +6,7 @@ using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Services.Interfaces;
 using OmniFi_API.Utilities;
 using OmniFi_DTOs.Dtos.Api;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace OmniFi_API.Controllers.Portfolio
@@ -30,24 +31,24 @@ namespace OmniFi_API.Controllers.Portfolio
             _apiResponse = new();
         }
 
-        [HttpPost("{username}",  Name = nameof(FetchPortfolio))]
+        [HttpPost(nameof(FetchPortfolio))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> FetchPortfolio(string username)
+        public async Task<ActionResult<ApiResponse>> FetchPortfolio([Required] string usernameOrEmail)
         {
-            var user = await _userRepository.GetUserAsync(username);
+            var user = await _userRepository.GetUserAsync(usernameOrEmail);
 
             if (user is null)
             {
                 _apiResponse.IsSuccess = false;
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                _apiResponse.AddErrorMessage($"the user '{username}' does'nt exists");
+                _apiResponse.AddErrorMessage($"the user or email '{usernameOrEmail}' does'nt exists");
                 return BadRequest(_apiResponse);
             }
 
-            await _fetchPortfolioService.FetchPortfolio(username);
+            await _fetchPortfolioService.FetchPortfolio(usernameOrEmail);
 
             _apiResponse.IsSuccess = true;
             _apiResponse.StatusCode = HttpStatusCode.OK;

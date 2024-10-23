@@ -25,8 +25,16 @@ namespace OmniFi_API.Repository
 
         public async Task RemoveAsync(T entity)
         {
-            _dbSet.Remove(entity);
-            await SaveAsync();
+            try
+            {
+                _dbSet.Remove(entity);
+                await SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message); ;
+            }
+
         }
 
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, int? pageSize = null, int pageNumber = 1)

@@ -8,6 +8,7 @@ using OmniFi_API.Models.Portfolio;
 using OmniFi_API.Repository.Cryptos;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Services.Interfaces;
+using OmniFi_API.Utilities;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 
@@ -43,29 +44,16 @@ namespace OmniFi_API.Repository.Assets
                     var actualDateTime = DateTime.UtcNow;
 
                     financialAsset.LastUpdatedAt = actualDateTime;
-                    financialAsset.Value = portfolioData.Balance;
+                    financialAsset.Amount = portfolioData.Balance;
 
                     db.Update(financialAsset);
-
-                    var cryptoCurrency = await _cryptoCurrencyRepository.GetAsync(
-                        x => x.CurrencySymbol == portfolioData.CryptoCurrencySymbol);
-
-                    var cryptoHolding = await _cryptoHoldingRepository
-                        .GetAsync(x => x.FinancialAssetID == financialAsset.FinancialEntityId);
-
-                    if (cryptoHolding is not null && portfolioData.Quantity is not null)
-                    {
-                        var quantity = (decimal)portfolioData.Quantity;
-
-                        await _cryptoHoldingRepository.UpdateAsync(cryptoHolding, quantity);
-                    }
 
                     var financialAssetHistory = new FinancialAssetHistory()
                     {
                         UserID = financialAsset.UserID,
                         AssetPlatformID = financialAsset.AssetPlatformID,
                         AssetSourceID = financialAsset.AssetSourceID,
-                        Value = financialAsset.Value,
+                        Amount = financialAsset.Amount,
                         FiatCurrencyID = financialAsset.FiatCurrencyID,
                         FinancialAssetId = financialAsset.FinancialEntityId,
                         RecordedAt = actualDateTime
@@ -73,17 +61,31 @@ namespace OmniFi_API.Repository.Assets
 
                     await _financialAssetHistoryRepository.CreateAsync(financialAssetHistory);
 
-                    var CryptoHoldingHistory = new CryptoHoldingHistory()
+                    if (portfolioData.AssetSourceName == AssetSourceNames.CryptoHolding)
                     {
-                        FinancialAssetHistoryID = financialAssetHistory.FinancialEntityId,
-                        CryptoHoldingId = cryptoHolding!.CryptoHoldingEntityId,
-                        CryptoCurrencId = cryptoCurrency!.CurrencyID,
-                        Quantity = (decimal)portfolioData.Quantity,
-                    };
+                        var cryptoCurrency = await _cryptoCurrencyRepository.GetAsync(
+                            x => x.CurrencySymbol == portfolioData.CryptoCurrencySymbol);
 
-                    await _cryptoHoldingHistoryRepository.CreateAsync(CryptoHoldingHistory);
+                        var cryptoHolding = await _cryptoHoldingRepository
+                            .GetAsync(x => x.FinancialAssetID == financialAsset.FinancialEntityId);
 
-                    await SaveAsync();
+                        if (cryptoHolding is not null && portfolioData.Quantity is not null)
+                        {
+                            var quantity = (decimal)portfolioData.Quantity;
+
+                            await _cryptoHoldingRepository.UpdateAsync(cryptoHolding, quantity);
+                        }
+
+                        var CryptoHoldingHistory = new CryptoHoldingHistory()
+                        {
+                            FinancialAssetHistoryID = financialAssetHistory.FinancialEntityId,
+                            CryptoHoldingId = cryptoHolding!.CryptoHoldingEntityId,
+                            CryptoCurrencId = cryptoCurrency!.CurrencyID,
+                            Quantity = (decimal)portfolioData.Quantity,
+                        };
+
+                        await _cryptoHoldingHistoryRepository.CreateAsync(CryptoHoldingHistory);
+                    }
 
                     await transaction.CommitAsync();
                 }
@@ -107,24 +109,12 @@ namespace OmniFi_API.Repository.Assets
 
                     await base.CreateAsync(financialAsset);
 
-                    var cryptoCurrency = await _cryptoCurrencyRepository.GetAsync(
-                        x => x.CurrencySymbol == portfolioData.CryptoCurrencySymbol);
-
-                    var CryptoHolding = new CryptoHolding() {
-                        FinancialAssetID = financialAsset.FinancialEntityId,
-                        CryptoCurrencId = cryptoCurrency!.CurrencyID,
-                        Quantity = (decimal)portfolioData.Quantity!,
-                    };
-
-                    await _cryptoHoldingRepository.CreateAsync(CryptoHolding);
-
-
                     var financialAssetHistory = new FinancialAssetHistory()
                     {
                         UserID = financialAsset.UserID,
                         AssetPlatformID = financialAsset.AssetPlatformID,
                         AssetSourceID = financialAsset.AssetSourceID,
-                        Value = financialAsset.Value,
+                        Amount = financialAsset.Amount,
                         FiatCurrencyID = financialAsset.FiatCurrencyID,
                         FinancialAssetId = financialAsset.FinancialEntityId,
                         RecordedAt = financialAsset.FirstRetrievedAt,
@@ -132,15 +122,30 @@ namespace OmniFi_API.Repository.Assets
 
                     await _financialAssetHistoryRepository.CreateAsync(financialAssetHistory);
 
-                    var CryptoHoldingHistory = new CryptoHoldingHistory()
+                    if (portfolioData.AssetSourceName == AssetSourceNames.CryptoHolding)
                     {
-                        FinancialAssetHistoryID = financialAssetHistory.FinancialEntityId,
-                        CryptoHoldingId = CryptoHolding.CryptoHoldingEntityId,
-                        CryptoCurrencId = cryptoCurrency!.CurrencyID,
-                        Quantity = (decimal)portfolioData.Quantity,
-                    };
+                        var cryptoCurrency = await _cryptoCurrencyRepository.GetAsync(
+                            x => x.CurrencySymbol == portfolioData.CryptoCurrencySymbol);
 
-                    await _cryptoHoldingHistoryRepository.CreateAsync(CryptoHoldingHistory);
+                        var CryptoHolding = new CryptoHolding()
+                        {
+                            FinancialAssetID = financialAsset.FinancialEntityId,
+                            CryptoCurrencId = cryptoCurrency!.CurrencyID,
+                            Quantity = (decimal)portfolioData.Quantity!,
+                        };
+
+                        await _cryptoHoldingRepository.CreateAsync(CryptoHolding);
+
+                        var CryptoHoldingHistory = new CryptoHoldingHistory()
+                        {
+                            FinancialAssetHistoryID = financialAssetHistory.FinancialEntityId,
+                            CryptoHoldingId = CryptoHolding.CryptoHoldingEntityId,
+                            CryptoCurrencId = cryptoCurrency!.CurrencyID,
+                            Quantity = (decimal)portfolioData.Quantity,
+                        };
+
+                        await _cryptoHoldingHistoryRepository.CreateAsync(CryptoHoldingHistory);
+                    }
 
                     await transaction.CommitAsync();
                 }
