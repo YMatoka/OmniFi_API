@@ -60,6 +60,9 @@ namespace OmniFi_API.Data
             // Use the built-in method to defines the key of the entity IdentityUserLogin<string>
             base.OnModelCreating(modelBuilder);
 
+
+
+
             modelBuilder.ApplyConfiguration(new AssetPlatformConfig());
             modelBuilder.ApplyConfiguration(new AssetSourceConfig());
             modelBuilder.ApplyConfiguration(new FinancialAssetConfig());

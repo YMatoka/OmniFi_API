@@ -42,6 +42,7 @@ using OmniFi_API.Repository.Api.Banks;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using OmniFi_API.Services.Api.Banks;
 using OmniFi_API.Comparers;
+using System.Globalization;
 
 const string DefaultSQlConnection = "DefaultSQLConnection";
 const string SecondSQlConnection = "SecondSQLConnection";
@@ -60,7 +61,7 @@ builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options
-    .UseSqlServer(builder.Configuration.GetConnectionString(DefaultSQlConnection))
+    .UseSqlServer(builder.Configuration.GetConnectionString(SecondSQlConnection))
     .EnableDetailedErrors()
     .EnableSensitiveDataLogging()
     .EnableDetailedErrors()
@@ -88,7 +89,7 @@ builder.Services.AddScoped<ICryptoExchangeAccountRepository, CryptoExchangeAccou
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
 builder.Services.AddScoped<ICryptoApiCredentialRepository, CryptoApiCredentialRepository>();
 builder.Services.AddScoped<IBankCredentialRepository, BankCredentialRepository>();
-builder.Services.AddScoped<IFinancialAssetRepository, FinancialAssetRepository>();
+builder.Services.AddScoped<IFinancialAssetRepository, FinancialAssetRepository>(); 
 builder.Services.AddScoped<IFinancialAssetHistoryRepository, FinancialAssetHistoryRepository>();
 builder.Services.AddScoped<ICryptoHoldingRepository, CryptoHoldingRepository>();
 
@@ -120,7 +121,6 @@ builder.Services.AddScoped<IFiatCurrencyService, FiatCurrencyService>();
 
 builder.Services.AddHttpClient<ICryptoInfoService, CryptoInfoService>();
 builder.Services.AddScoped<ICryptoInfoService, CryptoInfoService>();
-
 
 
 builder.Services.AddHttpClient<BinanceService>();
@@ -155,6 +155,11 @@ builder.Services.Configure<GocardlessBankInfoOptions>(builder.Configuration.GetS
     GocardlessBankInfoOptions.SectionName));
 
 var secretKey = builder.Configuration.GetValue<string>(SecretKeySection);
+
+// Set invariant culture for the whole project, for each thread
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+
 
 builder.Services.AddAuthentication(x =>
 {

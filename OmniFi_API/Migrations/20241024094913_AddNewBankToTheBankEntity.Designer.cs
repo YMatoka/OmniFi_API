@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OmniFi_API.Data;
 
@@ -11,9 +12,11 @@ using OmniFi_API.Data;
 namespace OmniFi_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241024094913_AddNewBankToTheBankEntity")]
+    partial class AddNewBankToTheBankEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,11 +245,6 @@ namespace OmniFi_API.Migrations
                         {
                             AssetPlatformID = 4,
                             CryptoExchangeID = 3
-                        },
-                        new
-                        {
-                            AssetPlatformID = 5,
-                            BankID = 2
                         });
                 });
 

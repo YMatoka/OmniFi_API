@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using OmniFi_API.Models.Api;
 using OmniFi_API.Services.Interfaces;
 using OmniFi_API.Utilities;
+using System.Data;
 using System.Text;
 using System.Web;
 using static OmniFi_API.Utilities.ApiTypes;
@@ -78,7 +79,13 @@ namespace OmniFi_API.Services.Api
 
                     var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
 
+                    if (httpResponseMessage.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                    {
+                        throw new Exception(responseContent);
+                    }
+
                     var deserializeContent = JsonConvert.DeserializeObject<T>(responseContent);
+
 
                     return deserializeContent;
                 }

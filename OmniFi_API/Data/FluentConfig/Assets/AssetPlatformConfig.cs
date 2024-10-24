@@ -48,7 +48,12 @@ namespace OmniFi_API.Data.FluentConfig.Assets
                     {
                         AssetPlatformID = 4,
                         CryptoExchangeID = 3
-                    }
+                    },
+                    new AssetPlatform()
+                    {
+                        AssetPlatformID = 5,
+                        BankID = 2
+                    },
                 }
             );
 

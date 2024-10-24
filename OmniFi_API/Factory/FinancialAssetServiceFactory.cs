@@ -28,6 +28,8 @@ namespace OmniFi_API.Factory
                     _serviceProvider.GetRequiredService<CryptoDotComService>(),
                 BankNames.BoursoBank =>
                     _serviceProvider.GetRequiredService<BankInfoService>(),
+                BankNames.CaisseDepargneIleDeFrance =>
+                    _serviceProvider.GetRequiredService<BankInfoService>(),
                 _ => throw new ArgumentException($"'{platformName}' is not a supported platform")
             };
         }

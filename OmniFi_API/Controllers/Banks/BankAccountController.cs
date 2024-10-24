@@ -14,6 +14,7 @@ using OmniFi_API.DTOs.GoCardless;
 using System.ComponentModel.DataAnnotations;
 using static System.Net.WebRequestMethods;
 using OmniFi_API.Repository.Banks;
+using OmniFi_API.Repository.Cryptos;
 
 namespace OmniFi_API.Controllers.Banks
 {
@@ -115,7 +116,6 @@ namespace OmniFi_API.Controllers.Banks
                     }
                 }
 
-
                 string institutionId = _goCardlessOptions.BankInfos[bank.BankName].InstitutionId;
 
                 var authorisationRedirectUrl =
@@ -126,9 +126,8 @@ namespace OmniFi_API.Controllers.Banks
                     _bankInfoServiceOptions.ApiSecret,
                     institutionId,
                     authorisationRedirectUrl
-                    );
-
-
+                );
+                
                 if (bankRequisition is null)
                 {
                     _apiResponse.IsSuccess = false;
@@ -308,6 +307,67 @@ namespace OmniFi_API.Controllers.Banks
                     await _bankSubAccountRepository.CreateAsync(newSubAccount);
                 }
 
+
+
+            }
+        }
+
+        [HttpDelete(nameof(Delete))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Roles = Roles.User)]
+        public async Task<ActionResult<ApiResponse>> Delete(
+            [Required] string usernameOrMail,
+            [Required] string bankName)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserAsync(usernameOrMail);
+
+                if (user is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.AddErrorMessage($"the username or email '{usernameOrMail}' is invalid");
+                    return BadRequest(_apiResponse);
+                }
+
+                var bank = await _banksRepository.GetAsync(
+                    filter: (x) =>  x.BankName.ToUpper() == bankName.ToUpper(),
+                    tracked: false);
+
+                if (bank is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.AddErrorMessage($"the bank '{bankName}' does'nt exists in the database");
+                    return BadRequest(_apiResponse);
+                }
+
+                var bankAccount = await _bankAccountRepository.GetWithEntitiesAsync(
+                    filter: (x) => x.UserID == user.Id && x.Bank!.BankName == bankName,
+                    tracked: false);
+
+                if (bankAccount is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.AddErrorMessage($"the user '{user.UserName}' doesn't have a '{bankName}' account in the database");
+                    return BadRequest(_apiResponse);
+                }
+
+                await _bankAccountRepository.RemoveAsync(bankAccount);
+
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.IsSuccess = false;
+                _apiResponse.AddErrorMessage(ex.Message);
+                return _apiResponse;
             }
         }
 
