@@ -30,9 +30,9 @@ namespace OmniFi_API.Repository
                 _dbSet.Remove(entity);
                 await SaveAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message); ;
+                throw;
             }
 
         }

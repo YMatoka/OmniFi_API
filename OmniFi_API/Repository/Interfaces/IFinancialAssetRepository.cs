@@ -12,6 +12,7 @@ namespace OmniFi_API.Repository.Interfaces
         Task<FinancialAsset?> GetWithEntitiesAsync(Expression<Func<FinancialAsset, bool>>? filter = null, bool tracked = false);
         Task CreateAsync(FinancialAsset financialAsset, PortfolioData portfolioData);
         Task UpdateAsync(FinancialAsset financialAsset, PortfolioData portfolioData);
+        Task UpdateAsync(FinancialAsset financialAsset, bool isAccountExists);
     }
 
 }

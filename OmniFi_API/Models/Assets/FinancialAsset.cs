@@ -11,6 +11,6 @@ namespace OmniFi_API.Models.Assets
         public CryptoHolding? CryptoHolding { get; set; }
         public required DateTime FirstRetrievedAt { get; set; }
         public required DateTime LastUpdatedAt { get; set; }
-
+        public bool IsAccountExists { get; set; } = true;
     }
 }

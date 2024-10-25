@@ -193,6 +193,8 @@ namespace OmniFi_API_Tests.Repository.Identity
             var result = _ct!.IsUserExistsByEmail(email);
 
             // Assert
+          
+            
             Assert.That(result, Is.False);
         }
 
@@ -219,6 +221,7 @@ namespace OmniFi_API_Tests.Repository.Identity
             _db!
                 .Setup(x => x.FiatCurrencies)
                 .ReturnsDbSet(GetFiatCurrencies());
+
 
             _mapper!
                 .Setup(x => x.Map<UserDTO>(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>()))
@@ -296,9 +299,9 @@ namespace OmniFi_API_Tests.Repository.Identity
                     ID = "test"
                 });
 
-            //_mapper!
-            //    .Setup(x => x.Map<UserDTO>(It.IsAny<ApplicationUser>()))
-            //    .Returns(new UserDTO() { });
+            _mapper!
+                .Setup(x => x.Map<UserDTO>(It.IsAny<ApplicationUser>()))
+                .Returns(new UserDTO() { UserName = "", FirstName = "", ID = "", LastName = "" });
 
             var email = "tes@mail.com";
 

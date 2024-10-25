@@ -50,7 +50,7 @@ namespace OmniFi_API.Controllers.Assets
             try
             {
                 var user = await _userRepository.GetUserAsync(usernameOrEmail);
-
+                
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
@@ -60,7 +60,9 @@ namespace OmniFi_API.Controllers.Assets
                 }
 
                 var financialAssets = await _financialAssetRepository
-                    .GetAllWithEntitiesAsync((x) => x.UserID == user.Id);
+                    .GetAllWithEntitiesAsync(
+                    x => x.UserID == user.Id &&
+                    x.IsAccountExists == true);
 
                 var financialAssetDTOs = _mapper
                     .Map<IEnumerable<FinancialAssetDTO>>(financialAssets)
@@ -101,7 +103,9 @@ namespace OmniFi_API.Controllers.Assets
                 }
 
                 var financialAssets = await _financialAssetRepository
-                    .GetAllWithEntitiesAsync((x) => x.UserID == user.Id);
+                    .GetAllWithEntitiesAsync(
+                    x => x.UserID == user.Id && 
+                    x.IsAccountExists == true);
 
                 _apiResponse.Result = (new AggregatedFinancialAssetsDTO()
                 {
@@ -140,9 +144,12 @@ namespace OmniFi_API.Controllers.Assets
                     _apiResponse.AddErrorMessage($"the username or email '{usernameOrEmail}' does not exists");
                     return NotFound(_apiResponse);
                 }
-
+                
                 var financialAsset = await _financialAssetRepository
-                    .GetWithEntitiesAsync((x) => x.UserID == user.Id && x.FinancialEntityId == financialAssetId);
+                    .GetWithEntitiesAsync(
+                    x => x.UserID == user.Id && 
+                    x.FinancialEntityId == financialAssetId && 
+                    x.IsAccountExists == true);
 
 
                 if (financialAsset is null)

@@ -218,5 +218,12 @@ namespace OmniFi_API.Repository.Assets
            return await query.ToListAsync();
 
         }
+
+        public async Task UpdateAsync(FinancialAsset financialAsset, bool isAccountExists)
+        {
+            financialAsset.IsAccountExists = isAccountExists;
+            db.Update(financialAsset);
+            await SaveAsync();
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace OmniFi_API.Repository.Interfaces
     {
         //public new Task RemoveAsync(CryptoExchangeAccount cryptoExchangeAccount);
         public Task CreateAsync(CryptoExchangeAccount cryptoExchangeAccount, CryptoExchangeAccountCreateDTO cryptoExchangeAccountCreateDTO);
-        Task<CryptoExchangeAccount?> GetWithEntitiesAsync(Expression<Func<CryptoExchangeAccount, bool>> filter, bool tracked = false);
+
+        public Task<CryptoExchangeAccount?> GetWithEntitiesAsync(Expression<Func<CryptoExchangeAccount, bool>> filter, bool tracked = false);
     }
 }

@@ -43,13 +43,17 @@ namespace OmniFi_API.Data
         internal DbSet<BankDataApiCredential> BankDataApiCredentials { get; set; }
         internal DbSet<BankAgreement> BankAgreements { get; set; }
 
-        public DbSet<FiatCurrency> FiatCurrencies { get; set; }
+        public virtual DbSet<FiatCurrency> FiatCurrencies { get; set; }
 
         internal DbSet<AesKey> AesKeys { get; set; }
         internal DbSet<AesIV> AesIV { get; set; }
 
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+            
+        }
+        public ApplicationDbContext()
         {
             
         }

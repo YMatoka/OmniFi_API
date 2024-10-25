@@ -15,6 +15,7 @@ using System.ComponentModel.DataAnnotations;
 using static System.Net.WebRequestMethods;
 using OmniFi_API.Repository.Banks;
 using OmniFi_API.Repository.Cryptos;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 
 namespace OmniFi_API.Controllers.Banks
 {
@@ -26,6 +27,8 @@ namespace OmniFi_API.Controllers.Banks
         private readonly IUserRepository _userRepository;
         private readonly IBankAccountRepository _bankAccountRepository;
         private readonly IBankInfoService _bankInfoService;
+        private readonly IFinancialAssetRepository _financialAssetRepository;
+
         private readonly IRepository<BankSubAccount> _bankSubAccountRepository;
 
         private readonly IEqualityComparer<BankSubAccount> _bankSubAccountEqualityComparer;
@@ -50,6 +53,7 @@ namespace OmniFi_API.Controllers.Banks
             IOptions<BankInfoServiceOptions> bankInfoServiceOptions,
             IOptions<GocardlessBankInfoOptions> goCardlessOptions,
             IConfiguration configuration,
+            IFinancialAssetRepository financialAssetRepository,
             IRepository<BankSubAccount> bankSubAccountRepository,
             IEqualityComparer<BankSubAccount> bankSubAccountEqualityComparer)
         {
@@ -62,6 +66,7 @@ namespace OmniFi_API.Controllers.Banks
             _bankInfoServiceOptions = bankInfoServiceOptions.Value;
             _goCardlessOptions = goCardlessOptions.Value;
             _configuration = configuration;
+            _financialAssetRepository = financialAssetRepository;
             _bankSubAccountRepository = bankSubAccountRepository;
             _bankSubAccountEqualityComparer = bankSubAccountEqualityComparer;
         }
@@ -195,6 +200,15 @@ namespace OmniFi_API.Controllers.Banks
                 await _bankAccountRepository.UpdateAsync(bankAccount, isAccessGranted: true);
 
                 await GetSubAccounts(bankAccount);
+
+                var financialAssets = await _financialAssetRepository.GetAllWithEntitiesAsync(
+                    x => x.UserID == x.UserID &&
+                    x.AssetPlatform!.Bank!.BankName == bankAccount!.Bank!.BankName);
+
+                foreach(var financialAsset in financialAssets)
+                {
+                    await _financialAssetRepository.UpdateAsync(financialAsset: financialAsset, isAccountExists: true);
+                }
 
                 _apiResponse.IsSuccess = true;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
@@ -358,6 +372,16 @@ namespace OmniFi_API.Controllers.Banks
                 }
 
                 await _bankAccountRepository.RemoveAsync(bankAccount);
+
+                var financialAssets = await _financialAssetRepository.GetAllWithEntitiesAsync(
+                    x => x.UserID == user.Id && 
+                    x.AssetPlatform!.Bank!.BankName == bankName);
+
+
+                foreach(var asset in financialAssets)
+                {
+                    await _financialAssetRepository.UpdateAsync(financialAsset:asset, isAccountExists: false);
+                }
 
                 _apiResponse.StatusCode = HttpStatusCode.OK;
 

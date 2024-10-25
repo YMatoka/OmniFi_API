@@ -24,6 +24,8 @@ namespace OmniFi_API.Services.Api
         {
             try
             {
+
+
                 using (var client = _httpClient.CreateClient())
                 {
 

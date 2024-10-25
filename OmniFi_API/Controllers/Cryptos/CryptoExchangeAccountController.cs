@@ -14,6 +14,7 @@ using OmniFi_API.Utilities;
 using System.Net;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System.ComponentModel.DataAnnotations;
+using OmniFi_API.Models.Banks;
 
 namespace OmniFi_API.Controllers.Cryptos
 {
@@ -23,6 +24,7 @@ namespace OmniFi_API.Controllers.Cryptos
     {
         private readonly IRepository<CryptoExchange> _cryptoExchangeRepository;
         private readonly ICryptoExchangeAccountRepository _cryptoExchangeAccountRepository;
+        private readonly IFinancialAssetRepository _financialAssetRepository;
         private readonly IUserRepository _userRepository;
 
         private ApiResponse _apiResponse;
@@ -30,12 +32,13 @@ namespace OmniFi_API.Controllers.Cryptos
         public CryptoExchangeAccountController(
             IRepository<CryptoExchange> cryptoExchangeRepository,
             IUserRepository userRepository,
-            ICryptoExchangeAccountRepository cryptoExchangeAccountRepository)
+            ICryptoExchangeAccountRepository cryptoExchangeAccountRepository,
+            IFinancialAssetRepository financialAssetRepository)
         {
             _cryptoExchangeRepository = cryptoExchangeRepository;
             _userRepository = userRepository;
             _cryptoExchangeAccountRepository = cryptoExchangeAccountRepository;
-
+            _financialAssetRepository = financialAssetRepository;
             _apiResponse = new();
         }
 
@@ -87,6 +90,15 @@ namespace OmniFi_API.Controllers.Cryptos
                 };
 
                 await _cryptoExchangeAccountRepository.CreateAsync(cryptoExchangeAccount, cryptoExchangeAccountCreateDTO);
+
+                var financialAssets = await _financialAssetRepository.GetAllWithEntitiesAsync(
+                        x => x.UserID == x.UserID &&
+                        x.AssetPlatform!.CryptoExchange!.ExchangeName == cryptoExchange.ExchangeName);
+
+                foreach (var financialAsset in financialAssets)
+                {
+                    await _financialAssetRepository.UpdateAsync(financialAsset: financialAsset, isAccountExists: true);
+                }
 
                 //    (x) => x.CryptoApiCredentialId == credential.CryptoApiCredentialID);
 
@@ -155,6 +167,15 @@ namespace OmniFi_API.Controllers.Cryptos
                 }
 
                 await _cryptoExchangeAccountRepository.RemoveAsync(cryptoExchangeAccount);
+
+                var financialAssets = await _financialAssetRepository.GetAllWithEntitiesAsync(
+                    x => x.UserID == x.UserID &&
+                    x.AssetPlatform!.CryptoExchange!.ExchangeName == cryptoExchangeName);
+
+                foreach(var financialAsset in financialAssets)
+                {
+                    await _financialAssetRepository.UpdateAsync(financialAsset: financialAsset, isAccountExists:false);
+                }
 
                 _apiResponse.StatusCode = HttpStatusCode.OK;
 
