@@ -270,15 +270,15 @@ namespace OmniFi_API_Tests.Repository.Identity
         }
 
         [TestCaseSource(nameof(LoginRequestDTOsCases))]
-        public void Login_ShallReturnALoginResponseDTO_ForACorrectLoginRequestDTO(LoginRequestDTO loginRequestDTO)
+        public async Task Login_ShallReturnALoginResponseDTO_ForACorrectLoginRequestDTO(LoginRequestDTO loginRequestDTO)
         {
             // Arrange
             _userManager!
-                .Setup(x => x.GetRolesAsync(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>()).Result)
+                .Setup(x => x.GetRolesAsync(It.IsAny<ApplicationUser>()).Result)
                 .Returns(new List<string>() { Roles.User});
 
             _userManager!
-                .Setup(x => x.CheckPasswordAsync(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>(), It.IsAny<string>()).Result)
+                .Setup(x => x.CheckPasswordAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()).Result)
                 .Returns(true);
 
             _db!
@@ -290,7 +290,7 @@ namespace OmniFi_API_Tests.Repository.Identity
                 .ReturnsDbSet(GetFiatCurrencies());
 
             _mapper!
-                .Setup(x => x.Map<UserDTO>(It.IsAny<OmniFi_API.Models.Identity.ApplicationUser>()))
+                .Setup(x => x.Map<UserDTO>(It.IsAny<ApplicationUser>()))
                 .Returns(new UserDTO()
                 {
                     FirstName = "test",
@@ -299,14 +299,12 @@ namespace OmniFi_API_Tests.Repository.Identity
                     ID = "test"
                 });
 
-            _mapper!
-                .Setup(x => x.Map<UserDTO>(It.IsAny<ApplicationUser>()))
-                .Returns(new UserDTO() { UserName = "", FirstName = "", ID = "", LastName = "" });
-
-            var email = "tes@mail.com";
+            //_mapper!
+            //    .Setup(x => x.Map<UserDTO>(It.IsAny<ApplicationUser>()))
+            //    .Returns(new UserDTO() { UserName = "", FirstName = "", ID = "", LastName = "" });
 
             // Act
-            var result = _ct!.Login(loginRequestDTO).Result;
+            var result = await _ct!.Login(loginRequestDTO);
 
             // Assert
             Assert.That(result, Is.Not.Null);
@@ -319,12 +317,12 @@ namespace OmniFi_API_Tests.Repository.Identity
             return
             [
                 new LoginRequestDTO(){
-                    UserNameOrEmail = "test@mail",
+                    UserNameOrEmail = "test1@mail.com",
                     Password = "1234",
                 },
 
                 new LoginRequestDTO(){
-                    UserNameOrEmail = "test1@mail",
+                    UserNameOrEmail = "TestUserName",
                     Password = "1234",
                 }
             ];
