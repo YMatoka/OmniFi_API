@@ -30,6 +30,7 @@ using OmniFi_API.Models.Currencies;
 using Microsoft.Extensions.Logging;
 using OmniFi_API.Services.Portfolio;
 using OmniFi_API.Options.Currencies;
+
 using OmniFi_API.Services.Api.Cryptos;
 using OmniFi_API.Services.Api.Currencies;
 using OmniFi_API.Options.Cryptos;
@@ -43,173 +44,21 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using OmniFi_API.Services.Api.Banks;
 using OmniFi_API.Comparers;
 using System.Globalization;
-
-const string DefaultSQlConnection = "DefaultSQLConnection";
-const string SecondSQlConnection = "SecondSQLConnection";
-const string SecretKeySection = "UserRepositoryOptions:SecretKey";
+using OmniFi_API.Extensions;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddServices(builder.Configuration);
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-
-builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options
-    .UseSqlServer(builder.Configuration.GetConnectionString(SecondSQlConnection))
-    .EnableDetailedErrors()
-    .EnableSensitiveDataLogging()
-    .EnableDetailedErrors()
-    );
-
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-builder.Services.AddScoped<IRepository<CryptoExchange>, BaseRepository<CryptoExchange>>();
-builder.Services.AddScoped<IRepository<Bank>, BaseRepository<Bank>>();
-builder.Services.AddScoped<IRepository<AesKey>, BaseRepository<AesKey>>();
-builder.Services.AddScoped<IRepository<AesIV>, BaseRepository<AesIV>>();
-builder.Services.AddScoped<IRepository<AssetPlatform>, BaseRepository<AssetPlatform>>();
-builder.Services.AddScoped<IRepository<FiatCurrency>, BaseRepository<FiatCurrency>>();
-builder.Services.AddScoped<IRepository<AssetPlatform>, BaseRepository<AssetPlatform>>();
-builder.Services.AddScoped<IRepository<Bank>, BaseRepository<Bank>>();
-builder.Services.AddScoped<IRepository<CryptoExchange>, BaseRepository<CryptoExchange>>();
-builder.Services.AddScoped<IRepository<AssetSource>, BaseRepository<AssetSource>>();
-builder.Services.AddScoped<IRepository<CryptoHoldingHistory>, BaseRepository<CryptoHoldingHistory>>();
-builder.Services.AddScoped<IRepository<CryptoCurrency>, BaseRepository<CryptoCurrency>>();
-builder.Services.AddScoped<IRepository<BankSubAccount>, BaseRepository<BankSubAccount>>();
-builder.Services.AddScoped<IRepository<BankAgreement>, BaseRepository<BankAgreement>>();
-
-builder.Services.AddScoped<IBankDataApiRepository, BankDataApiCredentialRepository>();
-builder.Services.AddScoped<ICryptoExchangeAccountRepository, CryptoExchangeAccountRepository>();
-builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
-builder.Services.AddScoped<ICryptoApiCredentialRepository, CryptoApiCredentialRepository>();
-builder.Services.AddScoped<IBankCredentialRepository, BankCredentialRepository>();
-builder.Services.AddScoped<IFinancialAssetRepository, FinancialAssetRepository>(); 
-builder.Services.AddScoped<IFinancialAssetHistoryRepository, FinancialAssetHistoryRepository>();
-builder.Services.AddScoped<ICryptoHoldingRepository, CryptoHoldingRepository>();
-
-builder.Services.AddScoped<IEqualityComparer<BankSubAccount>, BankSubAccountComparer>();
-
-builder.Services.AddScoped<IStringEncryptionService, StringEncryptionService>();
-builder.Services.AddScoped<IFetchPortfolioService, PortfolioService>();
-
-builder.Services.AddHttpClient<BinanceService>();
-builder.Services.AddScoped< BinanceService>();
-
-builder.Services.AddHttpClient<CryptoDotComService>();
-builder.Services.AddScoped<CryptoDotComService>();
-
-builder.Services.AddHttpClient<KrakenService>();
-builder.Services.AddScoped<KrakenService>();
-
-builder.Services.AddHttpClient<BankInfoService>();
-builder.Services.AddScoped<BankInfoService>();
-
-builder.Services.AddHttpClient<IBankInfoService, BankInfoService>();
-builder.Services.AddScoped<IBankInfoService, BankInfoService>();
-
-builder.Services.AddHttpClient<BankInfoService>();
-builder.Services.AddScoped<BankInfoService>();
-
-builder.Services.AddHttpClient<IFiatCurrencyService, FiatCurrencyService>();
-builder.Services.AddScoped<IFiatCurrencyService, FiatCurrencyService>();
-
-builder.Services.AddHttpClient<ICryptoInfoService, CryptoInfoService>();
-builder.Services.AddScoped<ICryptoInfoService, CryptoInfoService>();
-
-
-builder.Services.AddHttpClient<BinanceService>();
-builder.Services.AddScoped<BinanceService>();
-
-
-
-builder.Services.AddScoped<IFinancialAssetServiceFactory, FinancialAssetServiceFactory>();
-
-
-
-builder.Services
-    .AddIdentity<ApplicationUser, ApplicationRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddAutoMapper(typeof(MappingConfig));
-
-builder.Services.Configure<UserRepositoryOptions>(
-    builder.Configuration.GetSection(UserRepositoryOptions.SectionName));
-
-builder.Services.Configure<FiatCurrencyServiceOptions>(
-    builder.Configuration.GetSection(FiatCurrencyServiceOptions.SectionName));
-
-builder.Services.Configure<CryptoInfoServiceOptions>(
-    builder.Configuration.GetSection(CryptoInfoServiceOptions.SectionName));
-
-builder.Services.Configure<BankInfoServiceOptions>(builder.Configuration.GetSection(
-    BankInfoServiceOptions.SectionName));
-
-builder.Services.Configure<GocardlessBankInfoOptions>(builder.Configuration.GetSection(
-    GocardlessBankInfoOptions.SectionName));
-
-var secretKey = builder.Configuration.GetValue<string>(SecretKeySection);
+// adding service log at host level
+builder.Host.UseSerilog((ctx, lc) =>
+    lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
 
 // Set invariant culture for the whole project, for each thread
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
-
-
-builder.Services.AddAuthentication(x =>
-{
-    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-}).AddJwtBearer(x =>
-{
-    x.RequireHttpsMetadata = false;
-    x.SaveToken = true;
-    x.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey!)),
-        ValidateIssuer = false,
-        ValidateAudience = false
-    };
-});
-
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-    {
-        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n " +
-                      "Enter Bearer [space] and then your token in the text input below \r\n\r\n " +
-                      "Example: \"Bearer 1234abcdef\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Scheme = "Bearer"
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    {
-        {
-            new OpenApiSecurityScheme()
-            {
-                Reference = new OpenApiReference()
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-
-                Scheme = "oauth2",
-                Name= "Bearer",
-                In = ParameterLocation.Header
-            },
-            new List<string>()
-        }
-    }
-    );
-});
 
 var app = builder.Build();
 

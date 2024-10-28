@@ -285,6 +285,7 @@ namespace OmniFi_API_Tests.Repository.Identity
                 .Setup(x => x.Users)
                 .ReturnsDbSet(GetApplicationUsers());
 
+
             _db!
                 .Setup(x => x.FiatCurrencies)
                 .ReturnsDbSet(GetFiatCurrencies());

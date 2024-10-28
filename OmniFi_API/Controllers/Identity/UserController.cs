@@ -18,11 +18,15 @@ namespace OmniFi_API.Controllers.Identity
     {
         private ApiResponse _apiResponse;
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserRepository userRepository)
+        public UserController(
+            IUserRepository userRepository, 
+            ILogger<UserController> logger)
         {
             _userRepository = userRepository;
             _apiResponse = new();
+            _logger = logger;
         }
 
         [HttpPost(nameof(Login))]
@@ -30,8 +34,13 @@ namespace OmniFi_API.Controllers.Identity
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
+            _logger.LogInformation($"An user try to login");
+
             try
             {
+
+                throw new Exception("This is a logging test exception");
+
                 var loginResponse = await _userRepository.Login(loginRequestDTO);
 
                 if (loginResponse is null || loginResponse.User is null || string.IsNullOrEmpty(loginResponse.Token))
