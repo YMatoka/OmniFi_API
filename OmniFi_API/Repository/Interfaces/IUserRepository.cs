@@ -6,6 +6,7 @@ namespace OmniFi_API.Repository.Interfaces
     public interface IUserRepository
     {
         Task<ApplicationUser?> GetUserAsync(string usernameOrEmail, bool tracked = false);
+        Task<ApplicationUser?> UpdateAsync(ApplicationUser user, UserUpdateDTO userUpdateDTO);
         Task RemoveAsync(ApplicationUser user);
         Task<ApplicationUser?> GetWithAllAccountsAsync(string usernameOrEmail, bool tracked = false);
         bool IsUserExistsByEmail(string email);

@@ -73,8 +73,6 @@ namespace OmniFi_API.Controllers.Identity
 
         [HttpPut(nameof(Put))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status304NotModified)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -82,9 +80,44 @@ namespace OmniFi_API.Controllers.Identity
             [Required] string usernameOrEmail,
             [FromBody] UserUpdateDTO userUpdateDTO
         )
+        {
+            try
             {
+                var user = await _userRepository.GetUserAsync(usernameOrEmail);
+
+                if (user is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, usernameOrEmail));
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
+
+                if (!user.Equals(user, userUpdateDTO))
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.AddErrorMessage("There aren't no properties to update");
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
+
+                await _userRepository.UpdateAsync(user, userUpdateDTO);
+                
+                return NoContent();
+
 
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
+                   .Replace(ErrorMessages.VariableTag, nameof(Register)));
+                _apiResponse.IsSuccess = false;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
+            }
+        }
 
         [HttpPost(nameof(Register))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -207,5 +207,31 @@ namespace OmniFi_API.Repository.Identity
             _db.Remove(user);
             await _db.SaveChangesAsync();
         }
+
+        public async Task UpdateAsync(ApplicationUser user, UserUpdateDTO userUpdateDTO)
+        {
+            if(userUpdateDTO.FirstName is not null)
+                user.FirstName = userUpdateDTO.FirstName;
+
+            if (userUpdateDTO.LastName is not null)
+                user.LastName = userUpdateDTO.LastName;
+
+            if (userUpdateDTO.Username is not null)
+                user.UserName = userUpdateDTO.Username;
+
+            if (userUpdateDTO.FiatCurrencyCode is not null)
+            {
+                var currency = _db.FiatCurrencies.FirstOrDefault(x => x.CurrencyCode == userUpdateDTO.FiatCurrencyCode) ??
+                    _db.FiatCurrencies.First(x => x.CurrencyCode == userUpdateDTO.FiatCurrencyCode);
+
+                if(currency is not null)
+                {
+                    user.FiatCurrency = currency;
+                }
+            }
+            
+            _db.Update(user);
+            await _db.SaveChangesAsync();
+        }
     }
 }
