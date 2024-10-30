@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using Moq;
 using NUnit.Framework;
@@ -28,6 +29,8 @@ namespace OmniFi_API_Tests.Controllers.Assets
         private Mock<IUserRepository>? _userRepository;
         private Mock<IRepository<AssetPlatform>>? _assetPlatform;
         private Mock<IMapper>? _mapper;
+        private Mock<ILogger<FinancialAssetController>>? _logger;
+
         //private Mock<ApiResponse> _apiResponse;
         private FinancialAssetController? _ct;
 
@@ -39,13 +42,15 @@ namespace OmniFi_API_Tests.Controllers.Assets
             _financialAssetRepository = new Mock<IFinancialAssetRepository>();
             _userRepository = new Mock<IUserRepository>();
             _assetPlatform = new Mock<IRepository<AssetPlatform>>();
+            _logger = new Mock<ILogger<FinancialAssetController>>();
             //_apiResponse = new Mock<ApiResponse>();
 
             _ct = new FinancialAssetController(
                 _financialAssetRepository.Object,
                 _mapper.Object,
                 _userRepository.Object,
-                _assetPlatform.Object);
+                _assetPlatform.Object,
+                _logger.Object);
 
             //_apiResponse = new Mock<ApiResponse>();
         }

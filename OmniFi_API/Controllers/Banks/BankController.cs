@@ -19,12 +19,14 @@ namespace OmniFi_API.Controllers.Banks
         private readonly IRepository<Bank> _bankRepository;
         private ApiResponse _apiResponse;
         private readonly IMapper _mapper;
+        private readonly ILogger<BankController> _logger;
 
-        public BankController(IRepository<Bank> bankRepository, IMapper mapper)
+        public BankController(IRepository<Bank> bankRepository, IMapper mapper, ILogger<BankController> logger)
         {
             _bankRepository = bankRepository;
             _apiResponse = new ApiResponse();
             _mapper = mapper;
+            _logger = logger;
         }
 
 
@@ -32,6 +34,7 @@ namespace OmniFi_API.Controllers.Banks
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse>> GetBank([Required] int id)
         {
             try
@@ -40,6 +43,7 @@ namespace OmniFi_API.Controllers.Banks
                 {
                     _apiResponse.IsSuccess = false;
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.AddErrorMessage("The id 0 is not valid");
                     return BadRequest(_apiResponse);
                 }
 
@@ -49,6 +53,7 @@ namespace OmniFi_API.Controllers.Banks
                 {
                     _apiResponse.IsSuccess = false;
                     _apiResponse.StatusCode =HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage($"There isn't a bank with the id {id}");
                     return NotFound(_apiResponse);
                 }
 
@@ -61,14 +66,18 @@ namespace OmniFi_API.Controllers.Banks
             }
             catch (Exception ex)
             {
-                _apiResponse.IsSuccess=false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(GetBank)));
+                _apiResponse.IsSuccess = false;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
         }
 
         [HttpGet(nameof(GetBanks))]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse>> GetBanks()
         {
             try
@@ -84,9 +93,12 @@ namespace OmniFi_API.Controllers.Banks
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(GetBanks)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
         }
 

@@ -9,6 +9,8 @@ using OmniFi_DTOs.Dtos.Api;
 using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OmniFi_API.Controllers.Identity
 {
@@ -32,14 +34,12 @@ namespace OmniFi_API.Controllers.Identity
         [HttpPost(nameof(Login))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
-            _logger.LogInformation($"An user try to login");
 
             try
             {
-
-                throw new Exception("This is a logging test exception");
 
                 var loginResponse = await _userRepository.Login(loginRequestDTO);
 
@@ -61,17 +61,35 @@ namespace OmniFi_API.Controllers.Identity
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(Login)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
 
         }
 
+        [HttpPut(nameof(Put))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status304NotModified)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> Put(
+            [Required] string usernameOrEmail,
+            [FromBody] UserUpdateDTO userUpdateDTO
+        )
+            {
+
+            }
+
         [HttpPost(nameof(Register))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse>> Register([FromBody] RegisterationRequestDTO registerationRequestDTO)
         {
             try
@@ -96,10 +114,16 @@ namespace OmniFi_API.Controllers.Identity
 
                 if (!response.IsSucceeded)
                 {
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+
+                    var errorMessages = ErrorMessages.ErrorPostMethodMessage.Replace(ErrorMessages.VariableTag, nameof(Register))  + " : "
+                        + Environment.NewLine
+                        +  string.Join(Environment.NewLine, response.ErrorMessages);
+
+                    _logger.LogWarning(errorMessages);
+                    _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.ErrorMessages = response.ErrorMessages;
-                    return BadRequest(_apiResponse);
+                    _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                    return StatusCode(500, _apiResponse);
                 }
 
                 _apiResponse.IsSuccess = true;
@@ -109,11 +133,50 @@ namespace OmniFi_API.Controllers.Identity
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(Register)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
 
+        }
+
+        [HttpDelete(nameof(Delete))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Roles = Roles.User)]
+        public async Task<ActionResult<ApiResponse>> Delete([Required] string usernameOrEmail)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserAsync(usernameOrEmail);
+
+                if (user is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, usernameOrEmail));
+                    return NotFound(_apiResponse);
+                }
+
+                await _userRepository.RemoveAsync(user);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.ErrorDeleteMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(Delete)));
+                _apiResponse.IsSuccess = false;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
+            }
         }
 
     }

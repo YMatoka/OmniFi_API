@@ -1,5 +1,6 @@
 ﻿using OmniFi_API.Models.Encryption;
 using OmniFi_API.Models.Identity;
+using OmniFi_API.Models.Banks;
 
 namespace OmniFi_API.Models.Banks
 {

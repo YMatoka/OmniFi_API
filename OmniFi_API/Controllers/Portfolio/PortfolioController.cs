@@ -18,42 +18,56 @@ namespace OmniFi_API.Controllers.Portfolio
         IFetchPortfolioService _fetchPortfolioService;
 
         IUserRepository _userRepository;
-
+        private readonly ILogger<PortfolioController> _logger;
         ApiResponse _apiResponse;
+
         public PortfolioController(
             IFetchPortfolioService fetchPortfolioService,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            ILogger<PortfolioController> logger)
         {
             _fetchPortfolioService = fetchPortfolioService;
 
             _userRepository = userRepository;
 
             _apiResponse = new();
+            _logger = logger;
         }
 
         [HttpPost(nameof(FetchPortfolio))]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse>> FetchPortfolio([Required] string usernameOrEmail)
         {
-            var user = await _userRepository.GetUserAsync(usernameOrEmail);
-
-            if (user is null)
+            try
             {
+                var user = await _userRepository.GetUserAsync(usernameOrEmail);
+
+                if (user is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, usernameOrEmail));
+                    return NotFound(_apiResponse);
+                }
+
+                await _fetchPortfolioService.FetchPortfolio(usernameOrEmail);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(FetchPortfolio)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                _apiResponse.AddErrorMessage($"the user or email '{usernameOrEmail}' does'nt exists");
-                return BadRequest(_apiResponse);
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
 
-            await _fetchPortfolioService.FetchPortfolio(usernameOrEmail);
-
-            _apiResponse.IsSuccess = true;
-            _apiResponse.StatusCode = HttpStatusCode.OK;
-
-            return Ok(_apiResponse);
         }
     }
 }

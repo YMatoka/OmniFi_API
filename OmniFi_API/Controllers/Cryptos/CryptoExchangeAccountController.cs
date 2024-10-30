@@ -15,6 +15,7 @@ using System.Net;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System.ComponentModel.DataAnnotations;
 using OmniFi_API.Models.Banks;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace OmniFi_API.Controllers.Cryptos
 {
@@ -26,6 +27,7 @@ namespace OmniFi_API.Controllers.Cryptos
         private readonly ICryptoExchangeAccountRepository _cryptoExchangeAccountRepository;
         private readonly IFinancialAssetRepository _financialAssetRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<CryptoExchangeAccountController> _logger;
 
         private ApiResponse _apiResponse;
 
@@ -33,19 +35,23 @@ namespace OmniFi_API.Controllers.Cryptos
             IRepository<CryptoExchange> cryptoExchangeRepository,
             IUserRepository userRepository,
             ICryptoExchangeAccountRepository cryptoExchangeAccountRepository,
-            IFinancialAssetRepository financialAssetRepository)
+            IFinancialAssetRepository financialAssetRepository,
+            ILogger<CryptoExchangeAccountController> logger)
         {
             _cryptoExchangeRepository = cryptoExchangeRepository;
             _userRepository = userRepository;
             _cryptoExchangeAccountRepository = cryptoExchangeAccountRepository;
             _financialAssetRepository = financialAssetRepository;
             _apiResponse = new();
+            _logger = logger;
         }
 
         [HttpPost(nameof(Create))]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse>> Create([FromBody] CryptoExchangeAccountCreateDTO  cryptoExchangeAccountCreateDTO)
         {
@@ -56,9 +62,10 @@ namespace OmniFi_API.Controllers.Cryptos
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage($"the username or email '{cryptoExchangeAccountCreateDTO.UsernameOrEmail}' is invalid");
-                    return BadRequest(_apiResponse);
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, cryptoExchangeAccountCreateDTO.UsernameOrEmail));
+                    return NotFound(_apiResponse);
                 }
 
                 var cryptoExchange = await _cryptoExchangeRepository.GetAsync(
@@ -68,9 +75,9 @@ namespace OmniFi_API.Controllers.Cryptos
                 if (cryptoExchange is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     _apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeAccountCreateDTO.CryptoExchangeName}' does'nt exists in the database");
-                    return BadRequest(_apiResponse);
+                    return NotFound(_apiResponse);
                 }
 
                 if (await _cryptoExchangeAccountRepository.GetAsync(
@@ -100,30 +107,43 @@ namespace OmniFi_API.Controllers.Cryptos
                     await _financialAssetRepository.UpdateAsync(financialAsset: financialAsset, isAccountExists: true);
                 }
 
-                //    (x) => x.CryptoApiCredentialId == credential.CryptoApiCredentialID);
-
-                //var decryptedKey = await _stringEncryptionService.DecryptAsync( credential.ApiKey, aesKey!.Key);
-                //var deryptedSecretdKey = await _stringEncryptionService.DecryptAsync(credential.ApiSecret, aesKey!.Key);
-
                 _apiResponse.IsSuccess = true;
                 _apiResponse.StatusCode = HttpStatusCode.Created;
                 return CreatedAtAction(nameof(Create), _apiResponse);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorCreateMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(Create)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
 
+        }
 
+        [HttpPut(nameof(Put))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status304NotModified)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> Put(
+            [Required] string usernameOrEmail,
+            [FromBody] CryptoExchangeAccountUpdateDTO cryptoExchangeAccountUpdateDTO
+            )
+        {
 
         }
 
         [HttpDelete(nameof(Delete))]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles= Roles.User)]
         public async Task<ActionResult<ApiResponse>> Delete(
             [Required] string usernameOrMail,
@@ -136,9 +156,10 @@ namespace OmniFi_API.Controllers.Cryptos
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage($"the username or email '{usernameOrMail}' is invalid");
-                    return BadRequest(_apiResponse);
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, usernameOrMail));
+                    return NotFound(_apiResponse);
                 }
 
                 var cryptoExchange = await _cryptoExchangeRepository.GetAsync(
@@ -148,9 +169,9 @@ namespace OmniFi_API.Controllers.Cryptos
                 if (cryptoExchange is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     _apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeName}' does'nt exists in the database");
-                    return BadRequest(_apiResponse);
+                    return NotFound(_apiResponse);
                 }
 
 
@@ -177,15 +198,17 @@ namespace OmniFi_API.Controllers.Cryptos
                     await _financialAssetRepository.UpdateAsync(financialAsset: financialAsset, isAccountExists:false);
                 }
 
-                _apiResponse.StatusCode = HttpStatusCode.OK;
-
-                return Ok(_apiResponse);
+               
+                return NoContent();
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorDeleteMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(Delete)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
         }
 

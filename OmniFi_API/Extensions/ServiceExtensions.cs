@@ -39,21 +39,32 @@ namespace OmniFi_API.Extensions
 {
     public static class ServiceExtensions
     {
+        public static string CorPolicyName = "AllowAll";
+
         const string DefaultSQlConnection = "DefaultSQLConnection";
         const string SecondSQlConnection = "SecondSQLConnection";
         const string SecretKeySection = "UserRepositoryOptions:SecretKey";
-
+      
         public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
 
-            services.AddDbContext<ApplicationDbContext>(
+            // Enabling cross origin ressource sharing | the policy created had to be selected in the midlleware section 
+            services.AddCors(options =>
+                options.AddPolicy(CorPolicyName, 
+                    b => b.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowAnyOrigin()
+                )
+            );
+            
+            services.AddDbContext<ApplicationDbContext>(  
                 options => options
                 .UseSqlServer(configuration.GetConnectionString(SecondSQlConnection))
                 .EnableDetailedErrors()
-                .EnableSensitiveDataLogging()
+                .EnableSensitiveDataLogging(true)
                 .EnableDetailedErrors()
             );
 

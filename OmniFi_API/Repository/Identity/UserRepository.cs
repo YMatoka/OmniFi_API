@@ -201,5 +201,11 @@ namespace OmniFi_API.Repository.Identity
             return await query.FirstOrDefaultAsync();
 
         }
+
+        public async Task RemoveAsync(ApplicationUser user)
+        {
+            _db.Remove(user);
+            await _db.SaveChangesAsync();
+        }
     }
 }

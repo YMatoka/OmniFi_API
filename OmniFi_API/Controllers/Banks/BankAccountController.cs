@@ -16,6 +16,9 @@ using static System.Net.WebRequestMethods;
 using OmniFi_API.Repository.Banks;
 using OmniFi_API.Repository.Cryptos;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
+using OmniFi_API.Controllers.Identity;
+using System.Security.Cryptography.X509Certificates;
+using OmniFi_API.Comparers;
 
 namespace OmniFi_API.Controllers.Banks
 {
@@ -42,7 +45,7 @@ namespace OmniFi_API.Controllers.Banks
         private string _goCardlessSettingsIndex = $"GocardlessBankInfo:{BankInfoTag}";
         private const string WebhookSecretKey = "GocardlessWebhookSecret";
         private readonly IConfiguration _configuration;
-
+        private readonly ILogger<BankAccountController> _logger;
         private ApiResponse _apiResponse;
 
         public BankAccountController(
@@ -55,7 +58,8 @@ namespace OmniFi_API.Controllers.Banks
             IConfiguration configuration,
             IFinancialAssetRepository financialAssetRepository,
             IRepository<BankSubAccount> bankSubAccountRepository,
-            IEqualityComparer<BankSubAccount> bankSubAccountEqualityComparer)
+            IEqualityComparer<BankSubAccount> bankSubAccountEqualityComparer,
+            ILogger<BankAccountController> logger)
         {
             _userRepository = userRepository;
             _apiResponse = new();
@@ -69,13 +73,16 @@ namespace OmniFi_API.Controllers.Banks
             _financialAssetRepository = financialAssetRepository;
             _bankSubAccountRepository = bankSubAccountRepository;
             _bankSubAccountEqualityComparer = bankSubAccountEqualityComparer;
+            _logger = logger;
         }
 
 
         [HttpPost(nameof(CreateAuthorisationLink))]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse>> CreateAuthorisationLink([FromBody] AuthorisationLinkCreateDTO authorisationCreateDTO)
         {
@@ -86,9 +93,10 @@ namespace OmniFi_API.Controllers.Banks
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage($"the username or email '{authorisationCreateDTO.UsernameOrEmail}' is invalid");
-                    return BadRequest(_apiResponse);
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, authorisationCreateDTO.UsernameOrEmail));
+                    return NotFound(_apiResponse);
                 }
 
                 var bank = await _banksRepository.GetAsync(
@@ -98,9 +106,9 @@ namespace OmniFi_API.Controllers.Banks
                 if (bank is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     _apiResponse.AddErrorMessage($"the bank '{authorisationCreateDTO.BankName}' does'nt exists in the database");
-                    return BadRequest(_apiResponse);
+                    return NotFound(_apiResponse);
                 }
 
                 var bankAccount = await _bankAccountRepository.GetWithEntitiesAsync(
@@ -136,9 +144,9 @@ namespace OmniFi_API.Controllers.Banks
                 if (bankRequisition is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                     _apiResponse.AddErrorMessage($"the system could'nt create the authorisation link, please retry later");
-                    return BadRequest(_apiResponse);
+                    return StatusCode(500, _apiResponse);
                 }
 
 
@@ -171,15 +179,19 @@ namespace OmniFi_API.Controllers.Banks
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(CreateAuthorisationLink)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
 
         }
         [HttpGet(nameof(AuthorizationCallback))]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse>> AuthorizationCallback(
             [FromQuery(Name = "ref")] string referenceId)
         {
@@ -194,7 +206,7 @@ namespace OmniFi_API.Controllers.Banks
                     _apiResponse.IsSuccess = false;
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                     _apiResponse.AddErrorMessage($"The reference Id '{referenceId}' doesn't exists in the database");
-                    return BadRequest(_apiResponse);
+                    return NotFound(_apiResponse);
                 }
 
                 await _bankAccountRepository.UpdateAsync(bankAccount, isAccessGranted: true);
@@ -210,16 +222,16 @@ namespace OmniFi_API.Controllers.Banks
                     await _financialAssetRepository.UpdateAsync(financialAsset: financialAsset, isAccountExists: true);
                 }
 
-                _apiResponse.IsSuccess = true;
-                _apiResponse.StatusCode = HttpStatusCode.OK;
-
-                return Ok(_apiResponse);
+                return NoContent();
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(AuthorizationCallback)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
 
         }
@@ -242,9 +254,10 @@ namespace OmniFi_API.Controllers.Banks
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage($"the username or email '{usernameOrEmail}' is invalid");
-                    return BadRequest(_apiResponse);
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, usernameOrEmail));
+                    return NotFound(_apiResponse);
                 }
 
                 var bank = await _banksRepository.GetAsync(
@@ -254,9 +267,9 @@ namespace OmniFi_API.Controllers.Banks
                 if (bank is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     _apiResponse.AddErrorMessage($"the bank '{bankName}' does'nt exists in the database");
-                    return BadRequest(_apiResponse);
+                    return NotFound(_apiResponse);
                 }
 
 
@@ -267,9 +280,9 @@ namespace OmniFi_API.Controllers.Banks
                 if (bankAccount is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     _apiResponse.AddErrorMessage($"the user '{user.UserName}' does'nt have a '{bank.BankName}' account registered");
-                    return BadRequest(_apiResponse);
+                    return NotFound(_apiResponse);
                 }
 
                 _apiResponse.Result = new BankAccessDurationDTO()
@@ -286,9 +299,12 @@ namespace OmniFi_API.Controllers.Banks
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(GetAccessDuration)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
 
 
@@ -320,9 +336,6 @@ namespace OmniFi_API.Controllers.Banks
                 {
                     await _bankSubAccountRepository.CreateAsync(newSubAccount);
                 }
-
-
-
             }
         }
 
@@ -342,21 +355,23 @@ namespace OmniFi_API.Controllers.Banks
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage($"the username or email '{usernameOrMail}' is invalid");
-                    return BadRequest(_apiResponse);
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, usernameOrMail));
+                    return NotFound(_apiResponse);
                 }
 
                 var bank = await _banksRepository.GetAsync(
                     filter: (x) =>  x.BankName.ToUpper() == bankName.ToUpper(),
+
                     tracked: false);
 
                 if (bank is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     _apiResponse.AddErrorMessage($"the bank '{bankName}' does'nt exists in the database");
-                    return BadRequest(_apiResponse);
+                    return NotFound(_apiResponse);
                 }
 
                 var bankAccount = await _bankAccountRepository.GetWithEntitiesAsync(
@@ -366,9 +381,9 @@ namespace OmniFi_API.Controllers.Banks
                 if (bankAccount is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     _apiResponse.AddErrorMessage($"the user '{user.UserName}' doesn't have a '{bankName}' account in the database");
-                    return BadRequest(_apiResponse);
+                    return NotFound(_apiResponse);
                 }
 
                 await _bankAccountRepository.RemoveAsync(bankAccount);
@@ -389,9 +404,12 @@ namespace OmniFi_API.Controllers.Banks
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorDeleteMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(Delete)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return _apiResponse;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
         }
 

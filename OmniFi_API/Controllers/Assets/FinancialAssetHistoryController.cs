@@ -19,18 +19,22 @@ namespace OmniFi_API.Controllers.Assets
         private readonly IFinancialAssetRepository _financialAssetRepository;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<FinancialAssetHistoryController> _logger;
         private ApiResponse _apiResponse;
+
         public FinancialAssetHistoryController(
             IFinancialAssetHistoryRepository financialAssetHistoryRepository,
             IUserRepository userRepository,
             IMapper mapper,
-            IFinancialAssetRepository financialAssetRepository)
+            IFinancialAssetRepository financialAssetRepository,
+            ILogger<FinancialAssetHistoryController> logger)
         {
             _financialAssetHistoryRepository = financialAssetHistoryRepository;
             _userRepository = userRepository;
             _mapper = mapper;
             _apiResponse = new ApiResponse();
             _financialAssetRepository = financialAssetRepository;
+            _logger = logger;
         }
 
 
@@ -47,7 +51,8 @@ namespace OmniFi_API.Controllers.Assets
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"the username or email '{usernameOrEmail}' does not exists");
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, usernameOrEmail));
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_apiResponse);
                 }
@@ -69,9 +74,12 @@ namespace OmniFi_API.Controllers.Assets
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(GetAllFinancialHistoryAsset)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return BadRequest(_apiResponse);
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500,_apiResponse);
             }
         }
 
@@ -82,17 +90,18 @@ namespace OmniFi_API.Controllers.Assets
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse>> GetFinancialHistoryByAssetId(
-            [Required] string username, 
+            [Required] string usernameOrEmail, 
             [Required] int financialAssetId)
         {
             try
             {
-                var user = await _userRepository.GetUserAsync(username);
+                var user = await _userRepository.GetUserAsync(usernameOrEmail);
 
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"the usernameOrEmail '{username}' does not exists");
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, usernameOrEmail));
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_apiResponse);
                 }
@@ -103,7 +112,7 @@ namespace OmniFi_API.Controllers.Assets
                 if (financialAsset is null)
                 {
                     _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"the user '{username}' don't have a financial asset with the following id '{financialAssetId}'");
+                    _apiResponse.AddErrorMessage($"the user '{usernameOrEmail}' don't have a financial asset with the following id '{financialAssetId}'");
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_apiResponse);
                 }
@@ -123,9 +132,12 @@ namespace OmniFi_API.Controllers.Assets
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(GetFinancialHistoryByAssetId)));
                 _apiResponse.IsSuccess = false;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return BadRequest(_apiResponse);
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
             }
 
         }
