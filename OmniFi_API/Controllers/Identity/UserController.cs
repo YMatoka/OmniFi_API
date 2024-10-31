@@ -76,25 +76,25 @@ namespace OmniFi_API.Controllers.Identity
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse>> Put(
-            [Required] string usernameOrEmail,
             [FromBody] UserUpdateDTO userUpdateDTO
         )
         {
             try
             {
-                var user = await _userRepository.GetUserAsync(usernameOrEmail);
+                var user = await _userRepository.GetUserAsync(userUpdateDTO.UsernameOrEmail);
 
                 if (user is null)
                 {
                     _apiResponse.IsSuccess = false;
                     _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
-                        .Replace(ErrorMessages.VariableTag, usernameOrEmail));
+                        .Replace(ErrorMessages.VariableTag, userUpdateDTO.UsernameOrEmail));
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_apiResponse);
                 }
 
-                if (!user.Equals(user, userUpdateDTO))
+                if (user.Equals(userUpdateDTO))
                 {
                     _apiResponse.IsSuccess = false;
                     _apiResponse.AddErrorMessage("There aren't no properties to update");
@@ -126,6 +126,7 @@ namespace OmniFi_API.Controllers.Identity
         public async Task<ActionResult<ApiResponse>> Register([FromBody] RegisterationRequestDTO registerationRequestDTO)
         {
             try
+
             {
                 if (_userRepository.IsUserExistsByUserName(registerationRequestDTO.UserName))
                 {

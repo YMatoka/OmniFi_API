@@ -16,6 +16,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System.ComponentModel.DataAnnotations;
 using OmniFi_API.Models.Banks;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
+using OmniFi_DTOs.Dtos.Identity;
 
 namespace OmniFi_API.Controllers.Cryptos
 {
@@ -27,6 +29,7 @@ namespace OmniFi_API.Controllers.Cryptos
         private readonly ICryptoExchangeAccountRepository _cryptoExchangeAccountRepository;
         private readonly IFinancialAssetRepository _financialAssetRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IStringEncryptionService _stringEncryptionService;
         private readonly ILogger<CryptoExchangeAccountController> _logger;
 
         private ApiResponse _apiResponse;
@@ -36,7 +39,8 @@ namespace OmniFi_API.Controllers.Cryptos
             IUserRepository userRepository,
             ICryptoExchangeAccountRepository cryptoExchangeAccountRepository,
             IFinancialAssetRepository financialAssetRepository,
-            ILogger<CryptoExchangeAccountController> logger)
+            ILogger<CryptoExchangeAccountController> logger,
+            IStringEncryptionService stringEncryptionService)
         {
             _cryptoExchangeRepository = cryptoExchangeRepository;
             _userRepository = userRepository;
@@ -44,6 +48,7 @@ namespace OmniFi_API.Controllers.Cryptos
             _financialAssetRepository = financialAssetRepository;
             _apiResponse = new();
             _logger = logger;
+            _stringEncryptionService = stringEncryptionService;
         }
 
         [HttpPost(nameof(Create))]
@@ -120,22 +125,116 @@ namespace OmniFi_API.Controllers.Cryptos
                 _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
                 return StatusCode(500, _apiResponse);
             }
-
         }
 
         [HttpPut(nameof(Put))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status304NotModified)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse>> Put(
-            [Required] string usernameOrEmail,
             [FromBody] CryptoExchangeAccountUpdateDTO cryptoExchangeAccountUpdateDTO
             )
         {
+            try
+            {
+                var user = await _userRepository.GetUserAsync(cryptoExchangeAccountUpdateDTO.UsernameOrEmail);
 
+                if (user is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                        .Replace(ErrorMessages.VariableTag, cryptoExchangeAccountUpdateDTO.UsernameOrEmail));
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
+
+                var cryptoExchange = await _cryptoExchangeRepository.GetAsync(
+                    filter: (x) => x.ExchangeName.ToUpper() == cryptoExchangeAccountUpdateDTO.CryptoExchangeName.ToUpper(),
+                    tracked: false);
+
+                if (cryptoExchange is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeAccountUpdateDTO.CryptoExchangeName}' does'nt exists in the database");
+                    return NotFound(_apiResponse);
+                }
+
+                var cryptoExchangeAccount = await _cryptoExchangeAccountRepository.GetWithEntitiesAsync(
+                    (x) => x.UserID == user.Id
+                    && x.CryptoExchangeID == cryptoExchange.CryptoExchangeID);
+
+
+                if (cryptoExchangeAccount is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.AddErrorMessage($"the user '{user.UserName}' doesn't have a '{cryptoExchange.ExchangeName}' account");
+                    return NotFound(_apiResponse);
+                }
+
+                var isCryptoExchangeEqual = await IsCryptoExchangeEqual(
+                    cryptoExchangeAccount,
+                    cryptoExchangeAccountUpdateDTO);
+
+                if(isCryptoExchangeEqual is not null && 
+                    isCryptoExchangeEqual == true)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.AddErrorMessage("There aren't no properties to update");
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_apiResponse);
+                }
+
+                if (isCryptoExchangeEqual is null)
+                {
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                    _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                    return StatusCode(500,_apiResponse);
+                }
+
+                _cryptoExchangeAccountRepository;
+
+                return NoContent();
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
+                   .Replace(ErrorMessages.VariableTag, nameof(Register)));
+                _apiResponse.IsSuccess = false;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, _apiResponse);
+            }
+        }
+
+        private async Task<bool?> IsCryptoExchangeEqual(
+            CryptoExchangeAccount cryptoExchangeAccount,
+            CryptoExchangeAccountUpdateDTO cryptoExchangeAccountUpdateDTO)
+        {
+            var aesKey = cryptoExchangeAccount.CryptoApiCredential?.AesKey?.Key;
+            var aesIV = cryptoExchangeAccount.CryptoApiCredential?.AesIV?.IV;
+
+            if (aesKey == null ||
+                aesIV == null ||
+                cryptoExchangeAccount.CryptoApiCredential?.ApiKey == null ||
+                cryptoExchangeAccount?.CryptoApiCredential?.ApiSecret == null)
+                return null;
+
+            var actualApiKey = await _stringEncryptionService.DecryptAsync(
+                cryptoExchangeAccount.CryptoApiCredential.ApiKey, aesKey, aesIV!);
+
+            var actualApiSecret = await _stringEncryptionService.DecryptAsync(
+                cryptoExchangeAccount.CryptoApiCredential.ApiSecret, aesKey, aesIV!);
+
+            return actualApiKey != cryptoExchangeAccountUpdateDTO.ApiKey || actualApiSecret != cryptoExchangeAccountUpdateDTO.ApiSecret ?
+                true :
+                false;
         }
 
         [HttpDelete(nameof(Delete))]
@@ -198,7 +297,6 @@ namespace OmniFi_API.Controllers.Cryptos
                     await _financialAssetRepository.UpdateAsync(financialAsset: financialAsset, isAccountExists:false);
                 }
 
-               
                 return NoContent();
             }
             catch (Exception ex)

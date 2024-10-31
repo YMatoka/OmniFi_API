@@ -23,14 +23,15 @@ namespace OmniFi_API.Models.Identity
         public int SelectedFiatCurrencyID { get; set; }
         public required FiatCurrency FiatCurrency { get; set; }
 
-        public  bool Equals(this ApplicationUser user, UserUpdateDTO userUpdateDTO)
+        public  bool Equals(UserUpdateDTO userUpdateDTO)
         {
+
             bool isEqual = true;
 
-            IsStringEqual(userUpdateDTO.Username, user.UserName, ref isEqual);
-            IsStringEqual(userUpdateDTO.FirstName, user.FirstName, ref isEqual);
-            IsStringEqual(userUpdateDTO.LastName, user.LastName, ref isEqual);
-            IsStringEqual(userUpdateDTO.FiatCurrencyCode, user.FiatCurrency.CurrencyCode, ref isEqual);
+            IsStringEqual(userUpdateDTO.Username, this.UserName, ref isEqual);
+            IsStringEqual(userUpdateDTO.FirstName, this.FirstName, ref isEqual);
+            IsStringEqual(userUpdateDTO.LastName, this.LastName, ref isEqual);
+            IsStringEqual(userUpdateDTO.FiatCurrencyCode, this.FiatCurrency.CurrencyCode, ref isEqual);
 
             return isEqual;
         }

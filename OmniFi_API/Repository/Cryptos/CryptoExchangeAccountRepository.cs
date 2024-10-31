@@ -74,13 +74,14 @@ namespace OmniFi_API.Repository.Cryptos
                 }
 
             }
+
             catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<CryptoExchangeAccount?> GetWithEntitiesAsync(Expression<Func<CryptoExchangeAccount,bool>> filter, bool tracked = false)
+        public async Task<CryptoExchangeAccount?> GetWithEntitiesAsync(Expression<Func<CryptoExchangeAccount, bool>> filter, bool tracked = false)
         {
             IQueryable<CryptoExchangeAccount> query = _dbSet;
 
@@ -90,7 +91,7 @@ namespace OmniFi_API.Repository.Cryptos
             }
 
             query = query.Where(filter);
-           
+
             await query
                 .Include(x => x.CryptoExchange)
                 .Include(x => x.CryptoApiCredential)
@@ -102,26 +103,37 @@ namespace OmniFi_API.Repository.Cryptos
             return query.FirstOrDefault();
         }
 
-        //async Task ICryptoExchangeAccountRepository.RemoveAsync(CryptoExchangeAccount cryptoExchangeAccount)
-        //{
-        //    try
-        //    {
-        //        using (var transaction = db.Database.BeginTransaction())
-        //        {
+        public async Task UpdateAsync(
+            CryptoExchangeAccount cryptoExchangeAccount,
+            CryptoExchangeAccountUpdateDTO cryptoExchangeAccountUpdateDTO)
+        {
+            try
+            {
+                if (cryptoExchangeAccountUpdateDTO.ApiKey is not null)
+                {
+                    cryptoExchangeAccount.CryptoApiCredential!.ApiKey = await _stringEncryptionService.EncryptAsync(
+                        cryptoExchangeAccountUpdateDTO.ApiKey,
+                        cryptoExchangeAccount!.CryptoApiCredential!.AesKey!.Key,
+                        cryptoExchangeAccount!.CryptoApiCredential!.AesIV!.IV);
+                }
 
-        //           // await _cryptoApiCredentialRepository.RemoveAsync(cryptoExchangeAccount.CryptoApiCredential);
-        //            await RemoveAsync(cryptoExchangeAccount);
+                if (cryptoExchangeAccountUpdateDTO.ApiSecret is not null)
+                {
+                    cryptoExchangeAccount.CryptoApiCredential!.ApiSecret = await _stringEncryptionService.EncryptAsync(
+                        cryptoExchangeAccountUpdateDTO.ApiSecret,
+                        cryptoExchangeAccount!.CryptoApiCredential!.AesKey!.Key,
+                        cryptoExchangeAccount!.CryptoApiCredential!.AesIV!.IV);
+                }
 
-        //            await transaction.CommitAsync();
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
+                await _cryptoApiCredentialRepository.UpdateAsync(cryptoExchangeAccount.CryptoApiCredential!);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
-        //        throw;
-        //    }
- 
-        //}
+
+        }
     }
 }
 
