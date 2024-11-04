@@ -5,6 +5,7 @@
         public static string SectionName => nameof(GocardlessBankInfoOptions);
 
         public Dictionary<string,BankInfo> BankInfos { get; set; } = new();
+
     }
 
     public class BankInfo

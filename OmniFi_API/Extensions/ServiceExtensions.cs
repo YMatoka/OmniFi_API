@@ -34,6 +34,7 @@ using OmniFi_API.Services.Api.Cryptos;
 using OmniFi_API.Services.Api.Banks;
 using OmniFi_API.Services.Api.Currencies;
 using Microsoft.AspNetCore.Identity;
+using OmniFi_API.Utilities;
 
 namespace OmniFi_API.Extensions
 {
@@ -44,8 +45,11 @@ namespace OmniFi_API.Extensions
         const string DefaultSQlConnection = "DefaultSQLConnection";
         const string DefaultSQLConnectionCreteil = "DefaultSQLConnectionCreteil";
         const string SecondSQlConnection = "SecondSQLConnection";
-        const string SecretKeySection = "UserRepositoryOptions:SecretKey";
-      
+
+        const string JwtSecretKeySection = "JwtSettingsOptions:Key";
+        const string JwtIssuerSection = "JwtSettingsOptions:Issuer";
+        const string JwtAudienceSection = "JwtSettingsOptions:Audience";
+
         public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllers();
@@ -63,7 +67,7 @@ namespace OmniFi_API.Extensions
             
             services.AddDbContext<ApplicationDbContext>(  
                 options => options
-                .UseSqlServer(configuration.GetConnectionString(DefaultSQlConnection))
+                .UseSqlServer(configuration.GetConnectionString(SecondSQlConnection))
                 .EnableDetailedErrors()
                 .EnableSensitiveDataLogging(true)
                 .EnableDetailedErrors()
@@ -136,9 +140,6 @@ namespace OmniFi_API.Extensions
 
             services.AddAutoMapper(typeof(MappingConfig));
 
-            services.Configure<UserRepositoryOptions>(
-                configuration.GetSection(UserRepositoryOptions.SectionName));
-
             services.Configure<FiatCurrencyServiceOptions>(
                 configuration.GetSection(FiatCurrencyServiceOptions.SectionName));
 
@@ -151,8 +152,8 @@ namespace OmniFi_API.Extensions
             services.Configure<GocardlessBankInfoOptions>(configuration.GetSection(
                 GocardlessBankInfoOptions.SectionName));
 
-            var secretKey = configuration.GetValue<string>(SecretKeySection);
-
+            services.Configure<JwtSettingsOptions>(configuration.GetSection(
+                JwtSettingsOptions.GetSectionName));
 
             services.AddAuthentication(x =>
             {
@@ -166,9 +167,14 @@ namespace OmniFi_API.Extensions
                 x.TokenValidationParameters = new TokenValidationParameters()
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey!)),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidIssuer = configuration[JwtIssuerSection],
+                    ValidAudience = configuration[JwtAudienceSection],
+                    ClockSkew = TimeSpan.Zero,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
+                        Environment.GetEnvironmentVariable(EnvironnementVariablesNames.JWT_SECRET) ?? string.Empty)),
                 };
             });
 

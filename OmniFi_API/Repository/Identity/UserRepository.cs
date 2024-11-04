@@ -23,14 +23,14 @@ namespace OmniFi_API.Repository.Identity
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IMapper _mapper;
-        private readonly UserRepositoryOptions _options;
+        private readonly JwtSettingsOptions _options;
 
         public UserRepository(
             ApplicationDbContext db,
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
             IMapper mapper,
-            IOptions<UserRepositoryOptions> options)
+            IOptions<JwtSettingsOptions> options)
         {
             _db = db;
             _userManager = userManager;
@@ -76,7 +76,7 @@ namespace OmniFi_API.Repository.Identity
             var roles = await _userManager.GetRolesAsync(user);
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var key = Encoding.ASCII.GetBytes(_options.SecretKey);
+            var key = Encoding.ASCII.GetBytes(_options.Key);
 
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
@@ -85,7 +85,9 @@ namespace OmniFi_API.Repository.Identity
                     new Claim(ClaimTypes.Name, user.Id.ToString()),
                     new Claim(ClaimTypes.Role, roles.FirstOrDefault()!)
                 }),
-                Expires = DateTime.UtcNow.AddDays(_options.ExpirationTime),
+                Issuer = _options.Issuer,
+                Audience = _options.Audience,
+                Expires = DateTime.UtcNow.AddDays(_options.ExpirationTimeInDays),
                 SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

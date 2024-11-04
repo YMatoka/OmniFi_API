@@ -14,8 +14,6 @@ builder.Host.UseSerilog((ctx, lc) =>
 
 Serilog.Debugging.SelfLog.Enable(Console.Error);
 
-
-
 // Set invariant culture for the whole project, for each thread
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
