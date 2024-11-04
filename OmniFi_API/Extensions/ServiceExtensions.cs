@@ -46,7 +46,6 @@ namespace OmniFi_API.Extensions
         const string DefaultSQLConnectionCreteil = "DefaultSQLConnectionCreteil";
         const string SecondSQlConnection = "SecondSQLConnection";
 
-        const string JwtSecretKeySection = "JwtSettingsOptions:Key";
         const string JwtIssuerSection = "JwtSettingsOptions:Issuer";
         const string JwtAudienceSection = "JwtSettingsOptions:Audience";
 
@@ -67,7 +66,7 @@ namespace OmniFi_API.Extensions
             
             services.AddDbContext<ApplicationDbContext>(  
                 options => options
-                .UseSqlServer(configuration.GetConnectionString(SecondSQlConnection))
+                .UseSqlServer(configuration.GetConnectionString(DefaultSQlConnection))
                 .EnableDetailedErrors()
                 .EnableSensitiveDataLogging(true)
                 .EnableDetailedErrors()
