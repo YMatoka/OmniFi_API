@@ -11,5 +11,6 @@ namespace OmniFi_API.Repository.Interfaces
         public Task CreateAsync(CryptoExchangeAccount cryptoExchangeAccount, CryptoExchangeAccountCreateDTO cryptoExchangeAccountCreateDTO);
 
         public Task<CryptoExchangeAccount?> GetWithEntitiesAsync(Expression<Func<CryptoExchangeAccount, bool>> filter, bool tracked = false);
+        Task UpdateAsync(CryptoExchangeAccount cryptoExchangeAccount, CryptoExchangeAccountUpdateDTO cryptoExchangeAccountUpdateDTO);
     }
 }

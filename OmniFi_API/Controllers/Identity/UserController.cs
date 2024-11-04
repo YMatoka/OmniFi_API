@@ -11,6 +11,8 @@ using OmniFi_API.Utilities;
 using System.Net;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
+using OmniFi_API.Models.Currencies;
+using OmniFi_API.Models.Cryptos;
 
 namespace OmniFi_API.Controllers.Identity
 {
@@ -20,15 +22,18 @@ namespace OmniFi_API.Controllers.Identity
     {
         private ApiResponse _apiResponse;
         private readonly IUserRepository _userRepository;
+        private readonly IRepository<FiatCurrency> _fiatCurrencyRepository;
         private readonly ILogger<UserController> _logger;
 
         public UserController(
-            IUserRepository userRepository, 
-            ILogger<UserController> logger)
+            IUserRepository userRepository,
+            ILogger<UserController> logger,
+            IRepository<FiatCurrency> fiatCurrencyRepository)
         {
             _userRepository = userRepository;
             _apiResponse = new();
             _logger = logger;
+            _fiatCurrencyRepository = fiatCurrencyRepository;
         }
 
         [HttpPost(nameof(Login))]
@@ -83,7 +88,7 @@ namespace OmniFi_API.Controllers.Identity
         {
             try
             {
-                var user = await _userRepository.GetUserAsync(userUpdateDTO.UsernameOrEmail);
+                var user = await _userRepository.GetWithAllAccountsAsync(userUpdateDTO.UsernameOrEmail, tracked:true);
 
                 if (user is null)
                 {
@@ -94,6 +99,22 @@ namespace OmniFi_API.Controllers.Identity
                     return NotFound(_apiResponse);
                 }
 
+                if (userUpdateDTO.FiatCurrencyCode is not null)
+                {
+
+                    var fiatCurrency = await _fiatCurrencyRepository.GetAsync(
+                        x => x.CurrencyCode == userUpdateDTO.FiatCurrencyCode);
+
+                    if (fiatCurrency is null)
+                    {
+                        _apiResponse.IsSuccess = false;
+                        _apiResponse.AddErrorMessage($"The fiat currency code '{userUpdateDTO.FiatCurrencyCode}' " +
+                            $"is not available, please choose another currency");
+                        _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                        return NotFound(_apiResponse);
+                    }
+                }
+
                 if (user.Equals(userUpdateDTO))
                 {
                     _apiResponse.IsSuccess = false;
@@ -101,6 +122,9 @@ namespace OmniFi_API.Controllers.Identity
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_apiResponse);
                 }
+
+
+     
 
                 await _userRepository.UpdateAsync(user, userUpdateDTO);
                 
@@ -111,7 +135,7 @@ namespace OmniFi_API.Controllers.Identity
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
-                   .Replace(ErrorMessages.VariableTag, nameof(Register)));
+                   .Replace(ErrorMessages.VariableTag, nameof(Put)));
                 _apiResponse.IsSuccess = false;
                 _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                 _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);

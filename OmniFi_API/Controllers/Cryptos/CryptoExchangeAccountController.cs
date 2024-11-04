@@ -18,6 +18,7 @@ using OmniFi_API.Models.Banks;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using OmniFi_DTOs.Dtos.Identity;
+using OmniFi_API.Models.Currencies;
 
 namespace OmniFi_API.Controllers.Cryptos
 {
@@ -165,7 +166,8 @@ namespace OmniFi_API.Controllers.Cryptos
 
                 var cryptoExchangeAccount = await _cryptoExchangeAccountRepository.GetWithEntitiesAsync(
                     (x) => x.UserID == user.Id
-                    && x.CryptoExchangeID == cryptoExchange.CryptoExchangeID);
+                    && x.CryptoExchangeID == cryptoExchange.CryptoExchangeID,
+                    tracked: true);
 
 
                 if (cryptoExchangeAccount is null)
@@ -186,6 +188,8 @@ namespace OmniFi_API.Controllers.Cryptos
                     _apiResponse.IsSuccess = false;
                     _apiResponse.AddErrorMessage("There aren't no properties to update");
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+
+
                     return BadRequest(_apiResponse);
                 }
 
@@ -197,7 +201,8 @@ namespace OmniFi_API.Controllers.Cryptos
                     return StatusCode(500,_apiResponse);
                 }
 
-                _cryptoExchangeAccountRepository;
+                await _cryptoExchangeAccountRepository
+                    .UpdateAsync(cryptoExchangeAccount, cryptoExchangeAccountUpdateDTO);
 
                 return NoContent();
 
@@ -223,7 +228,7 @@ namespace OmniFi_API.Controllers.Cryptos
             if (aesKey == null ||
                 aesIV == null ||
                 cryptoExchangeAccount.CryptoApiCredential?.ApiKey == null ||
-                cryptoExchangeAccount?.CryptoApiCredential?.ApiSecret == null)
+                cryptoExchangeAccount.CryptoApiCredential?.ApiSecret == null)
                 return null;
 
             var actualApiKey = await _stringEncryptionService.DecryptAsync(
@@ -232,9 +237,10 @@ namespace OmniFi_API.Controllers.Cryptos
             var actualApiSecret = await _stringEncryptionService.DecryptAsync(
                 cryptoExchangeAccount.CryptoApiCredential.ApiSecret, aesKey, aesIV!);
 
-            return actualApiKey != cryptoExchangeAccountUpdateDTO.ApiKey || actualApiSecret != cryptoExchangeAccountUpdateDTO.ApiSecret ?
-                true :
-                false;
+            return actualApiKey != cryptoExchangeAccountUpdateDTO.ApiKey && cryptoExchangeAccountUpdateDTO.ApiKey is not null || 
+                   actualApiSecret != cryptoExchangeAccountUpdateDTO.ApiSecret && cryptoExchangeAccountUpdateDTO.ApiSecret is not null ?
+                   false :
+                   true;
         }
 
         [HttpDelete(nameof(Delete))]

@@ -196,6 +196,9 @@ namespace OmniFi_API.Repository.Identity
             await query
                 .Include(x => x.BankAccounts)
                 .Include(x => x.CryptoExchangeAccounts)
+                .Include(x => x.FinancialAssets)
+                .Include(x => x.FinancialAssetsHistory)
+                .Include(x => x.FiatCurrency)
                 .LoadAsync();
 
             return await query.FirstOrDefaultAsync();

@@ -38,6 +38,7 @@ namespace OmniFi_API.Controllers.Portfolio
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse>> FetchPortfolio([Required] string usernameOrEmail)
         {
@@ -57,6 +58,15 @@ namespace OmniFi_API.Controllers.Portfolio
                 await _fetchPortfolioService.FetchPortfolio(usernameOrEmail);
 
                 return NoContent();
+            }
+            catch(UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
+                    .Replace(ErrorMessages.VariableTag, nameof(FetchPortfolio)));
+                _apiResponse.IsSuccess = false;
+                _apiResponse.StatusCode = HttpStatusCode.Unauthorized;
+                _apiResponse.AddErrorMessage(ex.Message);
+                return Unauthorized(_apiResponse);
             }
             catch (Exception ex)
             {

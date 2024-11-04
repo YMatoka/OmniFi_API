@@ -228,21 +228,33 @@ namespace OmniFi_API.Services.Portfolio
 
         private async Task FetchCryptoPortfolio(CryptoExchangeAccount cryptoExchangeAccount, ApplicationUser user)
         {
-            var portFolioDatas = await GetCryptoPortfolioDataAsync(cryptoExchangeAccount);
-
-
-            if (portFolioDatas is not null)
+            try
             {
+                var portFolioDatas = await GetCryptoPortfolioDataAsync(cryptoExchangeAccount);
 
-                await UpdateCryptoCurrencies(portFolioDatas);
-
-                await UpdateFiatCurrencies(portFolioDatas);
-
-                foreach (var portfolioData in portFolioDatas)
+                if (portFolioDatas is not null)
                 {
-                    await UpdatePortfolioAsync(user, portfolioData);
+
+                    await UpdateCryptoCurrencies(portFolioDatas);
+
+                    await UpdateFiatCurrencies(portFolioDatas);
+
+                    foreach (var portfolioData in portFolioDatas)
+                    {
+                        await UpdatePortfolioAsync(user, portfolioData);
+                    }
                 }
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                throw new UnauthorizedAccessException(
+                    ErrorMessages.ErrorUnauthorizedAccessMessage
+                    .Replace(ErrorMessages.VariableTag, cryptoExchangeAccount?.CryptoExchange?.ExchangeName),
+                    ex);
+            }
+
+
+
         }
 
         private async Task UpdateFiatCurrencies(IEnumerable<PortfolioData> portFolioDatas)

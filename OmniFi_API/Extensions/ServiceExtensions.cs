@@ -42,6 +42,7 @@ namespace OmniFi_API.Extensions
         public static string CorPolicyName = "AllowAll";
 
         const string DefaultSQlConnection = "DefaultSQLConnection";
+        const string DefaultSQLConnectionCreteil = "DefaultSQLConnectionCreteil";
         const string SecondSQlConnection = "SecondSQLConnection";
         const string SecretKeySection = "UserRepositoryOptions:SecretKey";
       
@@ -62,7 +63,7 @@ namespace OmniFi_API.Extensions
             
             services.AddDbContext<ApplicationDbContext>(  
                 options => options
-                .UseSqlServer(configuration.GetConnectionString(SecondSQlConnection))
+                .UseSqlServer(configuration.GetConnectionString(DefaultSQlConnection))
                 .EnableDetailedErrors()
                 .EnableSensitiveDataLogging(true)
                 .EnableDetailedErrors()

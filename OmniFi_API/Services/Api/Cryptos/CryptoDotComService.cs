@@ -79,6 +79,7 @@ namespace OmniFi_API.Services.Api.Cryptos
 
         private async Task<UserBalanceResponse?> GetUserBalance(string apiKey, string apiSecret)
         {
+
             var cryptoDotComRequest = new CryptoDotComRequest()
             {
                 id = new Random().Next(1000, 9999),
@@ -99,6 +100,7 @@ namespace OmniFi_API.Services.Api.Cryptos
 
                 Data = cryptoDotComRequest
             });
+
         }
 
         private string GetSign(CryptoDotComRequest request, string apiKey, string apiSecret)

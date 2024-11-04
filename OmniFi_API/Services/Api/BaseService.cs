@@ -86,15 +86,20 @@ namespace OmniFi_API.Services.Api
                         throw new Exception(responseContent);
                     }
 
+                    if (httpResponseMessage.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        throw new UnauthorizedAccessException(responseContent);
+                    }
+
                     var deserializeContent = JsonConvert.DeserializeObject<T>(responseContent);
 
 
                     return deserializeContent;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
