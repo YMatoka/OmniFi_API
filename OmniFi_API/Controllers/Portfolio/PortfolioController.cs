@@ -19,7 +19,7 @@ namespace OmniFi_API.Controllers.Portfolio
 
         IUserRepository _userRepository;
         private readonly ILogger<PortfolioController> _logger;
-        ApiResponse _apiResponse;
+        ApiResponse apiResponse;
 
         public PortfolioController(
             IFetchPortfolioService fetchPortfolioService,
@@ -30,7 +30,7 @@ namespace OmniFi_API.Controllers.Portfolio
 
             _userRepository = userRepository;
 
-            _apiResponse = new();
+            apiResponse = new();
             _logger = logger;
         }
 
@@ -48,11 +48,11 @@ namespace OmniFi_API.Controllers.Portfolio
 
                 if (user is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
                         .Replace(ErrorMessages.VariableTag, usernameOrEmail));
-                    return NotFound(_apiResponse);
+                    return NotFound(apiResponse);
                 }
 
                 await _fetchPortfolioService.FetchPortfolio(usernameOrEmail);
@@ -63,19 +63,19 @@ namespace OmniFi_API.Controllers.Portfolio
             {
                 _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(FetchPortfolio)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.Unauthorized;
-                _apiResponse.AddErrorMessage(ex.Message);
-                return Unauthorized(_apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.Unauthorized;
+                apiResponse.AddErrorMessage(ex.Message);
+                return Unauthorized(apiResponse);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(FetchPortfolio)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
 
         }

@@ -20,7 +20,7 @@ namespace OmniFi_API.Controllers.Assets
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<FinancialAssetHistoryController> _logger;
-        private ApiResponse _apiResponse;
+        private ApiResponse apiResponse;
 
         public FinancialAssetHistoryController(
             IFinancialAssetHistoryRepository financialAssetHistoryRepository,
@@ -32,7 +32,7 @@ namespace OmniFi_API.Controllers.Assets
             _financialAssetHistoryRepository = financialAssetHistoryRepository;
             _userRepository = userRepository;
             _mapper = mapper;
-            _apiResponse = new ApiResponse();
+            apiResponse = new ApiResponse();
             _financialAssetRepository = financialAssetRepository;
             _logger = logger;
         }
@@ -50,11 +50,11 @@ namespace OmniFi_API.Controllers.Assets
 
                 if (user is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
                         .Replace(ErrorMessages.VariableTag, usernameOrEmail));
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    return NotFound(_apiResponse);
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(apiResponse);
                 }
 
                 var financialHistoryAssets = await _financialAssetHistoryRepository
@@ -65,21 +65,21 @@ namespace OmniFi_API.Controllers.Assets
                     .OrderBy(x => x.RecordedAt)
                     .GroupBy(x => x.FinancialAssetId);
 
-                _apiResponse.IsSuccess = true;
-                _apiResponse.StatusCode = HttpStatusCode.OK;
-                _apiResponse.Result = financialHistoryAssetsDTO;
+                apiResponse.IsSuccess = true;
+                apiResponse.StatusCode = HttpStatusCode.OK;
+                apiResponse.Result = financialHistoryAssetsDTO;
 
-                return Ok(_apiResponse);
+                return Ok(apiResponse);
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(GetAllFinancialHistoryAsset)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500,_apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500,apiResponse);
             }
         }
 
@@ -99,11 +99,11 @@ namespace OmniFi_API.Controllers.Assets
 
                 if (user is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
                         .Replace(ErrorMessages.VariableTag, usernameOrEmail));
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    return NotFound(_apiResponse);
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(apiResponse);
                 }
 
                 var financialAsset = await _financialAssetRepository
@@ -111,10 +111,10 @@ namespace OmniFi_API.Controllers.Assets
 
                 if (financialAsset is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"the user '{usernameOrEmail}' don't have a financial asset with the following id '{financialAssetId}'");
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    return NotFound(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage($"the user '{usernameOrEmail}' don't have a financial asset with the following id '{financialAssetId}'");
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(apiResponse);
                 }
 
                 var financialAssetsHistory = await _financialAssetHistoryRepository
@@ -124,20 +124,20 @@ namespace OmniFi_API.Controllers.Assets
                 var financialAssetsHistoryDTO = _mapper.Map<IEnumerable<FinancialAssetHistoryDTO>>(financialAssetsHistory)
                     .OrderBy(x => x.RecordedAt);
 
-                _apiResponse.IsSuccess = true;
-                _apiResponse.StatusCode = HttpStatusCode.OK;
-                _apiResponse.Result = financialAssetsHistoryDTO;
+                apiResponse.IsSuccess = true;
+                apiResponse.StatusCode = HttpStatusCode.OK;
+                apiResponse.Result = financialAssetsHistoryDTO;
 
-                return Ok(_apiResponse);
+                return Ok(apiResponse);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(GetFinancialHistoryByAssetId)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
 
         }

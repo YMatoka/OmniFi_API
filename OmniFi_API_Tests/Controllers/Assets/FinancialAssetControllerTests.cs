@@ -31,7 +31,7 @@ namespace OmniFi_API_Tests.Controllers.Assets
         private Mock<IMapper>? _mapper;
         private Mock<ILogger<FinancialAssetController>>? _logger;
 
-        //private Mock<ApiResponse> _apiResponse;
+        //private Mock<ApiResponse> apiResponse;
         private FinancialAssetController? _ct;
 
         [SetUp]
@@ -43,7 +43,7 @@ namespace OmniFi_API_Tests.Controllers.Assets
             _userRepository = new Mock<IUserRepository>();
             _assetPlatform = new Mock<IRepository<AssetPlatform>>();
             _logger = new Mock<ILogger<FinancialAssetController>>();
-            //_apiResponse = new Mock<ApiResponse>();
+            //apiResponse = new Mock<ApiResponse>();
 
             _ct = new FinancialAssetController(
                 _financialAssetRepository.Object,
@@ -52,7 +52,7 @@ namespace OmniFi_API_Tests.Controllers.Assets
                 _assetPlatform.Object,
                 _logger.Object);
 
-            //_apiResponse = new Mock<ApiResponse>();
+            //apiResponse = new Mock<ApiResponse>();
         }
 
         [Test]

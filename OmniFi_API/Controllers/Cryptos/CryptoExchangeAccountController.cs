@@ -33,8 +33,6 @@ namespace OmniFi_API.Controllers.Cryptos
         private readonly IStringEncryptionService _stringEncryptionService;
         private readonly ILogger<CryptoExchangeAccountController> _logger;
 
-        private ApiResponse _apiResponse;
-
         public CryptoExchangeAccountController(
             IRepository<CryptoExchange> cryptoExchangeRepository,
             IUserRepository userRepository,
@@ -47,7 +45,7 @@ namespace OmniFi_API.Controllers.Cryptos
             _userRepository = userRepository;
             _cryptoExchangeAccountRepository = cryptoExchangeAccountRepository;
             _financialAssetRepository = financialAssetRepository;
-            _apiResponse = new();
+            apiResponse = new();
             _logger = logger;
             _stringEncryptionService = stringEncryptionService;
         }
@@ -59,19 +57,21 @@ namespace OmniFi_API.Controllers.Cryptos
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> Create([FromBody] CryptoExchangeAccountCreateDTO  cryptoExchangeAccountCreateDTO)
+        public async Task<ActionResult<ApiResponse<string>>> Create([FromBody] CryptoExchangeAccountCreateDTO  cryptoExchangeAccountCreateDTO)
         {
             try
             {
+                var apiResponse = new ApiResponse<>();
+
                 var user = await _userRepository.GetUserAsync(cryptoExchangeAccountCreateDTO.UsernameOrEmail);
 
                 if (user is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
                         .Replace(ErrorMessages.VariableTag, cryptoExchangeAccountCreateDTO.UsernameOrEmail));
-                    return NotFound(_apiResponse);
+                    return NotFound(apiResponse);
                 }
 
                 var cryptoExchange = await _cryptoExchangeRepository.GetAsync(
@@ -80,20 +80,20 @@ namespace OmniFi_API.Controllers.Cryptos
 
                 if (cryptoExchange is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeAccountCreateDTO.CryptoExchangeName}' does'nt exists in the database");
-                    return NotFound(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeAccountCreateDTO.CryptoExchangeName}' does'nt exists in the database");
+                    return NotFound(apiResponse);
                 }
 
                 if (await _cryptoExchangeAccountRepository.GetAsync(
                     (x) => x.UserID == user.Id
                     && x.CryptoExchangeID == cryptoExchange.CryptoExchangeID) is not null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage($"the user '{user.UserName}' already have a '{cryptoExchange.ExchangeName}' account");
-                    return BadRequest(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.AddErrorMessage($"the user '{user.UserName}' already have a '{cryptoExchange.ExchangeName}' account");
+                    return BadRequest(apiResponse);
                 }
 
                 var cryptoExchangeAccount = new CryptoExchangeAccount()
@@ -113,18 +113,18 @@ namespace OmniFi_API.Controllers.Cryptos
                     await _financialAssetRepository.UpdateAsync(financialAsset: financialAsset, isAccountExists: true);
                 }
 
-                _apiResponse.IsSuccess = true;
-                _apiResponse.StatusCode = HttpStatusCode.Created;
-                return CreatedAtAction(nameof(Create), _apiResponse);
+                apiResponse.IsSuccess = true;
+                apiResponse.StatusCode = HttpStatusCode.Created;
+                return CreatedAtAction(nameof(Create), apiResponse);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorCreateMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(Create)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
         }
 
@@ -145,11 +145,11 @@ namespace OmniFi_API.Controllers.Cryptos
 
                 if (user is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
                         .Replace(ErrorMessages.VariableTag, cryptoExchangeAccountUpdateDTO.UsernameOrEmail));
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    return NotFound(_apiResponse);
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(apiResponse);
                 }
 
                 var cryptoExchange = await _cryptoExchangeRepository.GetAsync(
@@ -158,10 +158,10 @@ namespace OmniFi_API.Controllers.Cryptos
 
                 if (cryptoExchange is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeAccountUpdateDTO.CryptoExchangeName}' does'nt exists in the database");
-                    return NotFound(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeAccountUpdateDTO.CryptoExchangeName}' does'nt exists in the database");
+                    return NotFound(apiResponse);
                 }
 
                 var cryptoExchangeAccount = await _cryptoExchangeAccountRepository.GetWithEntitiesAsync(
@@ -172,10 +172,10 @@ namespace OmniFi_API.Controllers.Cryptos
 
                 if (cryptoExchangeAccount is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage($"the user '{user.UserName}' doesn't have a '{cryptoExchange.ExchangeName}' account");
-                    return NotFound(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage($"the user '{user.UserName}' doesn't have a '{cryptoExchange.ExchangeName}' account");
+                    return NotFound(apiResponse);
                 }
 
                 var isCryptoExchangeEqual = await IsCryptoExchangeEqual(
@@ -185,20 +185,20 @@ namespace OmniFi_API.Controllers.Cryptos
                 if(isCryptoExchangeEqual is not null && 
                     isCryptoExchangeEqual == true)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage("There aren't no properties to update");
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage("There aren't no properties to update");
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
 
 
-                    return BadRequest(_apiResponse);
+                    return BadRequest(apiResponse);
                 }
 
                 if (isCryptoExchangeEqual is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                    _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                    return StatusCode(500,_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                    apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                    return StatusCode(500,apiResponse);
                 }
 
                 await _cryptoExchangeAccountRepository
@@ -211,10 +211,10 @@ namespace OmniFi_API.Controllers.Cryptos
             {
                 _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
                    .Replace(ErrorMessages.VariableTag, nameof(Register)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
         }
 
@@ -260,11 +260,11 @@ namespace OmniFi_API.Controllers.Cryptos
 
                 if (user is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
                         .Replace(ErrorMessages.VariableTag, usernameOrMail));
-                    return NotFound(_apiResponse);
+                    return NotFound(apiResponse);
                 }
 
                 var cryptoExchange = await _cryptoExchangeRepository.GetAsync(
@@ -273,10 +273,10 @@ namespace OmniFi_API.Controllers.Cryptos
 
                 if (cryptoExchange is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeName}' does'nt exists in the database");
-                    return NotFound(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage($"the crypto exchange '{cryptoExchangeName}' does'nt exists in the database");
+                    return NotFound(apiResponse);
                 }
 
 
@@ -286,10 +286,10 @@ namespace OmniFi_API.Controllers.Cryptos
 
                 if (cryptoExchangeAccount is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage($"the user '{user.UserName}' doesn't have a '{cryptoExchangeName}' account in the database");
-                    return BadRequest(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.AddErrorMessage($"the user '{user.UserName}' doesn't have a '{cryptoExchangeName}' account in the database");
+                    return BadRequest(apiResponse);
                 }
 
                 await _cryptoExchangeAccountRepository.RemoveAsync(cryptoExchangeAccount);
@@ -309,10 +309,10 @@ namespace OmniFi_API.Controllers.Cryptos
             {
                 _logger.LogError(ex, ErrorMessages.ErrorDeleteMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(Delete)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
         }
 

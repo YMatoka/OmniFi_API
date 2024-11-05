@@ -20,7 +20,7 @@ namespace OmniFi_API.Controllers.Identity
     [ApiController]
     public class UserController : ControllerBase
     {
-        private ApiResponse _apiResponse;
+        private ApiResponse apiResponse;
         private readonly IUserRepository _userRepository;
         private readonly IRepository<FiatCurrency> _fiatCurrencyRepository;
         private readonly ILogger<UserController> _logger;
@@ -31,7 +31,7 @@ namespace OmniFi_API.Controllers.Identity
             IRepository<FiatCurrency> fiatCurrencyRepository)
         {
             _userRepository = userRepository;
-            _apiResponse = new();
+            apiResponse = new();
             _logger = logger;
             _fiatCurrencyRepository = fiatCurrencyRepository;
         }
@@ -50,28 +50,28 @@ namespace OmniFi_API.Controllers.Identity
 
                 if (loginResponse is null || loginResponse.User is null || string.IsNullOrEmpty(loginResponse.Token))
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage($"Invalid credentials\n\n" +
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.AddErrorMessage($"Invalid credentials\n\n" +
                         $"Your entered credentials may be incorrect or email sign-in is disabled for your account.\n\n" +
                         $"Please check your credentials and try again.");
-                    return BadRequest(_apiResponse);
+                    return BadRequest(apiResponse);
                 }
 
-                _apiResponse.StatusCode = HttpStatusCode.OK;
-                _apiResponse.IsSuccess = true;
-                _apiResponse.Result = loginResponse;
-                return Ok(_apiResponse);
+                apiResponse.StatusCode = HttpStatusCode.OK;
+                apiResponse.IsSuccess = true;
+                apiResponse.Result = loginResponse;
+                return Ok(apiResponse);
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(Login)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
 
         }
@@ -92,11 +92,11 @@ namespace OmniFi_API.Controllers.Identity
 
                 if (user is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
                         .Replace(ErrorMessages.VariableTag, userUpdateDTO.UsernameOrEmail));
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    return NotFound(_apiResponse);
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(apiResponse);
                 }
 
                 if (userUpdateDTO.FiatCurrencyCode is not null)
@@ -107,20 +107,20 @@ namespace OmniFi_API.Controllers.Identity
 
                     if (fiatCurrency is null)
                     {
-                        _apiResponse.IsSuccess = false;
-                        _apiResponse.AddErrorMessage($"The fiat currency code '{userUpdateDTO.FiatCurrencyCode}' " +
+                        apiResponse.IsSuccess = false;
+                        apiResponse.AddErrorMessage($"The fiat currency code '{userUpdateDTO.FiatCurrencyCode}' " +
                             $"is not available, please choose another currency");
-                        _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                        return NotFound(_apiResponse);
+                        apiResponse.StatusCode = HttpStatusCode.NotFound;
+                        return NotFound(apiResponse);
                     }
                 }
 
                 if (user.Equals(userUpdateDTO))
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage("There aren't no properties to update");
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    return BadRequest(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage("There aren't no properties to update");
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(apiResponse);
                 }
 
 
@@ -136,10 +136,10 @@ namespace OmniFi_API.Controllers.Identity
             {
                 _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
                    .Replace(ErrorMessages.VariableTag, nameof(Put)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
         }
 
@@ -154,18 +154,18 @@ namespace OmniFi_API.Controllers.Identity
             {
                 if (_userRepository.IsUserExistsByUserName(registerationRequestDTO.UserName))
                 {
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"username '{registerationRequestDTO.UserName}' already exists");
-                    return BadRequest(_apiResponse);
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage($"username '{registerationRequestDTO.UserName}' already exists");
+                    return BadRequest(apiResponse);
                 }
 
                 if (_userRepository.IsUserExistsByEmail(registerationRequestDTO.Email))
                 {
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage($"email '{registerationRequestDTO.Email}' already exists");
-                    return BadRequest(_apiResponse);
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage($"email '{registerationRequestDTO.Email}' already exists");
+                    return BadRequest(apiResponse);
                 }
 
                 var response = await _userRepository.Register(registerationRequestDTO);
@@ -178,25 +178,25 @@ namespace OmniFi_API.Controllers.Identity
                         +  string.Join(Environment.NewLine, response.ErrorMessages);
 
                     _logger.LogWarning(errorMessages);
-                    _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                    return StatusCode(500, _apiResponse);
+                    apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                    apiResponse.IsSuccess = false;
+                    apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                    return StatusCode(500, apiResponse);
                 }
 
-                _apiResponse.IsSuccess = true;
-                _apiResponse.StatusCode = HttpStatusCode.Created;
-                _apiResponse.Result = response.User;
-                return CreatedAtAction(nameof(Register), _apiResponse);
+                apiResponse.IsSuccess = true;
+                apiResponse.StatusCode = HttpStatusCode.Created;
+                apiResponse.Result = response.User;
+                return CreatedAtAction(nameof(Register), apiResponse);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorPostMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(Register)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
 
         }
@@ -215,11 +215,11 @@ namespace OmniFi_API.Controllers.Identity
 
                 if (user is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage(ErrorMessages.ErrorUserNotFoundMessage
                         .Replace(ErrorMessages.VariableTag, usernameOrEmail));
-                    return NotFound(_apiResponse);
+                    return NotFound(apiResponse);
                 }
 
                 await _userRepository.RemoveAsync(user);
@@ -230,10 +230,10 @@ namespace OmniFi_API.Controllers.Identity
             {
                 _logger.LogError(ex, ErrorMessages.ErrorDeleteMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(Delete)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
         }
 

@@ -17,14 +17,14 @@ namespace OmniFi_API.Controllers.Cryptos
         private readonly IRepository<CryptoExchange> _cryptoRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<CryptoExchangeController> _logger;
-        private ApiResponse _apiResponse;
+        private ApiResponse apiResponse;
 
 
         public CryptoExchangeController(IRepository<CryptoExchange> cryptoRepository, IMapper mapper, ILogger<CryptoExchangeController> logger)
         {
             _cryptoRepository = cryptoRepository;
             _mapper = mapper;
-            _apiResponse = new ApiResponse();
+            apiResponse = new ApiResponse();
             _logger = logger;
         }
 
@@ -39,37 +39,37 @@ namespace OmniFi_API.Controllers.Cryptos
             {
                 if (id == 0)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage("The id 0 is not valid");
-                    return BadRequest(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.AddErrorMessage("The id 0 is not valid");
+                    return BadRequest(apiResponse);
                 }
 
                 var cryptoExchange = await _cryptoRepository.GetAsync(x => x.CryptoExchangeID == id);
 
                 if (cryptoExchange is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage($"There isn't a crypto exchange with the id {id}");
-                    return NotFound(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage($"There isn't a crypto exchange with the id {id}");
+                    return NotFound(apiResponse);
                 }
 
-                _apiResponse.IsSuccess = true;
-                _apiResponse.StatusCode = HttpStatusCode.OK;
-                _apiResponse.Result = _mapper.Map<CryptoExchangeDTO>(cryptoExchange);
+                apiResponse.IsSuccess = true;
+                apiResponse.StatusCode = HttpStatusCode.OK;
+                apiResponse.Result = _mapper.Map<CryptoExchangeDTO>(cryptoExchange);
 
-                return Ok(_apiResponse);
+                return Ok(apiResponse);
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(GetCryptoExchange)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
         }
 
@@ -83,21 +83,21 @@ namespace OmniFi_API.Controllers.Cryptos
             {
                 var cryptoExchanges = await _cryptoRepository.GetAllAsync();
 
-                _apiResponse.IsSuccess = true;
-                _apiResponse.StatusCode= HttpStatusCode.OK;
-                _apiResponse.Result = _mapper.Map<IEnumerable<CryptoExchangeDTO>>(cryptoExchanges);
+                apiResponse.IsSuccess = true;
+                apiResponse.StatusCode= HttpStatusCode.OK;
+                apiResponse.Result = _mapper.Map<IEnumerable<CryptoExchangeDTO>>(cryptoExchanges);
 
-                return Ok(_apiResponse);
+                return Ok(apiResponse);
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(GetCryptoExchanges)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
 
         }

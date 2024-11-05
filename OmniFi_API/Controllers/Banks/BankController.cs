@@ -17,14 +17,14 @@ namespace OmniFi_API.Controllers.Banks
     public class BankController : ControllerBase
     {
         private readonly IRepository<Bank> _bankRepository;
-        private ApiResponse _apiResponse;
+        private ApiResponse apiResponse;
         private readonly IMapper _mapper;
         private readonly ILogger<BankController> _logger;
 
         public BankController(IRepository<Bank> bankRepository, IMapper mapper, ILogger<BankController> logger)
         {
             _bankRepository = bankRepository;
-            _apiResponse = new ApiResponse();
+            apiResponse = new ApiResponse();
             _mapper = mapper;
             _logger = logger;
         }
@@ -41,37 +41,37 @@ namespace OmniFi_API.Controllers.Banks
             {
                 if(id == 0)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    _apiResponse.AddErrorMessage("The id 0 is not valid");
-                    return BadRequest(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.AddErrorMessage("The id 0 is not valid");
+                    return BadRequest(apiResponse);
                 }
 
                 var bank = await _bankRepository.GetAsync(x => x.BankID == id);
 
                 if(bank is null)
                 {
-                    _apiResponse.IsSuccess = false;
-                    _apiResponse.StatusCode =HttpStatusCode.NotFound;
-                    _apiResponse.AddErrorMessage($"There isn't a bank with the id {id}");
-                    return NotFound(_apiResponse);
+                    apiResponse.IsSuccess = false;
+                    apiResponse.StatusCode =HttpStatusCode.NotFound;
+                    apiResponse.AddErrorMessage($"There isn't a bank with the id {id}");
+                    return NotFound(apiResponse);
                 }
 
-                _apiResponse.IsSuccess = true;
-                _apiResponse.StatusCode=HttpStatusCode.OK;
-                _apiResponse.Result = _mapper.Map<BankDTO>(bank);
+                apiResponse.IsSuccess = true;
+                apiResponse.StatusCode=HttpStatusCode.OK;
+                apiResponse.Result = _mapper.Map<BankDTO>(bank);
 
-                return Ok(_apiResponse);
+                return Ok(apiResponse);
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(GetBank)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
         }
 
@@ -84,21 +84,21 @@ namespace OmniFi_API.Controllers.Banks
             {
                 var banks = await _bankRepository.GetAllAsync();
 
-                _apiResponse.IsSuccess = true;
-                _apiResponse.StatusCode = HttpStatusCode.OK;
-                _apiResponse.Result = _mapper.Map<IEnumerable<BankDTO>>(banks);
+                apiResponse.IsSuccess = true;
+                apiResponse.StatusCode = HttpStatusCode.OK;
+                apiResponse.Result = _mapper.Map<IEnumerable<BankDTO>>(banks);
 
-                return Ok(_apiResponse);
+                return Ok(apiResponse);
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.ErrorGetMethodMessage
                     .Replace(ErrorMessages.VariableTag, nameof(GetBanks)));
-                _apiResponse.IsSuccess = false;
-                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
-                _apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
-                return StatusCode(500, _apiResponse);
+                apiResponse.IsSuccess = false;
+                apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                apiResponse.AddErrorMessage(ErrorMessages.Error500Message);
+                return StatusCode(500, apiResponse);
             }
         }
 
