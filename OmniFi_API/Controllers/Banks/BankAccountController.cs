@@ -46,7 +46,6 @@ namespace OmniFi_API.Controllers.Banks
         private const string WebhookSecretKey = "GocardlessWebhookSecret";
         private readonly IConfiguration _configuration;
         private readonly ILogger<BankAccountController> _logger;
-        private ApiResponse apiResponse;
 
         public BankAccountController(
             IUserRepository userRepository,
@@ -62,7 +61,6 @@ namespace OmniFi_API.Controllers.Banks
             ILogger<BankAccountController> logger)
         {
             _userRepository = userRepository;
-            apiResponse = new();
             _bankAccountRepository = bankAccountRepository;
             _banksRepository = banksRepository;
             _bankInfoService = bankInfoService;
@@ -84,8 +82,10 @@ namespace OmniFi_API.Controllers.Banks
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> CreateAuthorisationLink([FromBody] AuthorisationLinkCreateDTO authorisationCreateDTO)
+        public async Task<ActionResult<ApiResponse<AuthorisationLinkDTO>>> CreateAuthorisationLink([FromBody] AuthorisationLinkCreateDTO authorisationCreateDTO)
         {
+            var apiResponse = new ApiResponse<AuthorisationLinkDTO>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(authorisationCreateDTO.UsernameOrEmail);
@@ -188,13 +188,16 @@ namespace OmniFi_API.Controllers.Banks
             }
 
         }
+
         [HttpGet(nameof(AuthorizationCallback))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> AuthorizationCallback(
+        public async Task<ActionResult<ApiResponse<string?>>> AuthorizationCallback(
             [FromQuery(Name = "ref")] string referenceId)
         {
+            
+            var apiResponse = new ApiResponse<string?>();
 
             try
             {
@@ -242,10 +245,12 @@ namespace OmniFi_API.Controllers.Banks
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ApiResponse>> GetAccessDuration(
+        public async Task<ActionResult<ApiResponse<BankAccessDurationDTO>>> GetAccessDuration(
             [Required] string usernameOrEmail,
             [Required] string bankName)
         {
+
+            var apiResponse = new ApiResponse<BankAccessDurationDTO>();
 
             try
             {
@@ -344,10 +349,12 @@ namespace OmniFi_API.Controllers.Banks
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> Delete(
+        public async Task<ActionResult<ApiResponse<string?>>> Delete(
             [Required] string usernameOrMail,
             [Required] string bankName)
         {
+            var apiResponse = new ApiResponse<string?>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(usernameOrMail);
@@ -400,7 +407,7 @@ namespace OmniFi_API.Controllers.Banks
 
                 apiResponse.StatusCode = HttpStatusCode.OK;
 
-                return Ok(apiResponse);
+                return NoContent();
             }
             catch (Exception ex)
             {

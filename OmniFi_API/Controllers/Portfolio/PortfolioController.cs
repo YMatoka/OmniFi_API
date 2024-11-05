@@ -6,6 +6,7 @@ using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Services.Interfaces;
 using OmniFi_API.Utilities;
 using OmniFi_DTOs.Dtos.Api;
+using OmniFi_DTOs.Dtos.Banks;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 
@@ -19,7 +20,6 @@ namespace OmniFi_API.Controllers.Portfolio
 
         IUserRepository _userRepository;
         private readonly ILogger<PortfolioController> _logger;
-        ApiResponse apiResponse;
 
         public PortfolioController(
             IFetchPortfolioService fetchPortfolioService,
@@ -30,7 +30,6 @@ namespace OmniFi_API.Controllers.Portfolio
 
             _userRepository = userRepository;
 
-            apiResponse = new();
             _logger = logger;
         }
 
@@ -40,8 +39,10 @@ namespace OmniFi_API.Controllers.Portfolio
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> FetchPortfolio([Required] string usernameOrEmail)
+        public async Task<ActionResult<ApiResponse<string?>>> FetchPortfolio([Required] string usernameOrEmail)
         {
+            var apiResponse = new ApiResponse<string?>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(usernameOrEmail);

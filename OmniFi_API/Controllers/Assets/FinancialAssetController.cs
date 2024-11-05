@@ -44,8 +44,7 @@ namespace OmniFi_API.Controllers.Assets
         [HttpGet(nameof(GetFinancialAssets))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError
-            )]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
         public async Task<ActionResult<ApiResponse<IEnumerable<FinancialAssetDTO>>>> GetFinancialAssets([Required] string usernameOrEmail)

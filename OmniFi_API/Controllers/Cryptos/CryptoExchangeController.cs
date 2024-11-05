@@ -7,6 +7,7 @@ using OmniFi_API.Repository.Interfaces;
 using OmniFi_API.Utilities;
 using System.Net;
 using System.ComponentModel.DataAnnotations;
+using OmniFi_DTOs.Dtos.Banks;
 
 namespace OmniFi_API.Controllers.Cryptos
 {
@@ -17,14 +18,12 @@ namespace OmniFi_API.Controllers.Cryptos
         private readonly IRepository<CryptoExchange> _cryptoRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<CryptoExchangeController> _logger;
-        private ApiResponse apiResponse;
 
 
         public CryptoExchangeController(IRepository<CryptoExchange> cryptoRepository, IMapper mapper, ILogger<CryptoExchangeController> logger)
         {
             _cryptoRepository = cryptoRepository;
             _mapper = mapper;
-            apiResponse = new ApiResponse();
             _logger = logger;
         }
 
@@ -33,8 +32,10 @@ namespace OmniFi_API.Controllers.Cryptos
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> GetCryptoExchange([Required] int id)
+        public async Task<ActionResult<ApiResponse<CryptoExchangeDTO>>> GetCryptoExchange([Required] int id)
         {
+            var apiResponse = new ApiResponse<CryptoExchangeDTO>();
+
             try
             {
                 if (id == 0)
@@ -76,8 +77,10 @@ namespace OmniFi_API.Controllers.Cryptos
         [HttpGet(nameof(GetCryptoExchanges))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> GetCryptoExchanges()
+        public async Task<ActionResult<ApiResponse<IEnumerable<CryptoExchangeDTO>>>> GetCryptoExchanges()
         {
+
+            var apiResponse = new ApiResponse<IEnumerable<CryptoExchangeDTO>>();
 
             try
             {

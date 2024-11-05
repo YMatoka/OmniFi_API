@@ -17,14 +17,12 @@ namespace OmniFi_API.Controllers.Banks
     public class BankController : ControllerBase
     {
         private readonly IRepository<Bank> _bankRepository;
-        private ApiResponse apiResponse;
         private readonly IMapper _mapper;
         private readonly ILogger<BankController> _logger;
 
         public BankController(IRepository<Bank> bankRepository, IMapper mapper, ILogger<BankController> logger)
         {
             _bankRepository = bankRepository;
-            apiResponse = new ApiResponse();
             _mapper = mapper;
             _logger = logger;
         }
@@ -35,8 +33,10 @@ namespace OmniFi_API.Controllers.Banks
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> GetBank([Required] int id)
+        public async Task<ActionResult<ApiResponse<BankDTO>>> GetBank([Required] int id)
         {
+            var apiResponse = new ApiResponse<BankDTO>();
+
             try
             {
                 if(id == 0)
@@ -78,8 +78,11 @@ namespace OmniFi_API.Controllers.Banks
         [HttpGet(nameof(GetBanks))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> GetBanks()
+        public async Task<ActionResult<ApiResponse<IEnumerable<BankDTO>>>> GetBanks()
         {
+
+            var apiResponse = new ApiResponse<IEnumerable<BankDTO>>();
+
             try
             {
                 var banks = await _bankRepository.GetAllAsync();

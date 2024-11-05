@@ -41,9 +41,9 @@ namespace OmniFi_API.Controllers.Assets
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse<IEnumerable<FinancialAssetHistoryDTO>>> GetAllFinancialHistoryAsset([Required] string usernameOrEmail)
+        public async Task<ActionResult<ApiResponse<IEnumerable<IGrouping<int,FinancialAssetHistoryDTO>>>>> GetAllFinancialHistoryAsset([Required] string usernameOrEmail)
         {
-            var apiResponse = new ApiResponse<IEnumerable<FinancialAssetDTO>>();
+            var apiResponse = new ApiResponse<IEnumerable<IGrouping<int, FinancialAssetHistoryDTO>>>();
 
             try
             {
@@ -90,10 +90,12 @@ namespace OmniFi_API.Controllers.Assets
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> GetFinancialHistoryByAssetId(
+        public async Task<ActionResult<ApiResponse<IEnumerable<FinancialAssetHistoryDTO>>>> GetFinancialHistoryByAssetId(
             [Required] string usernameOrEmail, 
             [Required] int financialAssetId)
         {
+            var apiResponse = new ApiResponse<IEnumerable<FinancialAssetHistoryDTO>>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(usernameOrEmail);

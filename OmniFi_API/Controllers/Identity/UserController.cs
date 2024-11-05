@@ -13,6 +13,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using OmniFi_API.Models.Currencies;
 using OmniFi_API.Models.Cryptos;
+using OmniFi_DTOs.Dtos.Banks;
 
 namespace OmniFi_API.Controllers.Identity
 {
@@ -20,7 +21,6 @@ namespace OmniFi_API.Controllers.Identity
     [ApiController]
     public class UserController : ControllerBase
     {
-        private ApiResponse apiResponse;
         private readonly IUserRepository _userRepository;
         private readonly IRepository<FiatCurrency> _fiatCurrencyRepository;
         private readonly ILogger<UserController> _logger;
@@ -31,7 +31,6 @@ namespace OmniFi_API.Controllers.Identity
             IRepository<FiatCurrency> fiatCurrencyRepository)
         {
             _userRepository = userRepository;
-            apiResponse = new();
             _logger = logger;
             _fiatCurrencyRepository = fiatCurrencyRepository;
         }
@@ -40,8 +39,9 @@ namespace OmniFi_API.Controllers.Identity
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginRequestDTO loginRequestDTO)
+        public async Task<ActionResult<ApiResponse<LoginResponseDTO>>> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
+            var apiResponse = new ApiResponse<LoginResponseDTO>();
 
             try
             {
@@ -82,10 +82,13 @@ namespace OmniFi_API.Controllers.Identity
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> Put(
+        public async Task<ActionResult<ApiResponse<string?>>> Put(
             [FromBody] UserUpdateDTO userUpdateDTO
         )
         {
+
+            var apiResponse = new ApiResponse<string?>();
+
             try
             {
                 var user = await _userRepository.GetWithAllAccountsAsync(userUpdateDTO.UsernameOrEmail, tracked:true);
@@ -123,9 +126,6 @@ namespace OmniFi_API.Controllers.Identity
                     return BadRequest(apiResponse);
                 }
 
-
-     
-
                 await _userRepository.UpdateAsync(user, userUpdateDTO);
                 
                 return NoContent();
@@ -147,10 +147,11 @@ namespace OmniFi_API.Controllers.Identity
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> Register([FromBody] RegisterationRequestDTO registerationRequestDTO)
+        public async Task<ActionResult<ApiResponse<UserDTO>>> Register([FromBody] RegisterationRequestDTO registerationRequestDTO)
         {
-            try
+            var apiResponse = new ApiResponse<UserDTO>();
 
+            try
             {
                 if (_userRepository.IsUserExistsByUserName(registerationRequestDTO.UserName))
                 {
@@ -207,8 +208,11 @@ namespace OmniFi_API.Controllers.Identity
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> Delete([Required] string usernameOrEmail)
+        public async Task<ActionResult<ApiResponse<string?>>> Delete([Required] string usernameOrEmail)
         {
+
+            var apiResponse = new ApiResponse<string?>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(usernameOrEmail);

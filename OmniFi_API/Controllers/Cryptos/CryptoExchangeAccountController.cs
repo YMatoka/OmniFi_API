@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using OmniFi_DTOs.Dtos.Identity;
 using OmniFi_API.Models.Currencies;
+using Microsoft.IdentityModel.Tokens;
 
 namespace OmniFi_API.Controllers.Cryptos
 {
@@ -45,7 +46,6 @@ namespace OmniFi_API.Controllers.Cryptos
             _userRepository = userRepository;
             _cryptoExchangeAccountRepository = cryptoExchangeAccountRepository;
             _financialAssetRepository = financialAssetRepository;
-            apiResponse = new();
             _logger = logger;
             _stringEncryptionService = stringEncryptionService;
         }
@@ -240,8 +240,8 @@ namespace OmniFi_API.Controllers.Cryptos
             var actualApiSecret = await _stringEncryptionService.DecryptAsync(
                 cryptoExchangeAccount.CryptoApiCredential.ApiSecret, aesKey, aesIV!);
 
-            return actualApiKey != cryptoExchangeAccountUpdateDTO.ApiKey && cryptoExchangeAccountUpdateDTO.ApiKey is not null || 
-                   actualApiSecret != cryptoExchangeAccountUpdateDTO.ApiSecret && cryptoExchangeAccountUpdateDTO.ApiSecret is not null ?
+            return actualApiKey != cryptoExchangeAccountUpdateDTO.ApiKey && !string.IsNullOrEmpty(cryptoExchangeAccountUpdateDTO.ApiKey) || 
+                   actualApiSecret != cryptoExchangeAccountUpdateDTO.ApiSecret && !string.IsNullOrEmpty(cryptoExchangeAccountUpdateDTO.ApiSecret) ?
                    false :
                    true;
         }
