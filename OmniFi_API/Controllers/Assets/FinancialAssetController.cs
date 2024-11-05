@@ -27,8 +27,6 @@ namespace OmniFi_API.Controllers.Assets
         private readonly IMapper _mapper;
         private readonly ILogger<FinancialAssetController> _logger;
 
-        private ApiResponse apiResponse;
-
         public FinancialAssetController(
             IFinancialAssetRepository financialAssetRepository,
             IMapper mapper,
@@ -39,7 +37,6 @@ namespace OmniFi_API.Controllers.Assets
             _financialAssetRepository = financialAssetRepository;
             _mapper = mapper;
             _userRepository = userRepository;
-            apiResponse = new ApiResponse();
             _assetPlatform = assetPlatform;
             _logger = logger;
         }
@@ -51,8 +48,10 @@ namespace OmniFi_API.Controllers.Assets
             )]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> GetFinancialAssets([Required] string usernameOrEmail)
+        public async Task<ActionResult<ApiResponse<IEnumerable<FinancialAssetDTO>>>> GetFinancialAssets([Required] string usernameOrEmail)
         {
+            var apiResponse = new ApiResponse<IEnumerable<FinancialAssetDTO>>();
+
             try
             {
 
@@ -99,8 +98,10 @@ namespace OmniFi_API.Controllers.Assets
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> GetAggregatedFinancialAssets([FromQuery] string usernameOrEmail)
+        public async Task<ActionResult<ApiResponse<AggregatedFinancialAssetsDTO>>> GetAggregatedFinancialAssets([FromQuery] string usernameOrEmail)
         {
+            var apiResponse = new ApiResponse<AggregatedFinancialAssetsDTO>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(usernameOrEmail);
@@ -146,10 +147,13 @@ namespace OmniFi_API.Controllers.Assets
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> GetFinancialAssetsByAssetId(
+        public async Task<ActionResult<ApiResponse<FinancialAssetDTO>>> GetFinancialAssetsByAssetId(
             [Required] string usernameOrEmail,
             [Required] int financialAssetId)
         {
+
+            var apiResponse = new ApiResponse<FinancialAssetDTO>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(usernameOrEmail);

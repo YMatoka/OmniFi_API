@@ -20,7 +20,7 @@ namespace OmniFi_API.Controllers.Assets
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<FinancialAssetHistoryController> _logger;
-        private ApiResponse apiResponse;
+     
 
         public FinancialAssetHistoryController(
             IFinancialAssetHistoryRepository financialAssetHistoryRepository,
@@ -32,7 +32,6 @@ namespace OmniFi_API.Controllers.Assets
             _financialAssetHistoryRepository = financialAssetHistoryRepository;
             _userRepository = userRepository;
             _mapper = mapper;
-            apiResponse = new ApiResponse();
             _financialAssetRepository = financialAssetRepository;
             _logger = logger;
         }
@@ -42,8 +41,10 @@ namespace OmniFi_API.Controllers.Assets
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> GetAllFinancialHistoryAsset([Required] string usernameOrEmail)
+        public async Task<ActionResult<ApiResponse<IEnumerable<FinancialAssetHistoryDTO>>> GetAllFinancialHistoryAsset([Required] string usernameOrEmail)
         {
+            var apiResponse = new ApiResponse<IEnumerable<FinancialAssetDTO>>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(usernameOrEmail);

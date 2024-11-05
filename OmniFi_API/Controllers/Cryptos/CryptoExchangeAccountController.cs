@@ -57,12 +57,13 @@ namespace OmniFi_API.Controllers.Cryptos
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse<string>>> Create([FromBody] CryptoExchangeAccountCreateDTO  cryptoExchangeAccountCreateDTO)
+        public async Task<ActionResult<ApiResponse<string?>>> Create([FromBody] CryptoExchangeAccountCreateDTO  cryptoExchangeAccountCreateDTO)
         {
+            var apiResponse = new ApiResponse<string?>();
+
             try
             {
-                var apiResponse = new ApiResponse<>();
-
+                
                 var user = await _userRepository.GetUserAsync(cryptoExchangeAccountCreateDTO.UsernameOrEmail);
 
                 if (user is null)
@@ -135,10 +136,12 @@ namespace OmniFi_API.Controllers.Cryptos
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = Roles.User)]
-        public async Task<ActionResult<ApiResponse>> Put(
+        public async Task<ActionResult<ApiResponse<string?>>> Put(
             [FromBody] CryptoExchangeAccountUpdateDTO cryptoExchangeAccountUpdateDTO
             )
         {
+            var apiResponse = new ApiResponse<string?>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(cryptoExchangeAccountUpdateDTO.UsernameOrEmail);
@@ -250,10 +253,12 @@ namespace OmniFi_API.Controllers.Cryptos
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles= Roles.User)]
-        public async Task<ActionResult<ApiResponse>> Delete(
+        public async Task<ActionResult<ApiResponse<string?>>> Delete(
             [Required] string usernameOrMail,
             [Required] string cryptoExchangeName)
         {
+            var apiResponse = new ApiResponse<string?>();
+
             try
             {
                 var user = await _userRepository.GetUserAsync(usernameOrMail);
