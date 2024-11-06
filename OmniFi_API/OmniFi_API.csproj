@@ -7,6 +7,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="C:\Users\yannmatoka\.nuget\packages\omnifi_dtos\1.7.0\contentFiles\any\net7.0\Images\OmniFiLogo.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="13.0.1" />
 		<PackageReference Include="EfCore.SchemaCompare" Version="8.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
@@ -37,12 +41,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Images\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Update="C:\Users\yannmatoka\.nuget\packages\omnifi_dtos\1.7.0\contentFiles\any\net7.0\Images\OmniFiLogo.png">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
 	</ItemGroup>
 
 </Project>
