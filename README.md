@@ -1,6 +1,6 @@
 # OmniFi API
 
-![screenshot](/Images/OmniFiLogo.png)
+![Alt text](OmniFi_API/Images/OmniFiLogo.png)
 
 This project is an ASP.NET Core Web API that aggregates balance information from multiple sources, including traditional bank accounts and cryptocurrency accounts. The API provides a single endpoint to retrieve the consolidated balance data from both bank and crypto accounts, offering a comprehensive view of a user's financial status.
 

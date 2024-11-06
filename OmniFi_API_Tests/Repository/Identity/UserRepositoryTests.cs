@@ -30,7 +30,7 @@ namespace OmniFi_API_Tests.Repository.Identity
         private Mock<UserManager<OmniFi_API.Models.Identity.ApplicationUser>>? _userManager;
         private Mock<RoleManager<ApplicationRole>>? _roleManager;
         private Mock<IMapper>? _mapper;
-        private Mock<IOptions<UserRepositoryOptions>>? _options;
+        private Mock<IOptions<JwtSettingsOptions>>? _options;
         private UserRepository? _ct;
         private Mock<IdentityResult>? _identityResult;
 
@@ -61,11 +61,11 @@ namespace OmniFi_API_Tests.Repository.Identity
 
             _mapper = new Mock<IMapper>();
 
-            _options = new Mock<IOptions<UserRepositoryOptions>>();
+            _options = new Mock<IOptions<JwtSettingsOptions>>();
 
             _options!
                 .Setup(x => x.Value)
-                .Returns(new UserRepositoryOptions() { ExpirationTime = 7, SecretKey = "This a secret API key for testing purpose" });
+                .Returns(new JwtSettingsOptions() { ExpirationTimeInDays = 7, Issuer = "Test" , Audience = "test" });
 
             _ct = new UserRepository(
                 _db.Object,
