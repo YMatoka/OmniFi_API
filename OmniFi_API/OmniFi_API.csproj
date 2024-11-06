@@ -35,4 +35,14 @@
 		<PackageReference Include="OmniFi_DTOs" Version="1.7.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Images\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="C:\Users\yannmatoka\.nuget\packages\omnifi_dtos\1.7.0\contentFiles\any\net7.0\Images\OmniFiLogo.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
 </Project>
